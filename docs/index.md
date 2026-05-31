@@ -1,4 +1,4 @@
-# 🦎 Newt
+# Newt
 
 **Small script, big bot.**
 
