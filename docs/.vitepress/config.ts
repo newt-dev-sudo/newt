@@ -1,8 +1,8 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'Small script, big bot',
-  description: 'Small script, big bot. A beginner-friendly DSL for Discord bots.',
+  title: 'Newt',
+  description: 'A beginner-friendly DSL for Discord bots.',
   appearance: 'dark',
   head: [
     ['link', { rel: 'icon', href: '/favicon.svg' }]
@@ -41,11 +41,7 @@ export default defineConfig({
           { text: 'Hello World', link: '/examples/hello-world' },
           { text: 'Points System', link: '/examples/points-bot' },
           { text: 'Welcome Bot', link: '/examples/welcome-bot' },
-          { text: 'Moderation Bot', link: '/examples/moderation-bot' },
-          { text: 'Music Bot', link: '/examples/music-bot' },
-          { text: 'Ticket System', link: '/examples/ticket-system' },
-          { text: 'Giveaway Bot', link: '/examples/giveaway-bot' },
-          { text: 'Leveling System', link: '/examples/leveling-system' }
+          { text: 'Moderation Bot', link: '/examples/moderation-bot' }
         ]
       }
     ],
