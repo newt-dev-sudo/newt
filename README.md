@@ -1,12 +1,32 @@
-# Newt
+<div align="center">
+
+# 🦎 Newt
+
+**Small script, big bot.**
 
 ![npm version](https://img.shields.io/npm/v/@newt-dev/cli)
 ![License](https://img.shields.io/npm/l/@newt-dev/cli)
 ![Node](https://img.shields.io/node/v/@newt-dev/cli)
-
-**Small script, big bot.**
+![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2)
 
 A beginner-friendly DSL for Discord bots. Write `.newt` files, compile to `discord.js`.
+
+</div>
+
+## Why Newt?
+
+- **No JavaScript required** - Focus on bot logic, not boilerplate
+- **English-like syntax** - Readable and maintainable
+- **Production-ready** - Compiles to battle-tested discord.js
+- **Fast development** - Build bots in minutes, not hours
+
+## What You Can Build
+
+- 🎮 **Game bots** - Points systems, leaderboards, rewards
+- 👋 **Welcome bots** - Auto-role assignment, onboarding flows
+- 🔒 **Moderation bots** - Auto-moderation, content filtering
+- ⏰ **Scheduled tasks** - Reminders, announcements, recurring jobs
+- 📊 **Analytics bots** - Track activity, generate reports
 
 ## Installation
 
@@ -28,7 +48,8 @@ on command "hello":
 ```bash
 newt build my-bot.newt --out my-bot
 cd my-bot && npm install
-DISCORD_TOKEN="your-token" npm start
+echo "DISCORD_TOKEN=your-token" > .env
+npm start
 ```
 
 ## Features
@@ -37,7 +58,7 @@ DISCORD_TOKEN="your-token" npm start
 - Persistent SQLite storage
 - Role management & rich embeds
 - Timers & scheduled tasks
-- Browser playground
+- Built-in error handling
 
 ## Docs
 

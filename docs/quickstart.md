@@ -61,8 +61,11 @@ newt build my-bot.newt --out my-bot
 cd my-bot
 npm install
 
-# Run your bot (set your token as environment variable)
-DISCORD_TOKEN="your-bot-token-here" npm start
+# Create .env file with your token
+echo "DISCORD_TOKEN=your-bot-token-here" > .env
+
+# Run your bot
+npm start
 ```
 
 ## Step 6: Test Your Bot
