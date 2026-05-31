@@ -1,6 +1,5 @@
 [build]
-command = "npm install && npm run build"
-cwd = "docs"
+command = "cd docs && npm install && npm run build"
 
 [build.environment]
 NODE_VERSION = "20"
