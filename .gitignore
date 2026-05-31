@@ -12,6 +12,9 @@ dist/
 build/
 *.tsbuildinfo
 
+# Playground (not used)
+packages/playground/
+
 # Environment files
 .env
 .env.local
@@ -33,6 +36,9 @@ tmp/
 
 # Internal documentation (not for public)
 .internal/
+
+# Development scripts (not for public)
+scripts/
 
 # IDE
 .vscode/
