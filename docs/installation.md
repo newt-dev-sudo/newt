@@ -1,108 +1,169 @@
 # Installation
 
-Install Newt on your system to start building Discord bots.
+This guide will help you install Newt on your computer so you can start building Discord bots.
 
-## Prerequisites
+## What You Need Before Installing
 
-- **Node.js 20 or higher** - [Download Node.js](https://nodejs.org/)
-- **npm** (comes with Node.js)
-- A text editor (VS Code recommended)
+### Node.js
 
-## Global Installation
+**What is it?** Node.js is a program that runs JavaScript code outside of a web browser. Your Discord bot needs it to run.
 
-Install Newt globally to use the `newt` command from anywhere:
+**How to get it:**
+1. Go to [nodejs.org](https://nodejs.org/)
+2. Download the LTS (Long Term Support) version - it's the most stable
+3. Run the installer and follow the prompts
 
+**Why version 20 or higher?** Newt uses modern JavaScript features that require newer versions of Node.js.
+
+### npm
+
+**What is it?** npm (Node Package Manager) comes with Node.js. It's a tool that helps you download and manage software packages like Newt.
+
+**How to check if you have it:**
+```bash
+npm --version
+```
+
+If you see a version number, you're good to go!
+
+### A Text Editor
+
+You'll need a program to write your Newt code. We recommend:
+
+- **VS Code** - Free, popular, and has great Newt support
+- Download from [code.visualstudio.com](https://code.visualstudio.com/)
+
+## Installing Newt
+
+### Option 1: Global Installation (Recommended)
+
+This installs Newt on your entire computer so you can use it from anywhere.
+
+**Run this command:**
 ```bash
 npm install -g @newt-dev/cli
 ```
 
-### Verify Installation
+**What this does:**
+- Downloads the Newt tool
+- Makes the `newt` command available in your terminal
+- Lets you use Newt from any folder on your computer
 
+**Verify it worked:**
 ```bash
 newt --version
 ```
 
-You should see version information.
+You should see version information like `@newt-dev/cli 0.1.0`.
 
-### Troubleshooting Global Install
+### Option 2: Local Installation
 
-**Permission denied (Linux/Mac):**
-```bash
-sudo npm install -g newt-lang
-```
-
-**Command not found (Windows):**
-- Restart your terminal
-- Check that npm global bin is in your PATH
-- Run `npm config get prefix` to see where packages are installed
-
-## Local Installation
-
-Install Newt in a specific project:
+Install Newt only in a specific project folder:
 
 ```bash
 npm install @newt-dev/cli
 ```
 
-Then use it via npx:
+Then use it with `npx`:
 ```bash
 npx newt check my-bot.newt
 ```
 
-## Development Installation
+**When to use this:** If you only want to use Newt in one project or don't have permission to install globally.
 
-For contributing to Newt:
+## Troubleshooting Installation
 
+### "Permission denied" (Linux/Mac)
+
+If you get a permission error, try:
 ```bash
-git clone https://github.com/newt-lang/newt.git
-cd newt
-npm install
-npm run build
+sudo npm install -g @newt-dev/cli
 ```
 
-## Editor Setup
+### "Command not found" (Windows)
 
-### VS Code
+If `newt` command doesn't work:
 
-1. Install the [Newt Language Support](https://marketplace.visualstudio.com/items?itemName=newt-lang.newt) extension
-2. Syntax highlighting and error detection will be enabled automatically
+1. **Restart your terminal** - Sometimes it needs a restart to recognize new commands
+2. **Check your PATH** - Make sure npm's global bin folder is in your system PATH
+3. **Find where npm installs packages:**
+   ```bash
+   npm config get prefix
+   ```
+   This shows where packages are installed. Add this folder to your PATH.
+
+### "npm is not recognized"
+
+This means Node.js isn't installed or isn't in your PATH:
+
+1. Make sure you installed Node.js
+2. Restart your computer after installing
+3. Try reinstalling Node.js
+
+## Setting Up Your Editor
+
+### VS Code (Recommended)
+
+1. Install [VS Code](https://code.visualstudio.com/)
+2. Open VS Code
+3. Go to Extensions (Ctrl+Shift+X)
+4. Search for "Newt"
+5. Install the Newt Language Support extension
+
+**What this gives you:**
+- Syntax highlighting (colors in your code)
+- Error detection (underlines mistakes)
+- Auto-completion (suggests commands as you type)
 
 ### Other Editors
 
-Newt files use the `.newt` extension. Configure your editor to treat them as plain text or use generic syntax highlighting.
+Newt files use the `.newt` extension. You can:
+- Use plain text editing
+- Configure your editor for generic syntax highlighting
+- Use any editor you're comfortable with
 
 ## System Requirements
 
 ### Operating Systems
 
 - **Windows** - Windows 10 or later
-- **macOS** - macOS 10.15 or later
-- **Linux** - Any modern distribution
+- **macOS** - macOS 10.15 (Catalina) or later
+- **Linux** - Any modern distribution (Ubuntu, Debian, Fedora, etc.)
 
 ### Hardware
 
-- **RAM:** 512MB minimum
-- **Disk:** 100MB for installation
-- **Network:** Required for npm installation and Discord connectivity
+- **RAM:** 512MB minimum (most computers have way more)
+- **Disk Space:** 100MB for Newt installation
+- **Network:** Required for downloading Newt and connecting to Discord
 
-## Upgrading
+### What This Means
 
-To upgrade to the latest version:
+If your computer was made in the last 10 years, it probably meets these requirements. You don't need a powerful computer to run Discord bots.
+
+## Upgrading Newt
+
+To get the latest version with new features and bug fixes:
 
 ```bash
 npm update -g @newt-dev/cli
 ```
 
-## Uninstalling
+**What this does:** Updates Newt to the newest version while keeping your settings.
 
-To remove Newt from your system:
+## Uninstalling Newt
+
+If you want to remove Newt from your computer:
 
 ```bash
 npm uninstall -g @newt-dev/cli
 ```
 
+**Note:** This won't delete any bots you've created - just the Newt tool itself.
+
 ## Next Steps
 
-- [Quickstart Guide](./quickstart.md) - Build your first bot
-- [Token Security](./security.md) - Secure your bot tokens
-- [Language Reference](./reference/bot-config.md) - Learn the language
+Now that Newt is installed, you're ready to build your first bot!
+
+- [Quickstart Guide](./quickstart.md) - Build your first Discord bot in 5 minutes
+- [Token Security](./security.md) - Learn how to keep your bot safe
+- [Language Reference](./reference/bot-config.md) - Explore all available commands

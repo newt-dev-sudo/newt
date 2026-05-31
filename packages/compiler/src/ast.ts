@@ -27,10 +27,13 @@ export interface BotDecl extends BaseNode {
 export type Handler =
   | ReadyHandler
   | CommandHandler
+  | SlashCommandHandler
   | MessageContainsHandler
   | JoinHandler
   | LeaveHandler
-  | ReactionAddHandler;
+  | ReactionAddHandler
+  | ButtonClickHandler
+  | SelectMenuHandler;
 
 export interface ReadyHandler extends BaseNode {
   type: "ReadyHandler";
@@ -65,6 +68,34 @@ export interface ReactionAddHandler extends BaseNode {
   body: Statement[];
 }
 
+export interface SlashCommandHandler extends BaseNode {
+  type: "SlashCommandHandler";
+  command: string;
+  description?: StringLiteral;
+  options?: SlashOption[];
+  body: Statement[];
+}
+
+export interface SlashOption extends BaseNode {
+  type: "SlashOption";
+  name: string;
+  description: StringLiteral;
+  required: BooleanLiteral;
+  optionType: "string" | "number" | "boolean" | "user" | "channel" | "role";
+}
+
+export interface ButtonClickHandler extends BaseNode {
+  type: "ButtonClickHandler";
+  buttonId: StringLiteral;
+  body: Statement[];
+}
+
+export interface SelectMenuHandler extends BaseNode {
+  type: "SelectMenuHandler";
+  menuId: StringLiteral;
+  body: Statement[];
+}
+
 export type TimerDecl = EveryTimerDecl | DailyTimerDecl;
 
 export interface EveryTimerDecl extends BaseNode {
@@ -86,6 +117,7 @@ export type Statement =
   | ReplyStatement
   | SayStatement
   | SayEmbedStatement
+  | SayComponentsStatement
   | LetDecl
   | StoreStatement
   | IfStatement
@@ -116,6 +148,25 @@ export interface SayStatement extends BaseNode {
 export interface SayEmbedStatement extends BaseNode {
   type: "SayEmbedStatement";
   embed: EmbedBlock;
+}
+
+export interface SayComponentsStatement extends BaseNode {
+  type: "SayComponentsStatement";
+  message: Expression;
+  components: Component[];
+}
+
+export interface Component extends BaseNode {
+  type: "ButtonComponent" | "SelectMenuComponent";
+  id: StringLiteral;
+  label?: StringLiteral;
+  options?: SelectOption[];
+}
+
+export interface SelectOption extends BaseNode {
+  type: "SelectOption";
+  label: StringLiteral;
+  value: StringLiteral;
 }
 
 export interface EmbedBlock extends BaseNode {

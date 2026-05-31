@@ -8,12 +8,15 @@ import {
   type EveryTimerDecl,
   type Expression,
   type Handler,
+  type SlashOption,
   type MessageContainsHandler,
   type Program,
   type Statement,
   type StringLiteral,
   type TimeUnit,
-  type TopLevelNode
+  type TopLevelNode,
+  type Component,
+  type SelectOption
 } from "./ast.js";
 import { makeCatalogError, NewtError } from "./errors.js";
 import type { Token, TokenType } from "./lexer.js";
@@ -95,6 +98,48 @@ class Parser {
       this.consumeKeyword("add");
       const emoji = this.parseStringLiteral();
       handler = { type: "ReactionAddHandler", loc: this.loc(start), emoji, body: [] };
+    } else if (event.value === "slash") {
+      const command = this.parseStringLiteral();
+      let description: StringLiteral | undefined;
+      let options: SlashOption[] | undefined;
+      
+      if (this.matchKeyword("description")) {
+        description = this.parseStringLiteral();
+      }
+      
+      if (this.matchKeyword("with")) {
+        this.consumeKeyword("options");
+        options = [];
+        while (this.check("IDENTIFIER")) {
+          const name = this.consumeType("IDENTIFIER", "Expected option name").value;
+          this.consumeKeyword("as");
+          const optionType = this.consumeType("IDENTIFIER", "Expected option type").value;
+          this.consumeKeyword("description");
+          const optDescription = this.parseStringLiteral();
+          const required = this.matchKeyword("required") ? 
+            { type: "BooleanLiteral" as const, loc: this.loc(start), value: true } :
+            { type: "BooleanLiteral" as const, loc: this.loc(start), value: false };
+          
+          options.push({
+            type: "SlashOption",
+            loc: this.loc(start),
+            name,
+            description: optDescription,
+            required,
+            optionType: optionType as any
+          });
+        }
+      }
+      
+      handler = { type: "SlashCommandHandler", loc: this.loc(start), command: command.value, description, options, body: [] };
+    } else if (event.value === "button") {
+      this.consumeKeyword("click");
+      const buttonId = this.parseStringLiteral();
+      handler = { type: "ButtonClickHandler", loc: this.loc(start), buttonId, body: [] };
+    } else if (event.value === "select") {
+      this.consumeKeyword("menu");
+      const menuId = this.parseStringLiteral();
+      handler = { type: "SelectMenuHandler", loc: this.loc(start), menuId, body: [] };
     } else {
       throw makeCatalogError("NEWT_E003", event.line, event.column, this.sourceLineHint(event));
     }
@@ -236,6 +281,14 @@ class Parser {
       return { type: "SayEmbedStatement", loc: this.loc(start), embed };
     }
 
+    if (this.matchKeyword("with")) {
+      this.consumeKeyword("components");
+      const message = this.parseExpressionUntil(["NEWLINE", "EOF", "COLON"], ["in"]);
+      this.consumeBlockStart();
+      const components = this.parseComponents(start);
+      return { type: "SayComponentsStatement", loc: this.loc(start), message, components };
+    }
+
     const message = this.parseExpressionUntil(["NEWLINE", "EOF"], ["in"]);
     let channel: StringLiteral | undefined;
     if (this.matchKeyword("in")) {
@@ -244,6 +297,56 @@ class Parser {
     }
     this.consumeLineEnd();
     return { type: "SayStatement", loc: this.loc(start), message, channel };
+  }
+
+  private parseComponents(start: Token): Component[] {
+    this.skipNewlines();
+    this.consumeType("INDENT", "Components need to be indented.");
+    const components: Component[] = [];
+    this.skipNewlines();
+
+    while (!this.isAtEnd() && !this.check("DEDENT")) {
+      if (this.matchKeyword("button")) {
+        const id = this.parseStringLiteral();
+        this.consumeKeyword("label");
+        const label = this.parseStringLiteral();
+        components.push({
+          type: "ButtonComponent",
+          loc: this.loc(start),
+          id,
+          label
+        });
+      } else if (this.matchKeyword("select")) {
+        this.consumeKeyword("menu");
+        const id = this.parseStringLiteral();
+        this.consumeKeyword("with");
+        this.consumeKeyword("options");
+        const options: SelectOption[] = [];
+        while (this.check("STRING")) {
+          const label = this.parseStringLiteral();
+          this.consumeKeyword("as");
+          const value = this.parseStringLiteral();
+          options.push({
+            type: "SelectOption",
+            loc: this.loc(start),
+            label,
+            value
+          });
+        }
+        components.push({
+          type: "SelectMenuComponent",
+          loc: this.loc(start),
+          id,
+          options
+        });
+      } else {
+        this.advance();
+      }
+      this.skipNewlines();
+    }
+
+    this.consumeType("DEDENT", "Expected end of components block.");
+    return components;
   }
 
   private parseEmbedBlock(start: Token): EmbedBlock {

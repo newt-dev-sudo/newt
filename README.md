@@ -9,16 +9,20 @@
 ![Node](https://img.shields.io/node/v/@newt-dev/cli)
 ![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2)
 
-A beginner-friendly DSL for Discord bots. Write `.newt` files, compile to `discord.js`.
+Newt is a programming language designed specifically for Discord bots. If you use Discord and want to create your own bot but don't know how to code, Newt is for you.
+
+**What is Newt?**
+Newt lets you write Discord bots using simple, English-like commands. You don't need to learn JavaScript or complex programming concepts - just write what you want your bot to do in plain language.
 
 </div>
 
 ## Why Newt?
 
-- **No JavaScript required** - Focus on bot logic, not boilerplate
-- **English-like syntax** - Readable and maintainable
-- **Production-ready** - Compiles to battle-tested discord.js
-- **Fast development** - Build bots in minutes, not hours
+- **No programming experience needed** - Write in plain English
+- **Learn programming concepts** - Understand how bots work while building them
+- **Fast results** - Create a working bot in minutes
+- **Real Discord features** - Slash commands, buttons, roles, and more
+- **Professional results** - Compiles to production-ready code
 
 ## What You Can Build
 
@@ -36,6 +40,7 @@ npm install -g @newt-dev/cli
 
 ## Quick Start
 
+1. **Create a bot file** (`my-bot.newt`):
 ```newt
 bot name "MyBot"
 bot prefix "!"
@@ -45,12 +50,17 @@ on command "hello":
     reply "Hello, {user.username}!"
 ```
 
+2. **Build your bot**:
 ```bash
 newt build my-bot.newt --out my-bot
 cd my-bot && npm install
 echo "DISCORD_TOKEN=your-token" > .env
 npm start
 ```
+
+**Note:** The `.env` file stores your Discord token securely. Replace `your-token` with your actual bot token from the Discord Developer Portal.
+
+3. **Use your bot in Discord!**
 
 ## Features
 
@@ -59,13 +69,16 @@ npm start
 - Role management & rich embeds
 - Timers & scheduled tasks
 - Built-in error handling
+- Slash commands support
+- Button & select menu interactions
+- Conditional logic & loops
 
-## Docs
+## Learning Path
 
-- [Quickstart](https://github.com/newt-dev-sudo/newt/blob/main/docs/quickstart.md)
-- [Reference](https://github.com/newt-dev-sudo/newt/blob/main/docs/reference/bot-config.md)
-- [Examples](https://github.com/newt-dev-sudo/newt/blob/main/docs/examples/hello-world.md)
-- [Deployment](https://github.com/newt-dev-sudo/newt/blob/main/docs/deployment.md)
+1. **Start here** - [Quickstart Guide](https://github.com/newt-dev-sudo/newt/blob/main/docs/quickstart.md)
+2. **Learn the basics** - [Language Reference](https://github.com/newt-dev-sudo/newt/blob/main/docs/reference/bot-config.md)
+3. **See examples** - [Example Bots](https://github.com/newt-dev-sudo/newt/blob/main/docs/examples/hello-world.md)
+4. **Deploy your bot** - [Deployment Guide](https://github.com/newt-dev-sudo/newt/blob/main/docs/deployment.md)
 
 ## Links
 

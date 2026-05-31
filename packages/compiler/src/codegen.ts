@@ -22,7 +22,7 @@ export function generate(program: Program): GeneratedProject {
     .map((node) => emitTopLevel(node, prefix))
     .join("\n\n");
 
-  const botJs = `import { Client, EmbedBuilder, GatewayIntentBits, Partials } from "discord.js";
+  const botJs = `import { Client, EmbedBuilder, GatewayIntentBits, Partials, ButtonBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonStyle } from "discord.js";
 import Database from "better-sqlite3";
 import axios from "axios";
 
@@ -132,6 +132,58 @@ ${emitStatements(node.body, "  ", "member")}
   const server = message.guild;
 ${emitStatements(node.body, "  ", "message")}
 });`;
+    case "SlashCommandHandler":
+      const optionsDef = node.options ? node.options.map(opt => 
+        `{
+          name: "${opt.name}",
+          description: ${emitExpression(opt.description)},
+          type: ${getOptionTypeValue(opt.optionType)},
+          required: ${opt.required.value}
+        }`
+      ).join(",\n          ") : "";
+      
+      const commandReg = `client.on("ready", async () => {
+  try {
+    await client.application.commands.create({
+      name: "${node.command}",
+      description: ${node.description ? emitExpression(node.description) : '"No description"'},
+      options: [${optionsDef}]
+    });
+  } catch (err) {
+    console.error("Failed to register slash command:", err);
+  }
+});`;
+      
+      const commandHandler = `client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+  if (interaction.commandName !== "${node.command}") return;
+  const user = interaction.user;
+  const channel = interaction.channel;
+  const server = interaction.guild;
+  const args = interaction.options;
+${emitStatements(node.body, "  ", "interaction")}
+});`;
+      
+      return commandReg + "\n\n" + commandHandler;
+    case "ButtonClickHandler":
+      return `client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isButton()) return;
+  if (interaction.customId !== ${emitExpression(node.buttonId)}) return;
+  const user = interaction.user;
+  const channel = interaction.channel;
+  const server = interaction.guild;
+${emitStatements(node.body, "  ", "interaction")}
+});`;
+    case "SelectMenuHandler":
+      return `client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isStringSelectMenu()) return;
+  if (interaction.customId !== ${emitExpression(node.menuId)}) return;
+  const user = interaction.user;
+  const channel = interaction.channel;
+  const server = interaction.guild;
+  const values = interaction.values;
+${emitStatements(node.body, "  ", "interaction")}
+});`;
     case "EveryTimerDecl":
       return `setInterval(async () => {\n${emitStatements(node.body, "  ", "message")}\n}, ${durationMs(node.amount.value, node.unit)});`;
     case "DailyTimerDecl":
@@ -165,6 +217,12 @@ function emitStatement(statement: Statement, indent: string, triggerName: string
         return `${indent}await findChannel(server, "general")?.send({ embeds: [${emitEmbed(statement.embed)}] });`;
       }
       return `${indent}await (${triggerName}.channel ?? channel)?.send({ embeds: [${emitEmbed(statement.embed)}] });`;
+    case "SayComponentsStatement":
+      const components = emitComponents(statement.components);
+      if (triggerName === "member") {
+        return `${indent}await findChannel(server, "general")?.send({ content: ${emitExpression(statement.message)}, components: [${components}] });`;
+      }
+      return `${indent}await (${triggerName}.channel ?? channel)?.send({ content: ${emitExpression(statement.message)}, components: [${components}] });`;
     case "LetDecl":
       return `${indent}const ${statement.name} = ${emitExpression(statement.value)};`;
     case "StoreStatement":
@@ -283,4 +341,44 @@ function durationMs(amount: number, unit: string): number {
     days: 86400000
   };
   return amount * (multipliers[unit] ?? 1000);
+}
+
+function getOptionTypeValue(type: string): number {
+  const types: Record<string, number> = {
+    string: 3,
+    number: 4,
+    boolean: 5,
+    user: 6,
+    channel: 7,
+    role: 8
+  };
+  return types[type] ?? 3;
+}
+
+function emitComponents(components: any[]): string {
+  const rows: string[] = [];
+  let currentRow: string[] = [];
+  
+  for (const component of components) {
+    if (component.type === "ButtonComponent") {
+      currentRow.push(`new ButtonBuilder()
+        .setCustomId(${emitExpression(component.id)})
+        .setLabel(${emitExpression(component.label)})
+        .setStyle(ButtonStyle.Primary)`);
+    } else if (component.type === "SelectMenuComponent") {
+      currentRow.push(`new StringSelectMenuBuilder()
+        .setCustomId(${emitExpression(component.id)})
+        .setOptions(${component.options.map((opt: any) => 
+          `new StringSelectMenuOptionBuilder()
+            .setLabel(${emitExpression(opt.label)})
+            .setValue(${emitExpression(opt.value)})`
+        ).join(", ")})`);
+    }
+  }
+  
+  if (currentRow.length > 0) {
+    rows.push(`new ActionRowBuilder().addComponents(${currentRow.join(", ")})`);
+  }
+  
+  return rows.join(", ");
 }
