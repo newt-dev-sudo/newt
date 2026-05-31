@@ -1,5 +1,5 @@
 {
-  "name": "@newt-lang/compiler",
+  "name": "@newt-dev/compiler",
   "version": "0.1.0",
   "description": "Compiler for the Newt Discord bot DSL.",
   "type": "module",
@@ -25,10 +25,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/newt-lang/newt.git",
+    "url": "https://github.com/newt-dev-sudo/newt.git",
     "directory": "packages/compiler"
   },
-  "homepage": "https://github.com/newt-lang/newt#readme",
+  "homepage": "https://github.com/newt-dev-sudo/newt#readme",
   "devDependencies": {
     "@types/node": "^20.12.0",
     "typescript": "^5.5.0"

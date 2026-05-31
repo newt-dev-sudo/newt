@@ -1,5 +1,5 @@
 import { relative, resolve } from "node:path";
-import { compile } from "@newt-lang/compiler";
+import { compile } from "@newt-dev/compiler";
 import { printErrors, readSource, writeProject } from "../util.js";
 
 export interface BuildOptions {

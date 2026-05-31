@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { formatError, type NewtError } from "@newt-lang/compiler";
+import { formatError, type NewtError } from "@newt-dev/compiler";
 
 export function readSource(file: string): { filename: string; source: string } {
   const filename = resolve(file);

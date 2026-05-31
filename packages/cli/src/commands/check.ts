@@ -1,4 +1,4 @@
-import { compile } from "@newt-lang/compiler";
+import { compile } from "@newt-dev/compiler";
 import { printErrors, readSource } from "../util.js";
 
 export function checkCommand(file: string): number {

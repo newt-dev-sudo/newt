@@ -1,5 +1,5 @@
 {
-  "name": "newt-lang",
+  "name": "@newt-dev/cli",
   "version": "0.1.0",
   "description": "Command-line tools for the Newt Discord bot DSL.",
   "type": "module",
@@ -20,12 +20,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/newt-lang/newt.git",
+    "url": "https://github.com/newt-dev-sudo/newt.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://github.com/newt-lang/newt#readme",
+  "homepage": "https://github.com/newt-dev-sudo/newt#readme",
   "dependencies": {
-    "@newt-lang/compiler": "0.1.0"
+    "@newt-dev/compiler": "0.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.12.0",
