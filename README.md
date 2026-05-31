@@ -75,13 +75,14 @@ npm start
 
 ## Learning Path
 
-1. **Start here** - [Quickstart Guide](https://github.com/newt-dev-sudo/newt/blob/main/docs/quickstart.md)
-2. **Learn the basics** - [Language Reference](https://github.com/newt-dev-sudo/newt/blob/main/docs/reference/bot-config.md)
-3. **See examples** - [Example Bots](https://github.com/newt-dev-sudo/newt/blob/main/docs/examples/hello-world.md)
-4. **Deploy your bot** - [Deployment Guide](https://github.com/newt-dev-sudo/newt/blob/main/docs/deployment.md)
+1. **Start here** - [Quickstart Guide](https://newt-d3s.pages.dev/quickstart)
+2. **Learn the basics** - [Language Reference](https://newt-d3s.pages.dev/reference/bot-config)
+3. **See examples** - [Example Bots](https://newt-d3s.pages.dev/examples/hello-world)
+4. **Deploy your bot** - [Deployment Guide](https://newt-d3s.pages.dev/deployment)
 
 ## Links
 
+- [Documentation](https://newt-d3s.pages.dev)
 - [GitHub](https://github.com/newt-dev-sudo/newt)
 - [npm](https://www.npmjs.com/package/@newt-dev/cli)
 
