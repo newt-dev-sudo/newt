@@ -17,6 +17,77 @@ Think of event handlers like instructions you give your bot: "When X happens, do
 - Handler: You go to the door and see who it is
 - Response: You greet them or ignore them
 
+## Commands vs Events
+
+**Commands are a specialized type of message event.**
+
+When you use `on command`, Newt is actually listening for message events and checking if they start with your bot's prefix. This is a convenience - you don't have to manually check every message.
+
+**How it works internally:**
+```newt
+# This is what you write:
+on command "hello":
+    reply "Hi!"
+
+# This is what's happening behind the scenes:
+on message:
+    if message starts with "!hello":
+        reply "Hi!"
+```
+
+**Why this matters:**
+- Commands are easier to use than raw message events
+- Newt handles the prefix checking for you
+- You can still use `on message` for more complex message handling
+- `on command` and `on slash` are specialized handlers for common patterns
+
+**When to use which:**
+- Use `on command` for simple prefix-based commands (`!hello`, `!help`)
+- Use `on slash` for Discord's modern slash commands (`/hello`, `/help`)
+- Use `on message` when you need to react to any message content
+- Use `on message contains` for keyword detection in messages
+
+## Context Model
+
+Each handler has access to specific variables (context) that provide information about the event. This context determines what data is available in your handler.
+
+**Available in most handlers:**
+- `user` - The Discord user object (username, ID, etc.)
+- `channel` - The channel where the event occurred
+- `server` - The server (guild) where the event occurred
+
+**Available in message-related handlers:**
+- `message` - The full message object (content, author, etc.)
+- `args` - Command arguments (words after the command)
+- `target` - First mentioned user (if applicable)
+
+**Available in member-related handlers:**
+- `member` - The member object (server-specific user data, roles, etc.)
+
+**Available in interaction handlers:**
+- `interaction` - The interaction object (for slash commands, buttons, menus)
+- `values` - Selected values (for select menus)
+
+**Handler-specific context:**
+
+| Handler | Available Variables |
+|---------|---------------------|
+| `on ready` | None (bot is just starting) |
+| `on command` | user, message, channel, server, args, target |
+| `on slash` | user, channel, server, args, interaction |
+| `on button click` | user, channel, server, interaction |
+| `on select menu` | user, channel, server, values, interaction |
+| `on message contains` | user, message, channel, server |
+| `on join` | user, member, server |
+| `on leave` | user, server |
+| `on reaction add` | user, channel, server |
+
+**Why context matters:**
+- Not all variables are available in every handler
+- Using a variable that doesn't exist will cause an error
+- Check the "Available variables" section for each handler
+- This prevents confusion about what data you can access
+
 ## on ready
 
 **What it does:** Runs when your bot starts up and successfully connects to Discord
