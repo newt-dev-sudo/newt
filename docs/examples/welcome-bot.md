@@ -4,7 +4,7 @@ Automatically welcomes new members and assigns roles.
 
 ## Code
 
-```newt
+```javascript
 bot name "WelcomeNewt"
 bot prefix "!"
 bot token from env "DISCORD_TOKEN"
@@ -39,7 +39,7 @@ on leave:
 
 ### Role Management
 
-```newt
+```javascript
 give user role "Member"
 ```
 
@@ -48,7 +48,7 @@ give user role "Member"
 
 ### Rich Embeds
 
-```newt
+```javascript
 say embed:
     title "Welcome, {user.username}!"
     description "Read #rules first, then say hello in #general."
@@ -62,7 +62,7 @@ say embed:
 
 ### Conditional Logic
 
-```newt
+```javascript
 if user has role "Member":
     reply "You already have the Member role!"
 else:

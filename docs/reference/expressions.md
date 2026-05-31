@@ -22,7 +22,7 @@ These are special variables that Newt provides automatically. You don't need to 
 **When it's available:** In most event handlers (commands, reactions, etc.)
 
 **What you can do with it:**
-```newt
+```javascript
 reply "Hello, {user.username}"
 ```
 
@@ -32,7 +32,7 @@ reply "Hello, {user.username}"
 - `user.mention` - A special string that mentions the user (like `@username`)
 
 **Example:**
-```newt
+```javascript
 on command "whoami":
     reply "You are {user.username} (ID: {user.id})"
 ```
@@ -49,7 +49,7 @@ on command "whoami":
 
 **Difference from user:** A `user` is the same across all Discord servers, but a `member` is specific to one server (with server-specific roles, nickname, etc.)
 
-```newt
+```javascript
 on join:
     reply "Welcome, {member.user.username}!"
 ```
@@ -61,7 +61,7 @@ on join:
 **When it's available:** In command handlers and message contains handlers
 
 **What you can do with it:**
-```newt
+```javascript
 reply "You said: {message.content}"
 ```
 
@@ -69,7 +69,7 @@ reply "You said: {message.content}"
 - `message.content` - The actual text of the message
 
 **Example:**
-```newt
+```javascript
 on command "echo":
     reply "You said: {message.content}"
 ```
@@ -85,7 +85,7 @@ on command "echo":
 **When it's available:** In most event handlers
 
 **What you can do with it:**
-```newt
+```javascript
 say "Announcement" in channel "general"
 ```
 
@@ -93,7 +93,7 @@ say "Announcement" in channel "general"
 - `channel.name` - The name of the channel
 
 **Example:**
-```newt
+```javascript
 on command "whereami":
     reply "You are in #{channel.name}"
 ```
@@ -105,7 +105,7 @@ on command "whereami":
 **When it's available:** In most event handlers
 
 **What you can do with it:**
-```newt
+```javascript
 for each member in server.members:
     say "Hello" in channel "general"
 ```
@@ -115,7 +115,7 @@ for each member in server.members:
 - `server.members` - All members in the server
 
 **Example:**
-```newt
+```javascript
 on command "serverinfo":
     reply "Welcome to {server.name}!"
 ```
@@ -130,7 +130,7 @@ on command "serverinfo":
 - If user types `!greet John`, then `args[0]` is "John"
 - If user types `!greet John Doe`, then `args[0]` is "John" and `args[1]` is "Doe"
 
-```newt
+```javascript
 on command "greet":
     reply "Hello, {args[0]}!"
 ```
@@ -144,7 +144,7 @@ on command "greet":
 **Why start at 0?** This is how most programming languages work - counting starts at 0 instead of 1.
 
 **Example:**
-```newt
+```javascript
 on command "add":
     let sum = args[0] + args[1]
     reply "The sum is {sum}"
@@ -164,13 +164,13 @@ on command "add":
 - If user types `!kick @JohnDoe`, then `target` is JohnDoe
 - Useful for commands that act on other users
 
-```newt
+```javascript
 on command "kick":
     kick target
 ```
 
 **Example:**
-```newt
+```javascript
 on command "ban":
     ban target
     reply "Banned {target.username}"
@@ -186,14 +186,14 @@ on command "ban":
 
 **How it works:** Use `{variable}` inside a string to insert the variable's value
 
-```newt
+```javascript
 reply "Hello, {user.username}! You have {points} points."
 ```
 
 **Why it's useful:** Makes your messages dynamic and personalized
 
 **Example:**
-```newt
+```javascript
 on command "status":
     reply "{user.username} has {points} points"
 ```
@@ -203,7 +203,7 @@ on command "status":
 - Bot responds: "JohnDoe has 150 points"
 
 **Multiple variables:**
-```newt
+```javascript
 reply "Hello {user.username}! You're in #{channel.name}"
 ```
 
@@ -223,7 +223,7 @@ Operators let you compare values, combine conditions, and do math.
 - `<=` - Less than or equal to
 - `>=` - Greater than or equal to
 
-```newt
+```javascript
 if points > 100:
     reply "You have lots of points!"
 
@@ -232,7 +232,7 @@ if level = 10:
 ```
 
 **Example:**
-```newt
+```javascript
 on command "check":
     if points > 50:
         reply "You have more than 50 points"
@@ -249,7 +249,7 @@ on command "check":
 - `or` - Either condition can be true
 - `not` - Reverses the condition (true becomes false, false becomes true)
 
-```newt
+```javascript
 if user has role "Admin" or user has role "Mod":
     reply "You have moderation powers"
 
@@ -258,7 +258,7 @@ if points > 100 and user has role "VIP":
 ```
 
 **Example:**
-```newt
+```javascript
 on command "admin":
     if user has role "Admin" and user has role "Owner":
         reply "You are the supreme admin!"
@@ -278,7 +278,7 @@ on command "admin":
 - `*` - Multiplication
 - `/` - Division
 
-```newt
+```javascript
 let newPoints = points + 10
 let half = points / 2
 let doubled = points * 2
@@ -286,7 +286,7 @@ let decreased = points - 5
 ```
 
 **Example:**
-```newt
+```javascript
 on command "addpoints":
     let newTotal = points + args[0]
     store user.id points newTotal
@@ -305,13 +305,13 @@ on command "addpoints":
 
 **Why it's useful:** For permissions - only let certain users use certain commands
 
-```newt
+```javascript
 if user has role "Admin":
     reply "Admin access granted"
 ```
 
 **Example:**
-```newt
+```javascript
 on command "ban":
     if user has role "Admin":
         ban target
@@ -326,7 +326,7 @@ on command "ban":
 
 **Why it's useful:** Prevents errors when data might be missing
 
-```newt
+```javascript
 let points = load user.id points or 0
 ```
 
@@ -336,7 +336,7 @@ let points = load user.id points or 0
 - This prevents "undefined" errors
 
 **Example:**
-```newt
+```javascript
 on command "points":
     let points = load user.id points or 0
     reply "You have {points} points"
@@ -356,7 +356,7 @@ Literals are fixed values you type directly into your code.
 
 **How to write them:** Wrap text in quotes
 
-```newt
+```javascript
 reply "Hello"
 reply 'World'
 ```
@@ -372,7 +372,7 @@ reply 'World'
 
 **How to write them:** Just type the number
 
-```newt
+```javascript
 let count = 42
 let price = 19.99
 let negative = -5
@@ -389,7 +389,7 @@ let negative = -5
 
 **How to write them:** Start with `#` followed by 6 characters
 
-```newt
+```javascript
 say embed:
     color #5865F2
 ```
@@ -407,7 +407,7 @@ say embed:
 
 **How it works:** `object.property`
 
-```newt
+```javascript
 user.username
 message.content
 channel.name
@@ -421,7 +421,7 @@ server.members
 - `message.content` = "the content property of the message object"
 
 **Nested access:**
-```newt
+```javascript
 member.user.username
 ```
 
@@ -437,7 +437,7 @@ This means: "the username property of the user object, which is a property of th
 ### Can I create my own variables?
 
 Yes! Use the `let` statement:
-```newt
+```javascript
 let myVariable = 42
 ```
 
@@ -448,7 +448,7 @@ You'll get an error. Make sure you're using valid properties for each object typ
 ### Can I do complex math?
 
 Yes! You can combine operators:
-```newt
+```javascript
 let result = (points + bonus) * multiplier
 ```
 

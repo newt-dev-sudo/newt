@@ -54,7 +54,7 @@ Before writing code, you need to register your bot with Discord:
 
 Create a file named `my-bot.newt` and add this code:
 
-```newt
+```javascript
 bot name "MyFirstBot"
 bot prefix "!"
 bot token from env "DISCORD_TOKEN"

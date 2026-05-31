@@ -4,7 +4,7 @@ The simplest possible Discord bot in Newt.
 
 ## Code
 
-```newt
+```javascript
 bot name "HelloBot"
 bot prefix "!"
 bot token from env "DISCORD_TOKEN"

@@ -4,7 +4,7 @@ A gamification bot that tracks user points with persistent storage.
 
 ## Code
 
-```newt
+```javascript
 bot name "PointsPal"
 bot prefix "!"
 bot token from env "DISCORD_TOKEN"
@@ -39,7 +39,7 @@ on command "leaderboard":
 
 ### Persistent Storage
 
-```newt
+```javascript
 let current = load user.id points or 0
 store user.id points = current + 10
 ```
@@ -50,7 +50,7 @@ store user.id points = current + 10
 
 ### Iteration
 
-```newt
+```javascript
 for each member in server.members:
     let memberPoints = load member.id points or 0
     say "{member.user.username}: {memberPoints} points"

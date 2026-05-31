@@ -24,7 +24,7 @@ Think of event handlers like instructions you give your bot: "When X happens, do
 When you use `on command`, Newt is actually listening for message events and checking if they start with your bot's prefix. This is a convenience - you don't have to manually check every message.
 
 **How it works internally:**
-```newt
+```javascript
 # This is what you write:
 on command "hello":
     reply "Hi!"
@@ -90,13 +90,15 @@ Each handler has access to specific variables (context) that provide information
 
 ## on ready
 
+**Concept:** Event-driven programming (initialization)
+
 **What it does:** Runs when your bot starts up and successfully connects to Discord
 
 **When it triggers:** Once, when your bot first comes online
 
 **Why it's useful:** Perfect for initialization tasks - things that need to happen when your bot starts
 
-```newt
+```javascript
 on ready:
     say "Bot is online!" in channel "general"
 ```
@@ -108,7 +110,7 @@ on ready:
 - Loading configuration
 
 **Example:**
-```newt
+```javascript
 on ready:
     say "🟢 {botName} is now online!" in channel "general"
 ```
@@ -124,6 +126,8 @@ on ready:
 
 ## on command
 
+**Concept:** Event-driven programming (command pattern)
+
 **What it does:** Responds to user commands with the configured prefix
 
 **When it triggers:** When someone sends a message starting with your bot's prefix
@@ -133,7 +137,7 @@ on ready:
 - The handler receives the command name and any arguments
 - Your bot can respond based on the command
 
-```newt
+```javascript
 on command "hello":
     reply "Hello, {user.username}!"
 
@@ -150,7 +154,7 @@ on command "info":
 - `target` - First mentioned user (if someone was mentioned)
 
 **Example with arguments:**
-```newt
+```javascript
 on command "greet":
     reply "Hello, {args[0]}!"
 ```
@@ -160,7 +164,7 @@ on command "greet":
 - Bot responds: "Hello, John!"
 
 **Example with multiple commands:**
-```newt
+```javascript
 on command "hello":
     reply "Hi there!"
 
@@ -178,6 +182,8 @@ on command "help":
 
 ## on slash
 
+**Concept:** Event-driven programming (command pattern)
+
 **What it does:** Responds to Discord slash commands (commands starting with `/`)
 
 **When it triggers:** When someone uses a slash command registered with your bot
@@ -188,7 +194,7 @@ on command "help":
 - Discord shows command descriptions and options
 - More discoverable than prefix commands
 
-```newt
+```javascript
 on slash "greet":
     reply "Hello from slash command!"
 ```
@@ -203,7 +209,7 @@ on slash "greet":
 **Note:** Slash commands are automatically registered when your bot starts. They may take a few minutes to appear in Discord after the first run.
 
 **Example:**
-```newt
+```javascript
 on slash "ping":
     reply "Pong!"
 ```
@@ -221,6 +227,8 @@ on slash "ping":
 
 ## on button click
 
+**Concept:** Event-driven programming (interaction)
+
 **What it does:** Triggers when a user clicks a button in a message component
 
 **When it triggers:** When someone clicks a button your bot sent
@@ -231,7 +239,7 @@ on slash "ping":
 3. This handler runs with the button's ID
 4. Your bot can respond to the click
 
-```newt
+```javascript
 on button click "approve":
     reply "You clicked approve!"
 ```
@@ -243,7 +251,7 @@ on button click "approve":
 - `interaction` - The interaction object
 
 **Example:**
-```newt
+```javascript
 on slash "poll":
     say with components "Vote now!":
         button "yes" label "Yes"
@@ -270,6 +278,8 @@ on button click "no":
 
 ## on select menu
 
+**Concept:** Event-driven programming (interaction)
+
 **What it does:** Triggers when a user selects an option from a dropdown menu
 
 **When it triggers:** When someone makes a selection from a select menu your bot sent
@@ -280,7 +290,7 @@ on button click "no":
 3. This handler runs with the selected values
 4. Your bot can respond to the selection
 
-```newt
+```javascript
 on select menu "role_select":
     reply "You selected: {values.join(', ')}"
 ```
@@ -293,7 +303,7 @@ on select menu "role_select":
 - `interaction` - The interaction object
 
 **Example:**
-```newt
+```javascript
 on slash "role":
     say with components "Choose a role:":
         select menu "role_select" with options:
@@ -320,6 +330,8 @@ on select menu "role_select":
 
 ## on message contains
 
+**Concept:** Event-driven programming (pattern matching)
+
 **What it does:** Triggers when any message contains specific text
 
 **When it triggers:** When a message is sent that includes the specified text
@@ -329,7 +341,7 @@ on select menu "role_select":
 - If the message contains your specified text, the handler runs
 - This is different from commands - it's more like keyword detection
 
-```newt
+```javascript
 on message contains "help":
     reply "Type !commands for help"
 
@@ -344,7 +356,7 @@ on message contains "bug":
 - Easter eggs
 
 **Example:**
-```newt
+```javascript
 on message contains "hello":
     reply "Hi there!"
 ```
@@ -360,13 +372,15 @@ on message contains "hello":
 
 ## on join
 
+**Concept:** Event-driven programming (lifecycle events)
+
 **What it does:** Triggers when a new member joins the server
 
 **When it triggers:** When someone joins your Discord server
 
 **Why it's useful:** Perfect for onboarding - welcoming new members, giving them roles, showing them around
 
-```newt
+```javascript
 on join:
     say "Welcome to the server!" in channel "general"
     give user role "Member"
@@ -378,7 +392,7 @@ on join:
 - `server` - The server they joined
 
 **Example:**
-```newt
+```javascript
 on join:
     say "Welcome {user.mention}! Read #rules before posting." in channel "general"
     give user role "New Member"
@@ -397,13 +411,15 @@ on join:
 
 ## on leave
 
+**Concept:** Event-driven programming (lifecycle events)
+
 **What it does:** Triggers when a member leaves the server
 
 **When it triggers:** When someone leaves or is kicked/banned from your server
 
 **Why it's useful:** For logging, cleanup, or analytics
 
-```newt
+```javascript
 on leave:
     say "{user.username} has left." in channel "general"
 ```
@@ -413,7 +429,7 @@ on leave:
 - `server` - The server they left
 
 **Example:**
-```newt
+```javascript
 on leave:
     say "Goodbye, {user.username}! We'll miss you." in channel "general"
 ```
@@ -426,6 +442,8 @@ on leave:
 
 ## on reaction add
 
+**Concept:** Event-driven programming (reaction events)
+
 **What it does:** Triggers when someone reacts to a message
 
 **When it triggers:** When a reaction emoji is added to any message
@@ -435,7 +453,7 @@ on leave:
 - When someone reacts with the specified emoji, your handler runs
 - Great for reaction-based commands and interactions
 
-```newt
+```javascript
 on reaction add "👍":
     reply "Thanks for the thumbs up!"
 
@@ -450,7 +468,7 @@ on reaction add "❌":
 - Simple confirmations
 
 **Example:**
-```newt
+```javascript
 on reaction add "✅":
     give user role "Verified"
     reply "You're now verified!"
@@ -472,7 +490,7 @@ on reaction add "✅":
 
 You can have multiple handlers of the same type. This lets your bot respond to many different events.
 
-```newt
+```javascript
 on command "hello":
     reply "Hello!"
 
@@ -524,7 +542,7 @@ No, only one handler will match each command. If you have duplicate command name
 ### What if I want a command to work in multiple ways?
 
 Use arguments or conditional logic:
-```newt
+```javascript
 on command "ban":
     if user has role "Admin":
         ban target

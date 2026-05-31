@@ -4,7 +4,7 @@ A moderation bot with content filtering and member management commands.
 
 ## Code
 
-```newt
+```javascript
 bot name "ModNewt"
 bot prefix "!"
 bot token from env "DISCORD_TOKEN"
@@ -44,7 +44,7 @@ at "09:00" daily:
 
 ### Content Filtering
 
-```newt
+```javascript
 on message contains "spoiler":
     reply "Please keep spoilers in the spoiler channel."
 ```
@@ -55,7 +55,7 @@ on message contains "spoiler":
 
 ### Role Requirements
 
-```newt
+```javascript
 on command "mute":
     require role "Moderator"
     mute target for 10 minutes
@@ -67,7 +67,7 @@ on command "mute":
 
 ### Moderation Actions
 
-```newt
+```javascript
 mute target for 10 minutes
 kick target
 ```
@@ -78,7 +78,7 @@ kick target
 
 ### Timers
 
-```newt
+```javascript
 every 1 hour:
     say "Reminder" in channel "general"
 

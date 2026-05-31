@@ -9,7 +9,7 @@ Newt is a programming language designed specifically for Discord bots. If you us
 Newt lets you write Discord bots using simple, English-like commands. You don't need to learn JavaScript or complex programming concepts. Just write what you want your bot to do in plain language.
 
 **Example:**
-```newt
+```javascript
 bot name "MyBot"
 bot prefix "!"
 bot token from env "DISCORD_TOKEN"

@@ -17,7 +17,7 @@ Bot configuration is like filling out a profile for your bot. It tells Discord:
 
 **Why it matters:** A clear name helps users know what your bot does and makes it easier to find.
 
-```newt
+```javascript
 bot name "MyAwesomeBot"
 ```
 
@@ -35,7 +35,7 @@ bot name "MyAwesomeBot"
 
 **Why it matters:** The prefix tells Discord "this message is for the bot, not just regular chat."
 
-```newt
+```javascript
 bot prefix "!"
 ```
 
@@ -57,7 +57,7 @@ bot prefix "!"
 - Consider what other bots in your server use
 
 **Example:**
-```newt
+```javascript
 bot prefix "!"
 
 on command "hello":
@@ -75,7 +75,7 @@ on command "hello":
 
 **Important:** **Always use environment variables** for security. Never put your token directly in your code.
 
-```newt
+```javascript
 bot token from env "DISCORD_TOKEN"
 ```
 
@@ -116,13 +116,13 @@ Replace `your-actual-token-here` with the token you copied.
 ### Security Best Practices
 
 **Never do this:**
-```newt
+```javascript
 # BAD - Don't put your token directly in code!
 bot token "MTUxMDM4OTc5NzYwMzI1MDIxNg.GaEFc_.abc123"
 ```
 
 **Always do this:**
-```newt
+```javascript
 # GOOD - Read from environment variable
 bot token from env "DISCORD_TOKEN"
 ```
@@ -143,7 +143,7 @@ bot token from env "DISCORD_TOKEN"
 
 Here's a complete example of bot configuration:
 
-```newt
+```javascript
 bot name "HelperBot"
 bot prefix "!"
 bot token from env "DISCORD_TOKEN"

@@ -18,6 +18,8 @@ Think of statements like actions or commands. If handlers are "when X happens," 
 
 ## reply
 
+**Concept:** Side effects and output
+
 **What it does:** Sends a reply to the message that triggered the handler
 
 **When to use it:** When you want your bot to respond directly to a user's message
@@ -27,17 +29,17 @@ Think of statements like actions or commands. If handlers are "when X happens," 
 - It's linked to the original message (shows as a reply in Discord)
 - Other users can see the reply
 
-```newt
+```javascript
 reply "Your message here"
 ```
 
 **With variables:**
-```newt
+```javascript
 reply "Hello, {user.username}!"
 ```
 
 **Example:**
-```newt
+```javascript
 on command "hello":
     reply "Hi there, {user.username}!"
 ```
@@ -58,6 +60,8 @@ on command "hello":
 
 ## say
 
+**Concept:** Side effects and output
+
 **What it does:** Sends a message to a specific channel
 
 **When to use it:** When you want your bot to send a message to a different channel than where the command was sent
@@ -67,12 +71,12 @@ on command "hello":
 - The message appears as a regular message (not a reply)
 - Useful for announcements or cross-channel communication
 
-```newt
+```javascript
 say "Announcement" in channel "announcements"
 ```
 
 **Example:**
-```newt
+```javascript
 on command "announce":
     say "Server maintenance in 10 minutes!" in channel "general"
 ```
@@ -94,6 +98,8 @@ on command "announce":
 
 ## say embed
 
+**Concept:** Side effects and output (structured data)
+
 **What it does:** Sends a rich embedded message with formatting, colors, and structured content
 
 **When to use it:** When you want your message to look professional and visually appealing
@@ -103,7 +109,7 @@ on command "announce":
 - They can have titles, descriptions, fields, and more
 - Great for important information, rules, or data display
 
-```newt
+```javascript
 say embed:
     title "Welcome!"
     description "Read the rules before posting"
@@ -118,7 +124,7 @@ say embed:
 - `field` - Named field with a value (you can have multiple fields)
 
 **Example:**
-```newt
+```javascript
 on command "rules":
     say embed:
         title "Server Rules"
@@ -146,6 +152,8 @@ on command "rules":
 
 ## say with components
 
+**Concept:** Side effects and output (interactive UI)
+
 **What it does:** Sends a message with interactive buttons or select menus
 
 **When to use it:** When you want users to interact with your bot through buttons or dropdowns
@@ -156,14 +164,14 @@ on command "rules":
 - Your bot responds using `on button click` or `on select menu` handlers
 
 **Buttons:**
-```newt
+```javascript
 say with components "Choose an option:":
     button "approve" label "Approve"
     button "reject" label "Reject"
 ```
 
 **Select menus:**
-```newt
+```javascript
 say with components "Select a role:":
     select menu "role_select" with options:
         "Admin" as "admin"
@@ -172,7 +180,7 @@ say with components "Select a role:":
 ```
 
 **Example with buttons:**
-```newt
+```javascript
 on slash "poll":
     say with components "Vote now!":
         button "yes" label "Yes"
@@ -202,6 +210,8 @@ on button click "no":
 
 ## let
 
+**Concept:** Variables and scoping
+
 **What it does:** Declares a variable to store a value for use in your handler
 
 **When to use it:** When you need to store a value temporarily to use later in the same handler
@@ -211,13 +221,13 @@ on button click "no":
 - You can use the variable name instead of the value
 - Variables only exist within the handler they're created in
 
-```newt
+```javascript
 let points = load user.id points or 0
 let userName = user.username
 ```
 
 **Example:**
-```newt
+```javascript
 on command "status":
     let points = load user.id points or 0
     let level = points / 10
@@ -242,6 +252,8 @@ on command "status":
 
 ## store
 
+**Concept:** Key-value storage and persistence
+
 **What it does:** Saves a value to the database so it persists across bot restarts
 
 **When to use it:** When you need to remember data for later (even after the bot restarts)
@@ -251,13 +263,13 @@ on command "status":
 - Data persists even if the bot restarts
 - You can load it back later with `load`
 
-```newt
+```javascript
 store user.id points 100
 store server.id "last_announcement" "Welcome message"
 ```
 
 **Example:**
-```newt
+```javascript
 on command "setpoints":
     store user.id points args[0]
     reply "Set your points to {args[0]}"
@@ -282,6 +294,8 @@ on command "setpoints":
 
 ## load
 
+**Concept:** Key-value storage and persistence
+
 **What it does:** Loads a value from the database that was previously saved
 
 **When to use it:** When you need to retrieve stored data
@@ -291,13 +305,13 @@ on command "setpoints":
 - Returns the value if found
 - Can provide a default value if nothing is found
 
-```newt
+```javascript
 let points = load user.id points or 0
 let config = load server.id "setting" or "default"
 ```
 
 **Example:**
-```newt
+```javascript
 on command "points":
     let points = load user.id points or 0
     reply "You have {points} points"
@@ -322,6 +336,8 @@ on command "points":
 
 ## if / else
 
+**Concept:** Boolean logic and branching
+
 **What it does:** Conditional logic - runs code only if a condition is true
 
 **When to use it:** When you want your bot to make decisions based on conditions
@@ -331,7 +347,7 @@ on command "points":
 - If yes, runs the code inside the if block
 - If no, skips the code (or runs the else block if you have one)
 
-```newt
+```javascript
 if user has role "Admin":
     reply "You have admin access"
 else:
@@ -339,7 +355,7 @@ else:
 ```
 
 **With else if:**
-```newt
+```javascript
 if points > 100:
     reply "VIP level"
 else if points > 50:
@@ -349,7 +365,7 @@ else:
 ```
 
 **Example:**
-```newt
+```javascript
 on command "ban":
     if user has role "Admin":
         ban target
@@ -380,6 +396,8 @@ on command "ban":
 
 ## for each
 
+**Concept:** Iteration and collections
+
 **What it does:** Loops through a collection (like all server members)
 
 **When to use it:** When you need to do something for every item in a list
@@ -389,13 +407,13 @@ on command "ban":
 - Runs the code inside the loop for each item
 - Useful for bulk operations
 
-```newt
+```javascript
 for each member in server.members:
     say "Hello" in channel "general"
 ```
 
 **Example:**
-```newt
+```javascript
 on command "announceall":
     for each member in server.members:
         say "Welcome to our server!" in channel "general"
@@ -417,6 +435,8 @@ on command "announceall":
 
 ## give role
 
+**Concept:** Side effects and output (system state modification)
+
 **What it does:** Gives a role to a user
 
 **When to use it:** When you want to assign a role to someone
@@ -426,13 +446,13 @@ on command "announceall":
 - User gains all permissions that role has
 - Role must already exist in the server
 
-```newt
+```javascript
 give user role "Member"
 give target role "VIP"
 ```
 
 **Example:**
-```newt
+```javascript
 on join:
     give user role "New Member"
     reply "Welcome! You've been given the New Member role."
@@ -453,6 +473,8 @@ on join:
 
 ## remove role
 
+**Concept:** Side effects and output (system state modification)
+
 **What it does:** Removes a role from a user
 
 **When to use it:** When you want to take away a role from someone
@@ -462,13 +484,13 @@ on join:
 - User loses permissions that role had
 - User must have the role for this to work
 
-```newt
+```javascript
 remove user role "Member"
 remove target role "VIP"
 ```
 
 **Example:**
-```newt
+```javascript
 on command "timeout":
     remove user role "Active"
     give user role "Muted"
@@ -489,6 +511,8 @@ on command "timeout":
 
 ## mute
 
+**Concept:** Side effects and output (system state modification)
+
 **What it does:** Mutes a user (requires a Muted role to exist in the server)
 
 **When to use it:** For temporary silencing without kicking/banning
@@ -498,13 +522,13 @@ on command "timeout":
 - The Muted role should have no permission to send messages
 - User can still see messages but can't send them
 
-```newt
+```javascript
 mute target for 10 minutes
 mute user for 1 hour
 ```
 
 **Example:**
-```newt
+```javascript
 on command "mute":
     if user has role "Mod":
         mute target for 10 minutes
@@ -535,6 +559,8 @@ on command "mute":
 
 ## kick
 
+**Concept:** Side effects and output (system state modification)
+
 **What it does:** Kicks a user from the server (they can rejoin with a new invite)
 
 **When to use it:** For temporary removal as a warning or punishment
@@ -544,12 +570,12 @@ on command "mute":
 - They can rejoin if they have an invite link
 - Less severe than banning
 
-```newt
+```javascript
 kick target
 ```
 
 **Example:**
-```newt
+```javascript
 on command "kick":
     if user has role "Admin":
         kick target
@@ -573,6 +599,8 @@ on command "kick":
 
 ## ban
 
+**Concept:** Side effects and output (system state modification)
+
 **What it does:** Bans a user from the server (they cannot rejoin)
 
 **When to use it:** For permanent removal due to serious rule violations
@@ -582,12 +610,12 @@ on command "kick":
 - They cannot rejoin even with an invite
 - Only an admin can unban them
 
-```newt
+```javascript
 ban target
 ```
 
 **Example:**
-```newt
+```javascript
 on command "ban":
     if user has role "Admin":
         ban target
@@ -611,6 +639,8 @@ on command "ban":
 
 ## wait
 
+**Concept:** Asynchronous programming and timing
+
 **What it does:** Pauses execution for a specified time
 
 **When to use it:** When you need delays between actions
@@ -620,13 +650,13 @@ on command "ban":
 - Other handlers can still run during the wait
 - Useful for timed sequences or rate limiting
 
-```newt
+```javascript
 wait 5 seconds
 say "This appears 5 seconds later"
 ```
 
 **Example:**
-```newt
+```javascript
 on command "remind":
     reply "I'll remind you in 1 minute"
     wait 1 minute
@@ -655,7 +685,7 @@ on command "remind":
 ### Can I use multiple statements in one handler?
 
 Yes! Just put them one after another:
-```newt
+```javascript
 on command "status":
     let points = load user.id points or 0
     reply "You have {points} points"
@@ -674,7 +704,7 @@ No, variables created with `let` only exist within their handler. Use `store` an
 ### Can I nest if statements?
 
 Yes, you can put if statements inside other if statements:
-```newt
+```javascript
 if points > 100:
     if user has role "VIP":
         reply "VIP with bonus points!"

@@ -20,6 +20,8 @@ export default defineConfig({
       {
         text: 'Getting Started',
         items: [
+          { text: 'Learning Philosophy', link: '/learning-philosophy' },
+          { text: 'Programming Concepts', link: '/concepts' },
           { text: 'Quickstart', link: '/quickstart' },
           { text: 'Installation', link: '/installation' },
           { text: 'Token Security', link: '/security' },

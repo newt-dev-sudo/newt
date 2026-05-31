@@ -11,12 +11,12 @@ A bot token is a unique identifier that authenticates your bot with Discord's se
 ### 1. Never Commit Tokens to Git
 
 **❌ WRONG:**
-```newt
+```javascript
 bot token "MTUxMDM4OTc5NzYwMzI1MDIxNg.Gxsg73..."
 ```
 
 **✅ CORRECT:**
-```newt
+```javascript
 bot token from env "DISCORD_TOKEN"
 ```
 
