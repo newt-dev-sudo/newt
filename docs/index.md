@@ -37,6 +37,4 @@ on command "hello":
 
 ## Community
 
-- [GitHub](https://github.com/newt-lang/newt)
-- [Discord](https://discord.gg/newt)
-- [Playground](https://newt-lang.dev)
+- [GitHub](https://github.com/newt-dev-sudo/newt)

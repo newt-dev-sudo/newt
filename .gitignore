@@ -31,6 +31,9 @@ tmp/
 # Package tarballs
 *.tgz
 
+# Internal documentation (not for public)
+.internal/
+
 # IDE
 .vscode/
 .idea/

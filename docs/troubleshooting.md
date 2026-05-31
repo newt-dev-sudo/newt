@@ -25,7 +25,7 @@ Common issues and how to fix them.
 **Solution:** Newt automatically handles this, but if you see this issue, ensure you're using the latest version:
 
 ```bash
-npm update -g newt-lang
+npm update -g @newt-dev/cli
 ```
 
 ### Bot crashes on startup
@@ -42,14 +42,13 @@ DISCORD_TOKEN="your-token" npm start
 
 ## Build Issues
 
-### "Cannot find module @newt-lang/compiler"
+### "Cannot find module @newt-dev/compiler"
 
 **Cause:** Compiler package not installed
 
 **Solution:**
 ```bash
-npm install -g @newt-lang/compiler
-npm install -g newt-lang
+npm install -g @newt-dev/cli
 ```
 
 ### "Syntax error" in .newt file
@@ -83,14 +82,14 @@ export DISCORD_TOKEN="your-token"
 
 **Linux/Mac:**
 ```bash
-sudo npm install -g newt-lang
+sudo npm install -g @newt-dev/cli
 ```
 
 **Windows:**
 - Run terminal as Administrator
 - Or use a user-local install:
 ```bash
-npm install newt-lang
+npm install @newt-dev/cli
 npx newt check my-bot.newt
 ```
 
@@ -164,8 +163,7 @@ If you're still stuck:
 1. Check the [Quickstart Guide](./quickstart.md)
 2. Review [Language Reference](./reference/bot-config.md)
 3. Look at [Examples](./examples/hello-world.md)
-4. Search existing issues on [GitHub](https://github.com/newt-lang/newt/issues)
-5. Ask in the [Discord community](https://discord.gg/newt)
+4. Search existing issues on [GitHub](https://github.com/newt-dev-sudo/newt/issues)
 
 ## Reporting Bugs
 

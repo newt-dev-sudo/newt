@@ -11,7 +11,7 @@ Get your first Discord bot running in 5 minutes with Newt.
 ## Step 1: Install Newt
 
 ```bash
-npm install -g newt-lang
+npm install -g @newt-dev/cli
 ```
 
 ## Step 2: Create a Discord Bot

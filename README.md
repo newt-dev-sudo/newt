@@ -1,30 +1,54 @@
 # Newt
 
-Small script, big bot.
+![npm version](https://img.shields.io/npm/v/@newt-dev/cli)
+![License](https://img.shields.io/npm/l/@newt-dev/cli)
+![Node](https://img.shields.io/node/v/@newt-dev/cli)
 
-Newt is a beginner-friendly domain-specific language for building Discord bots. It compiles `.newt` files into runnable `discord.js` projects while keeping the authoring experience close to plain English.
+**Small script, big bot.**
+
+A beginner-friendly DSL for Discord bots. Write `.newt` files, compile to `discord.js`.
+
+## Installation
+
+```bash
+npm install -g @newt-dev/cli
+```
+
+## Quick Start
 
 ```newt
-bot name "CoolBot"
+bot name "MyBot"
 bot prefix "!"
 bot token from env "DISCORD_TOKEN"
 
-on ready:
-    say "CoolBot is online!" in channel "bot-status"
-
 on command "hello":
-    reply "Hey there, {user.name}!"
+    reply "Hello, {user.username}!"
 ```
 
-## Workspace
+```bash
+newt build my-bot.newt --out my-bot
+cd my-bot && npm install
+DISCORD_TOKEN="your-token" npm start
+```
 
-- `packages/compiler` - lexer, parser, validator, and code generator
-- `packages/cli` - `newt` command-line tool
-- `packages/playground` - browser IDE and Discord simulation
-- `vscode-newt` - VS Code language support
-- `examples` - language coverage examples used by compiler tests
-- `docs` - user-facing documentation
+## Features
 
-## Current Status
+- Simple, English-like syntax
+- Persistent SQLite storage
+- Role management & rich embeds
+- Timers & scheduled tasks
+- Browser playground
 
-This repository is in the Phase 1 foundation scaffold. The first implemented pieces are examples, AST definitions, friendly error types, and the lexer.
+## Docs
+
+- [Quickstart](https://github.com/newt-dev-sudo/newt/blob/main/docs/quickstart.md)
+- [Reference](https://github.com/newt-dev-sudo/newt/blob/main/docs/reference/bot-config.md)
+- [Examples](https://github.com/newt-dev-sudo/newt/blob/main/docs/examples/hello-world.md)
+- [Deployment](https://github.com/newt-dev-sudo/newt/blob/main/docs/deployment.md)
+
+## Links
+
+- [GitHub](https://github.com/newt-dev-sudo/newt)
+- [npm](https://www.npmjs.com/package/@newt-dev/cli)
+
+

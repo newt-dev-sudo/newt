@@ -13,7 +13,7 @@ Install Newt on your system to start building Discord bots.
 Install Newt globally to use the `newt` command from anywhere:
 
 ```bash
-npm install -g newt-lang
+npm install -g @newt-dev/cli
 ```
 
 ### Verify Installation
@@ -41,7 +41,7 @@ sudo npm install -g newt-lang
 Install Newt in a specific project:
 
 ```bash
-npm install newt-lang
+npm install @newt-dev/cli
 ```
 
 Then use it via npx:
@@ -90,7 +90,7 @@ Newt files use the `.newt` extension. Configure your editor to treat them as pla
 To upgrade to the latest version:
 
 ```bash
-npm update -g newt-lang
+npm update -g @newt-dev/cli
 ```
 
 ## Uninstalling
@@ -98,7 +98,7 @@ npm update -g newt-lang
 To remove Newt from your system:
 
 ```bash
-npm uninstall -g newt-lang
+npm uninstall -g @newt-dev/cli
 ```
 
 ## Next Steps
