@@ -1,0 +1,102 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Newt",
+  "scopeName": "source.newt",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#colors"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#builtins"
+    },
+    {
+      "include": "#keywords"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.newt",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.newt",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "punctuation.definition.template-expression.newt",
+              "match": "\\{[^}]+\\}"
+            }
+          ]
+        }
+      ]
+    },
+    "colors": {
+      "patterns": [
+        {
+          "name": "constant.other.color.newt",
+          "match": "#[0-9A-Fa-f]{6}\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.newt",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "variable.language.newt",
+          "match": "\\b(user\\.(name|id|mention)|message\\.content|channel\\.name|server\\.(name|members)|args(\\[\\d+\\])?|target)\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.declaration.newt",
+          "match": "\\b(bot|name|prefix|token|from|env)\\b"
+        },
+        {
+          "name": "keyword.control.event.newt",
+          "match": "\\b(on|ready|command|join|leave|message|contains|reaction|add)\\b"
+        },
+        {
+          "name": "keyword.control.action.newt",
+          "match": "\\b(reply|say|give|remove|require|store|load|fetch|mute|kick|ban|pin|wait|every|at|daily|embed|title|description|color|field)\\b"
+        },
+        {
+          "name": "keyword.control.flow.newt",
+          "match": "\\b(if|else|for|each|in|try|error)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.newt",
+          "match": "\\b(and|or|not|has)\\b"
+        },
+        {
+          "name": "keyword.other.newt",
+          "match": "\\blet\\b"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+bot name "WelcomeNewt"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on join:
+    give user role "Member"
+    say embed:
+        title "Welcome, {user.name}!"
+        description "Read #rules first, then say hello in #general."
+        color #5865F2
+        field "Starter role" "I gave you the Member role."
+
+on command "role":
+    if user has role "Member":
+        reply "You already have the Member role!"
+    else:
+        give user role "Member"
+        reply "Done! Role given."
+
+on leave:
+    say "{user.name} left the server. We'll miss them!" in channel "general"

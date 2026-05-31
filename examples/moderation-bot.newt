@@ -1,0 +1,25 @@
+bot name "ModNewt"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on ready:
+    say "ModNewt is watching the server." in channel "moderation"
+
+on message contains "spoiler":
+    reply "Please keep spoilers in the spoiler channel."
+
+on command "mute":
+    require role "Moderator"
+    mute target for 10 minutes
+    reply "{target} has been muted for 10 minutes."
+
+on command "kick":
+    require role "Moderator"
+    kick target
+    reply "{target} was kicked."
+
+every 1 hour:
+    say "Moderation reminder: be kind and read the rules." in channel "general"
+
+at "09:00" daily:
+    say "Good morning! Today's mod queue is ready." in channel "moderation"

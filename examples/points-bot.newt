@@ -1,0 +1,21 @@
+bot name "PointsPal"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on ready:
+    say "PointsPal is tracking points." in channel "bot-status"
+
+on command "addpoints":
+    let current = load user.id points or 0
+    store user.id points = current + 10
+    let newPoints = load user.id points or 0
+    reply "Nice, {user.name}! You now have {newPoints} points."
+
+on command "points":
+    let userPoints = load user.id points or 0
+    reply "{user.name}, you have {userPoints} points."
+
+on command "leaderboard":
+    for each member in server.members:
+        let memberPoints = load member.id points or 0
+        say "{member.name}: {memberPoints} points" in channel "bot-commands"

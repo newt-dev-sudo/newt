@@ -1,0 +1,37 @@
+{
+  "name": "@newt-lang/compiler",
+  "version": "0.1.0",
+  "description": "Compiler for the Newt Discord bot DSL.",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test dist/test/*.test.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "dsl",
+    "compiler",
+    "newt"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/newt-lang/newt.git",
+    "directory": "packages/compiler"
+  },
+  "homepage": "https://github.com/newt-lang/newt#readme",
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "typescript": "^5.5.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,54 @@
+{
+  "name": "newt-lang",
+  "displayName": "Newt Language Support",
+  "description": "Syntax highlighting and language support for .newt Discord bot files.",
+  "version": "0.1.0",
+  "publisher": "newt-lang",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:newt"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "newt",
+        "aliases": [
+          "Newt"
+        ],
+        "extensions": [
+          ".newt"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "newt",
+        "scopeName": "source.newt",
+        "path": "./syntaxes/newt.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "newt.run",
+        "title": "Newt: Run Bot"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./tsconfig.json",
+    "check": "tsc -p ./tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.5.0"
+  },
+  "license": "MIT"
+}
