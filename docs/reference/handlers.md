@@ -376,7 +376,8 @@ on message contains "hello":
 **Important notes:**
 - This triggers on ANY message containing the text, not just commands
 - Be careful with common words - you might get too many triggers
-- Case-sensitive by default
+- **Case-sensitive by default** - "spoiler" won't match "Spoiler" or "SPOILER"
+- To handle case-insensitivity, you'll need to check multiple variations or use string manipulation (when implemented)
 
 ## on message update
 
