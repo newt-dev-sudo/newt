@@ -54,7 +54,9 @@ npm install -g @newt-dev/cli
 newt --version
 ```
 
-You should see version information like `@newt-dev/cli 0.1.0`.
+You should see version information like `@newt-dev/cli 0.5.0`.
+
+**Next Step:** Install the [VS Code extension](#setting-up-your-editor) for syntax highlighting.
 
 ### Option 2: Local Installation
 
@@ -67,9 +69,12 @@ npm install @newt-dev/cli
 Then use it with `npx`:
 ```bash
 npx newt check my-bot.newt
+npx newt run my-bot.newt
 ```
 
 **When to use this:** If you only want to use Newt in one project or don't have permission to install globally.
+
+**Next Step:** Install the [VS Code extension](#setting-up-your-editor) for syntax highlighting.
 
 ### Option 3: Development Installation
 
@@ -163,6 +168,28 @@ Newt files use the `.newt` extension. You can:
 ### What This Means
 
 If your computer was made in the last 10 years, it probably meets these requirements. You don't need a powerful computer to run Discord bots.
+
+## Newt CLI Commands
+
+Once installed, you can use these commands:
+
+```bash
+newt check <file>           # Check .newt file for syntax errors
+newt run <file>             # Run a .newt bot
+newt token <token>          # Save your Discord bot token
+newt token --clear          # Clear saved token
+newt token                  # Check if token is set
+newt new [name]             # Create a new bot file
+newt new [name] --template hello|welcome|points|blank
+newt deploy <file>          # Deploy bot (for hosting services)
+newt --help                 # Show help
+```
+
+**Most commonly used:**
+- `newt token` - Set your Discord token
+- `newt run <file>` - Run your bot
+- `newt check <file>` - Validate syntax before running
+- `newt new mybot` - Create a new bot from template
 
 ## Upgrading Newt
 
