@@ -39,9 +39,9 @@ const keywords = new Set([
   "command",
   "slash",
   "button",
+  "click",
   "select",
   "menu",
-  "click",
   "join",
   "leave",
   "message",
@@ -51,9 +51,7 @@ const keywords = new Set([
   "with",
   "options",
   "components",
-  "button",
   "label",
-  "select",
   "let",
   "if",
   "else",
@@ -124,7 +122,8 @@ const keywords = new Set([
   "uppercase",
   "lowercase",
   "replace",
-  "split"
+  "split",
+  "as"
 ]);
 
 const CHAR_TOKEN_TYPES: Record<string, TokenType> = {

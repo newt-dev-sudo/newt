@@ -39,6 +39,20 @@ This document outlines the features currently supported by the Newt interpreter 
 - Triggers when a message is deleted
 - Useful for message deletion logging
 
+✅ **Slash Command Handler** - `on slash "name":`
+- Responds to Discord slash commands
+- Automatically registered with Discord API on bot startup
+- Provides context variables: `user`, `server`, `channel`, `interaction`
+
+✅ **Button Click Handler** - `on button click "id":`
+- Handles button interactions from components
+- Provides context variables: `user`, `server`, `channel`, `interaction`
+
+✅ **Select Menu Handler** - `on menu "id":`
+- Handles dropdown menu selections from components
+- Provides context variables: `user`, `server`, `channel`, `interaction`, `values`
+- `values` is an array of selected option values
+
 ### Statements
 
 ✅ **Reply Statement** - `reply "message"`
@@ -88,6 +102,11 @@ This document outlines the features currently supported by the Newt interpreter 
 - Removes a role from a user
 - Requires role to exist in server
 
+✅ **Require Role Statement** - `require role "RoleName"`
+- Checks if user has the specified role
+- Sends error message if role is missing or not found
+- Useful for restricting commands to specific user groups
+
 ✅ **Mute Statement** - `mute user for duration`
 - Gives user a "Muted" role for specified time
 - Requires "Muted" role to exist in server
@@ -123,6 +142,7 @@ This document outlines the features currently supported by the Newt interpreter 
 - Basic string values
 - Template string interpolation with `{variable}`
 - Supports nested property access: `{userInfo.username}`
+- Supports array indexing: `{values[0]}`, `{args[1]}`
 
 ✅ **Number Literals** - `123`, `45.67`
 - Integer and floating-point numbers
@@ -137,9 +157,22 @@ This document outlines the features currently supported by the Newt interpreter 
 - Access to context variables
 - Property access: `user.username`, `server.name`
 
+✅ **Binary Expressions** - `+`, `-`, `*`, `/`, `==`, `!=`, `<`, `>`, `<=`, `>=`, `and`, `or`
+- Mathematical and logical operations
+- Used in conditions and calculations
+
+✅ **Unary Expressions** - `not`, `-`
+- Logical negation and negation
+
 ✅ **REST Methods**
 - `getUser(userId)` - Fetch user information from Discord API
 - `getGuild(guildId)` - Fetch guild information from Discord API
+- `getReactionUsers(messageId, emoji)` - Fetch users who reacted to a message with a specific emoji
+
+✅ **Random Expression** - `random(min, max)`
+- Generates a random integer between min and max (inclusive)
+- If no arguments provided, returns 0 or 1
+- Useful for giveaways, games, and random selections
 
 ✅ **Fetch Expression** - `fetch "url"`
 - HTTP request functionality
@@ -158,18 +191,6 @@ Available in command handlers:
 ## Not Yet Supported
 
 The following features are documented but not yet implemented in the interpreter:
-
-❌ **Slash Commands** - `on slash "name":`
-- Discord's modern slash commands
-- Requires Discord API registration
-
-❌ **Button Click Handler** - `on button click "id":`
-- Handles button interactions
-- Requires interaction handling
-
-❌ **Select Menu Handler** - `on select menu "id":`
-- Handles dropdown menu selections
-- Requires interaction handling
 
 ⚠️ **Message Editing/Deletion Statements** - `edit message to "text"`, `delete message`
 - Implemented but syntax issue: `let botMessage = reply` not supported

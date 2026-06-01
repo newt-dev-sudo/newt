@@ -88,6 +88,21 @@ class Validator {
         return;
       }
 
+      case "SlashCommandHandler": {
+        if (node.options) {
+          for (const option of node.options) {
+            this.visitExpression(option.description, new Set(), false);
+          }
+        }
+        if (node.description) {
+          this.visitExpression(node.description, new Set(), false);
+        }
+        // Add built-in variables for slash commands
+        const slashScope = new Set(["user", "channel", "server", "args", "interaction"]);
+        this.visitStatements(node.body, slashScope);
+        return;
+      }
+
       case "MessageUpdateHandler":
       case "MessageDeleteHandler": {
         // Add built-in variables for message events
@@ -236,6 +251,17 @@ class Validator {
           this.errors.push(makeCatalogError("NEWT_E011", expression.loc.line, expression.loc.column, this.line(expression.loc.line)));
         }
         this.visitExpression(expression.guildId, scope, inTry);
+        break;
+      case "RandomExpr":
+        if (expression.min) this.visitExpression(expression.min, scope, inTry);
+        if (expression.max) this.visitExpression(expression.max, scope, inTry);
+        break;
+      case "GetReactionUsersExpr":
+        if (!inTry) {
+          this.errors.push(makeCatalogError("NEWT_E011", expression.loc.line, expression.loc.column, this.line(expression.loc.line)));
+        }
+        this.visitExpression(expression.messageId, scope, inTry);
+        this.visitExpression(expression.emoji, scope, inTry);
         break;
       case "BinaryExpr":
         this.visitExpression(expression.left, scope, inTry);

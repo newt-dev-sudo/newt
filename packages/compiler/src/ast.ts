@@ -321,6 +321,8 @@ export type Expression =
   | FetchExpr
   | GetUserExpr
   | GetGuildExpr
+  | RandomExpr
+  | GetReactionUsersExpr
   | BinaryExpr
   | UnaryExpr
   | CallExpr;
@@ -381,6 +383,18 @@ export interface GetUserExpr extends BaseNode {
 export interface GetGuildExpr extends BaseNode {
   type: "GetGuildExpr";
   guildId: Expression;
+}
+
+export interface RandomExpr extends BaseNode {
+  type: "RandomExpr";
+  min?: Expression;
+  max?: Expression;
+}
+
+export interface GetReactionUsersExpr extends BaseNode {
+  type: "GetReactionUsersExpr";
+  messageId: Expression;
+  emoji: Expression;
 }
 
 export interface BinaryExpr extends BaseNode {

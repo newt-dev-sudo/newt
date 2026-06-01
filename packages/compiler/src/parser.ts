@@ -164,6 +164,11 @@ class Parser {
         handler = { type: "ButtonClickHandler", loc: this.loc(start), buttonId, body: [] };
         break;
       }
+      case "menu": {
+        const menuId = this.parseStringLiteral();
+        handler = { type: "SelectMenuHandler", loc: this.loc(start), menuId, body: [] };
+        break;
+      }
       case "select": {
         this.consumeKeyword("menu");
         const menuId = this.parseStringLiteral();
@@ -388,6 +393,7 @@ class Parser {
         const id = this.parseStringLiteral();
         this.consumeKeyword("with");
         this.consumeKeyword("options");
+        this.skipNewlines();
         const options: SelectOption[] = [];
         while (this.check("STRING")) {
           const label = this.parseStringLiteral();
@@ -399,6 +405,7 @@ class Parser {
             label,
             value
           });
+          this.skipNewlines();
         }
         components.push({
           type: "SelectMenuComponent",
@@ -573,6 +580,40 @@ class Parser {
       const guildId = this.parseExpressionUntil(["RPAREN"]);
       this.consumeType("RPAREN", "getGuild needs a closing parenthesis.");
       return { type: "GetGuildExpr", loc: this.loc(start), guildId };
+    }
+
+    if (this.checkKeyword("random")) {
+      const start = this.advance();
+      this.consumeType("LPAREN", "random needs an opening parenthesis.");
+      const args: Expression[] = [];
+      if (!this.check("RPAREN")) {
+        args.push(this.parseExpressionUntil(["RPAREN", "COMMA"]));
+        if (this.match("COMMA")) {
+          args.push(this.parseExpressionUntil(["RPAREN"]));
+        }
+      }
+      this.consumeType("RPAREN", "random needs a closing parenthesis.");
+      return {
+        type: "RandomExpr",
+        loc: this.loc(start),
+        min: args[0],
+        max: args[1]
+      };
+    }
+
+    if (this.checkKeyword("getReactionUsers")) {
+      const start = this.advance();
+      this.consumeType("LPAREN", "getReactionUsers needs an opening parenthesis.");
+      const messageId = this.parseExpressionUntil(["COMMA"]);
+      this.consumeType("COMMA", "getReactionUsers needs a comma between arguments.");
+      const emoji = this.parseExpressionUntil(["RPAREN"]);
+      this.consumeType("RPAREN", "getReactionUsers needs a closing parenthesis.");
+      return {
+        type: "GetReactionUsersExpr",
+        loc: this.loc(start),
+        messageId,
+        emoji
+      };
     }
 
     if (this.match("LPAREN")) {

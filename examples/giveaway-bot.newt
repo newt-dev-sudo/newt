@@ -1,0 +1,77 @@
+bot name "GiveawayBot"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on ready:
+    set activity "Giveaways! Use /giveaway"
+
+# Start a giveaway
+on slash "giveaway":
+    say "🎉 **GIVEAWAY STARTED** 🎉"
+    say "React with 🎉 to enter!"
+    say "Use /end-giveaway to pick a winner"
+    
+    # Store giveaway data using bot's user ID as namespace
+    store user.id active = 1
+    store user.id prize = "Prize"
+    store user.id participantCount = 0
+
+# Track participants via reactions
+on reaction add "🎉":
+    let active = load user.id active or 0
+    let dummy = 0
+    
+    if active > 0:
+        # Increment participant count
+        let count = load user.id participantCount or 0
+        store user.id participantCount = count + 1
+        reply "{user.username} entered the giveaway! Total entries: {count + 1}"
+
+# End giveaway manually
+on slash "end-giveaway":
+    let active = load user.id active or 0
+    let dummy = 0
+    
+    if active > 0:
+        let count = load user.id participantCount or 0
+        
+        if count > 0:
+            # Pick a random number between 1 and count
+            let winnerNumber = random(1, count)
+            say "🎊 **GIVEAWAY ENDED** 🎊"
+            say "Total entries: {count}"
+            say "🏆 Random winner number: {winnerNumber} 🏆"
+            say "Note: This selects a random entry number. Full winner selection with usernames requires participant list iteration (not yet supported in Newt)."
+            
+            # Reset giveaway
+            store user.id active = 0
+            store user.id participantCount = 0
+        else:
+            say "Giveaway ended with no participants."
+            store user.id active = 0
+    else:
+        reply "No active giveaway to end."
+
+# Cancel a giveaway
+on slash "cancel-giveaway":
+    let active = load user.id active or 0
+    let dummy = 0
+    
+    if active > 0:
+        store user.id active = 0
+        store user.id participantCount = 0
+        reply "Giveaway cancelled!"
+    else:
+        reply "No active giveaway to cancel."
+
+# Check giveaway status
+on slash "giveaway-status":
+    let active = load user.id active or 0
+    let dummy = 0
+    
+    if active > 0:
+        let count = load user.id participantCount or 0
+        say "📊 **Giveaway Status**"
+        say "Total entries: {count}"
+    else:
+        reply "No active giveaway."

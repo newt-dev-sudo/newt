@@ -16,7 +16,10 @@ import type {
   FetchExpr,
   GetUserExpr,
   GetGuildExpr,
+  RandomExpr,
+  GetReactionUsersExpr,
   DurationLiteral,
+  TimerDecl,
 } from "@newt-dev/compiler";
 
 interface InterpreterOptions {
@@ -30,6 +33,9 @@ interface ExecutionContext {
   server: any;
   message?: any;
   target?: any;
+  args?: any[];
+  interaction?: any;
+  values?: string[];
   variables: Map<string, any>;
 }
 
@@ -59,7 +65,7 @@ export class NewtInterpreter {
     });
 
     // Increase max listeners to avoid warnings with multiple command handlers
-    this.client.setMaxListeners(20);
+    this.client.setMaxListeners(30);
 
     // Handle unhandled errors
     this.client.on('error', (error) => {
@@ -85,11 +91,60 @@ export class NewtInterpreter {
       (node): node is Handler => node.type.endsWith("Handler")
     );
 
+    const timers = this.program.body.filter(
+      (node): node is TimerDecl => node.type.endsWith("TimerDecl")
+    );
+
+    for (const timer of timers) {
+      if (timer.type === "EveryTimerDecl") {
+        const duration = this.parseDuration(timer.unit) * timer.amount.value;
+        setInterval(async () => {
+          const context: ExecutionContext = {
+            user: this.client.user,
+            channel: null,
+            server: null,
+            variables: new Map(),
+          };
+          await this.executeStatements(timer.body, context);
+        }, duration * 1000);
+      } else if (timer.type === "DailyTimerDecl") {
+        const [hours, minutes] = timer.time.value.split(":").map(Number);
+        const now = new Date();
+        const scheduledTime = new Date();
+        scheduledTime.setHours(hours, minutes, 0, 0);
+        if (scheduledTime <= now) {
+          scheduledTime.setDate(scheduledTime.getDate() + 1);
+        }
+        const delay = scheduledTime.getTime() - now.getTime();
+        setTimeout(async () => {
+          const context: ExecutionContext = {
+            user: this.client.user,
+            channel: null,
+            server: null,
+            variables: new Map(),
+          };
+          await this.executeStatements(timer.body, context);
+          // Schedule for next day
+          setInterval(async () => {
+            const dailyContext: ExecutionContext = {
+              user: this.client.user,
+              channel: null,
+              server: null,
+              variables: new Map(),
+            };
+            await this.executeStatements(timer.body, dailyContext);
+          }, 24 * 60 * 60 * 1000);
+        }, delay);
+      }
+    }
+
     for (const handler of handlers) {
       switch (handler.type) {
         case "ReadyHandler":
           this.client.once("clientReady", async () => {
             console.log(`Bot ${this.botName} is online!`);
+            // Register slash commands
+            await this.registerSlashCommands();
             const context: ExecutionContext = {
               user: this.client.user,
               channel: null,
@@ -174,6 +229,63 @@ export class NewtInterpreter {
           });
           break;
 
+        case "SlashCommandHandler":
+          this.client.on("interactionCreate", async (interaction) => {
+            if (!interaction.isChatInputCommand()) return;
+            if (interaction.commandName !== handler.command) return;
+
+            const context: ExecutionContext = {
+              user: interaction.user,
+              channel: interaction.channel,
+              server: interaction.guild,
+              message: null,
+              args: [],
+              interaction,
+              variables: new Map(),
+            };
+            await this.executeStatements(handler.body, context);
+          });
+          break;
+
+        case "ButtonClickHandler":
+          this.client.on("interactionCreate", async (interaction) => {
+            if (!interaction.isButton()) return;
+            if (interaction.customId !== handler.buttonId.value) return;
+
+            const context: ExecutionContext = {
+              user: interaction.user,
+              channel: interaction.channel,
+              server: interaction.guild,
+              message: null,
+              interaction,
+              variables: new Map(),
+            };
+            await this.executeStatements(handler.body, context);
+          });
+          break;
+
+        case "SelectMenuHandler":
+          this.client.on("interactionCreate", async (interaction) => {
+            if (!interaction.isStringSelectMenu()) return;
+            if (interaction.customId !== handler.menuId.value) return;
+
+            try {
+              const context: ExecutionContext = {
+                user: interaction.user,
+                channel: interaction.channel,
+                server: interaction.guild,
+                message: null,
+                values: interaction.values,
+                interaction,
+                variables: new Map(),
+              };
+              await this.executeStatements(handler.body, context);
+            } catch (error) {
+              console.error("Error in select menu handler:", error);
+            }
+          });
+          break;
+
         case "MessageUpdateHandler":
           this.client.on("messageUpdate", async (oldMessage, newMessage) => {
             if (newMessage.author?.bot) return;
@@ -222,7 +334,18 @@ export class NewtInterpreter {
       switch (stmt.type) {
         case "ReplyStatement":
           const replyText = await this.evaluateExpression(stmt.message, context);
-          await context.message?.reply(replyText);
+          if (context.interaction) {
+            // For select menu interactions, send a regular message to the channel
+            if (context.interaction.isStringSelectMenu()) {
+              await context.channel?.send(replyText);
+            } else {
+              if (!context.interaction.replied && !context.interaction.deferred) {
+                await context.interaction.reply(replyText);
+              }
+            }
+          } else {
+            await context.message?.reply(replyText);
+          }
           break;
 
         case "SayStatement":
@@ -245,15 +368,51 @@ export class NewtInterpreter {
         case "SayComponentsStatement":
           const compMessage = await this.evaluateExpression(stmt.message, context);
           const components = this.buildComponents(stmt.components);
-          await context.channel?.send({
-            content: compMessage,
-            components: components
-          });
+          try {
+            if (context.interaction) {
+              await context.interaction.reply({
+                content: compMessage,
+                components: components
+              });
+            } else {
+              await context.channel?.send({
+                content: compMessage,
+                components: components
+              });
+            }
+          } catch (error) {
+            console.error("Error sending components:", error);
+            throw error;
+          }
           break;
 
         case "LetDecl":
           const value = await this.evaluateExpression(stmt.value, context);
           context.variables.set(stmt.name, value);
+          break;
+
+        case "RequireRoleStatement":
+          const requiredRole = this.findRole(context.server, stmt.role.value);
+          if (!requiredRole) {
+            console.error(`Required role not found: ${stmt.role.value}`);
+            if (context.message) {
+              await context.message.reply(`Error: Role "${stmt.role.value}" not found on this server.`);
+            } else if (context.interaction) {
+              await context.interaction.reply({ content: `Error: Role "${stmt.role.value}" not found on this server.`, ephemeral: true });
+            }
+            return;
+          }
+          // Get the member object for the user
+          const member = context.user.roles ? context.user : await context.server.members.fetch(context.user.id);
+          if (!member.roles.cache.has(requiredRole.id)) {
+            const errorMsg = `You need the "${stmt.role.value}" role to use this command.`;
+            if (context.message) {
+              await context.message.reply(errorMsg);
+            } else if (context.interaction) {
+              await context.interaction.reply({ content: errorMsg, ephemeral: true });
+            }
+            return;
+          }
           break;
 
         case "StoreStatement":
@@ -427,9 +586,22 @@ export class NewtInterpreter {
           let result = expr.value;
           // Replace {variable} with actual values
           result = result.replace(/\{([^}]+)\}/g, (match, path) => {
+            // Handle array indexing like values[0]
+            const arrayMatch = path.match(/^(\w+)\[(\d+)\]$/);
+            if (arrayMatch) {
+              const [, arrayName, index] = arrayMatch;
+              let value: any;
+              if (context.variables.has(arrayName)) {
+                value = context.variables.get(arrayName);
+              } else {
+                value = (context as any)[arrayName];
+              }
+              return value !== undefined && value !== null ? String(value[parseInt(index)]) : match;
+            }
+
             const parts = path.split('.');
             let value: any;
-            
+
             // First check if it's a variable in context.variables
             if (context.variables.has(parts[0])) {
               value = context.variables.get(parts[0]);
@@ -444,7 +616,7 @@ export class NewtInterpreter {
                 value = value?.[part];
               }
             }
-            
+
             return value !== undefined && value !== null ? String(value) : match;
           });
           return result;
@@ -557,15 +729,42 @@ export class NewtInterpreter {
         const guildId = await this.evaluateExpression(expr.guildId, context);
         return await this.client.guilds.fetch(guildId);
 
+      case "RandomExpr":
+        const min = expr.min ? await this.evaluateExpression(expr.min, context) : 0;
+        const max = expr.max ? await this.evaluateExpression(expr.max, context) : 1;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+
+      case "GetReactionUsersExpr":
+        const messageId = await this.evaluateExpression(expr.messageId, context);
+        const emoji = await this.evaluateExpression(expr.emoji, context);
+        try {
+          const message = await context.channel?.messages.fetch(messageId);
+          const reaction = message?.reactions.cache.get(emoji);
+          if (!reaction) return [];
+          const users = await reaction.users.fetch();
+          return users.filter((u: any) => !u.bot).map((u: any) => u.id);
+        } catch (error) {
+          console.error("Error fetching reaction users:", error);
+          return [];
+        }
+
       default:
         throw new Error(`Unknown expression type: ${(expr as any).type}`);
     }
   }
 
-  private parseDuration(duration: DurationLiteral): number {
-    const value = duration.amount.value;
-    const unit = duration.unit;
-    
+  private parseDuration(duration: DurationLiteral | string): number {
+    let value: number;
+    let unit: string;
+
+    if (typeof duration === "string") {
+      value = 1;
+      unit = duration;
+    } else {
+      value = duration.amount.value;
+      unit = duration.unit;
+    }
+
     switch (unit) {
       case "second":
       case "seconds":
@@ -627,10 +826,11 @@ export class NewtInterpreter {
             .setLabel(opt.label?.value || "Option")
             .setValue(opt.value?.value || "value")
         ) || [];
-        
+
         const row = new ActionRowBuilder().addComponents(
           new StringSelectMenuBuilder()
             .setCustomId(comp.id.value)
+            .setPlaceholder("Select an option")
             .setOptions(options)
         );
         rows.push(row);
@@ -638,6 +838,56 @@ export class NewtInterpreter {
     }
     
     return rows;
+  }
+
+  private async registerSlashCommands(): Promise<void> {
+    const slashHandlers = this.program.body.filter(
+      (node): node is any => node.type === "SlashCommandHandler"
+    );
+
+    if (slashHandlers.length === 0) return;
+
+    const commands = slashHandlers.map((handler) => ({
+      name: handler.command,
+      description: handler.description?.value || "No description",
+      options: handler.options?.map((opt: any) => ({
+        name: opt.name,
+        description: opt.description.value,
+        type: this.mapOptionType(opt.optionType),
+        required: opt.required.value,
+      })) || [],
+    }));
+
+    try {
+      // Register commands globally (takes up to 1 hour to propagate)
+      // For testing, you might want to register to a specific guild instead
+      // await this.client.application?.commands.set(commands);
+      
+      // For faster testing, register to the first guild the bot is in
+      const guild = this.client.guilds.cache.first();
+      if (guild) {
+        await guild.commands.set(commands);
+        console.log(`Registered ${commands.length} slash commands to guild: ${guild.name}`);
+      } else {
+        console.log("No guilds found, skipping slash command registration");
+      }
+    } catch (error) {
+      console.error("Failed to register slash commands:", error);
+    }
+  }
+
+  private mapOptionType(type: string): number {
+    const typeMap: Record<string, number> = {
+      "string": 3,
+      "integer": 4,
+      "boolean": 5,
+      "user": 6,
+      "channel": 7,
+      "role": 8,
+      "mentionable": 9,
+      "number": 10,
+    };
+    return typeMap[type] || 3; // Default to string
   }
 
   private saveValue(namespace: string, key: string, value: any): void {
