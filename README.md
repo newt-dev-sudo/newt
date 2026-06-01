@@ -50,17 +50,17 @@ on command "hello":
     reply "Hello, {user.username}!"
 ```
 
-2. **Build your bot**:
+2. **Set your token**:
 ```bash
-newt build my-bot.newt --out my-bot
-cd my-bot && npm install
-echo "DISCORD_TOKEN=your-token" > .env
-npm start
+newt token YOUR_BOT_TOKEN
 ```
 
-**Note:** The `.env` file stores your Discord token securely. Replace `your-token` with your actual bot token from the Discord Developer Portal.
+3. **Run your bot**:
+```bash
+newt run my-bot.newt
+```
 
-3. **Use your bot in Discord!**
+4. **Use your bot in Discord!**
 
 ## Features
 
@@ -84,6 +84,7 @@ npm start
 
 - [Documentation](https://newt-d3s.pages.dev)
 - [GitHub](https://github.com/newt-dev-sudo/newt)
+- [Discord](https://discord.gg/cXFCVz3VcR)
 - [npm](https://www.npmjs.com/package/@newt-dev/cli)
 
 

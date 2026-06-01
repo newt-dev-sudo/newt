@@ -49,7 +49,8 @@ export default defineConfig({
       }
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/newt-dev-sudo/newt' }
+      { icon: 'github', link: 'https://github.com/newt-dev-sudo/newt' },
+      { icon: 'discord', link: 'https://discord.gg/cXFCVz3VcR' }
     ]
   }
 })
