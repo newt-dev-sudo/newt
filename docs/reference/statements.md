@@ -407,31 +407,30 @@ on command "ban":
 - Runs the code inside the loop for each item
 - Useful for bulk operations
 
+> ⚠️ **Rate Limit Warning:** Discord has strict rate limits on how many messages a bot can send per second (typically 10 messages per second). Never loop through large collections like `server.members` and send a message for each item - this will get your bot suspended. Always add delays or use batch operations.
+
 ```javascript
-for each member in server.members:
-    say "Hello" in channel "general"
+# Safe example - small list
+for each item in ["apple", "banana", "cherry"]:
+    say "I like {item}"
 ```
 
 **Example:**
 ```javascript
-on command "announceall":
-    for each member in server.members:
-        say "Welcome to our server!" in channel "general"
+on command "listitems":
+    for each item in ["item1", "item2", "item3"]:
+        say "Item: {item}"
 ```
 
 **What this does:**
-- User types: `!announceall`
-- Bot goes through every member in the server
-- Sends a welcome message for each one
-- (Note: This would spam the channel - use with caution!)
+- User types: `!listitems`
+- Bot goes through each item in the list
+- Sends a message for each one
 
 **Use cases:**
-- Bulk operations
-- Processing all members
+- Processing small lists
 - Data processing
 - Batch updates
-
-**Important:** Be careful with loops - they can send many messages quickly and hit Discord's rate limits.
 
 ## give role
 

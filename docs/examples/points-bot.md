@@ -23,16 +23,14 @@ on command "points":
     reply "{user.username}, you have {userPoints} points."
 
 on command "leaderboard":
-    for each member in server.members:
-        let memberPoints = load member.id points or 0
-        say "{member.user.username}: {memberPoints} points" in channel "bot-commands"
+    reply "Leaderboard feature coming soon - check the roadmap!"
 ```
 
 ## What It Does
 
 - `!addpoints` - Adds 10 points to the user
 - `!points` - Shows the user's current point total
-- `!leaderboard` - Lists all members and their points
+- `!leaderboard` - Placeholder for leaderboard (coming soon)
 - Points persist across bot restarts using SQLite
 
 ## Key Concepts
@@ -48,24 +46,11 @@ store user.id points = current + 10
 - `store` saves values to the database
 - `or 0` provides a default for new users
 
-### Iteration
-
-```javascript
-for each member in server.members:
-    let memberPoints = load member.id points or 0
-    say "{member.user.username}: {memberPoints} points"
-```
-
-- Iterates over all server members
-- Loads and displays each member's points
-
 ## How to Run
 
 ```bash
-newt build points-bot.newt --out points-bot
-cd points-bot
-npm install
-DISCORD_TOKEN="your-token" npm start
+newt token YOUR_BOT_TOKEN
+newt run points-bot.newt
 ```
 
 ## Use Cases

@@ -76,15 +76,17 @@ store user.id points points + 10
 **Concept:** Collections and loops
 
 ```javascript
-for each member in server.members:
-    say "Welcome!" in channel "general"
+for each item in ["apple", "banana", "cherry"]:
+    say "I like {item}"
 ```
+
+> ⚠️ **Rate Limit Warning:** Never loop through large collections like `server.members` and send a message for each item - this will hit Discord's rate limits and get your bot suspended. Only use `for each` with small, known lists.
 
 **What you learn:**
 - Collections and arrays
 - Iteration patterns
 - Processing multiple items
-- System data traversal
+- Rate limiting awareness
 
 ## Consistency Over Simplicity
 

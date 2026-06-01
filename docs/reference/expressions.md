@@ -106,9 +106,12 @@ on command "whereami":
 
 **What you can do with it:**
 ```javascript
-for each member in server.members:
-    say "Hello" in channel "general"
+# Safe example - small list
+for each item in ["item1", "item2", "item3"]:
+    say "Item: {item}"
 ```
+
+> ⚠️ **Rate Limit Warning:** Never loop through `server.members` and send a message for each member - this will hit Discord's rate limits and get your bot suspended. Only use `for each` with small, known lists.
 
 **Available properties:**
 - `server.name` - The name of the server

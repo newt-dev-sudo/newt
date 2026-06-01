@@ -16,6 +16,4 @@ on command "points":
     reply "{user.name}, you have {userPoints} points."
 
 on command "leaderboard":
-    for each member in server.members:
-        let memberPoints = load member.id points or 0
-        say "{member.name}: {memberPoints} points" in channel "bot-commands"
+    reply "Leaderboard feature coming soon - check the roadmap!"
