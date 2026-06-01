@@ -126,15 +126,18 @@ This means Node.js isn't installed or isn't in your PATH:
 ### VS Code (Recommended)
 
 1. Install [VS Code](https://code.visualstudio.com/)
-2. Open VS Code
-3. Go to Extensions (Ctrl+Shift+X)
-4. Search for "Newt"
-5. Install the Newt Language Support extension
+2. Download the [Newt Language Extension](https://github.com/newt-dev-sudo/newt/releases/tag/v0.1.0) (.vsix file)
+3. Open VS Code
+4. Go to Extensions (Ctrl+Shift+X)
+5. Click the "..." menu in the top right
+6. Select "Install from VSIX..."
+7. Choose the downloaded `.vsix` file
+8. Reload VS Code when prompted
 
 **What this gives you:**
 - Syntax highlighting (colors in your code)
-- Error detection (underlines mistakes)
-- Auto-completion (suggests commands as you type)
+- Better code readability
+- Language configuration for comments and indentation
 
 ### Other Editors
 
