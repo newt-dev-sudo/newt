@@ -25,7 +25,8 @@ export default defineConfig({
           { text: 'Quickstart', link: '/quickstart' },
           { text: 'Installation', link: '/installation' },
           { text: 'Token Security', link: '/security' },
-          { text: 'Deployment', link: '/deployment' }
+          { text: 'Deployment', link: '/deployment' },
+          { text: 'Roadmap', link: '/roadmap' }
         ]
       },
       {

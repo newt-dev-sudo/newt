@@ -27,12 +27,23 @@ Newt is designed to teach fundamental programming concepts through Discord bot d
 ### Boolean Logic and Branching
 **What it teaches:** Making decisions based on conditions using true/false logic.
 
+> ⚠️ **Important:** Newt uses `0` for false and `1` for true. The keywords `true` and `false` are not yet supported.
+>
+> ```newt
+> # Correct
+> let isAdmin = 1
+> if isAdmin:
+>     reply "You are an admin"
+>
+> # Incorrect - will cause an error
+> let isAdmin = true
+> ```
+
 **Newt features:**
 - `if / else` - Conditional statements
 - Comparison operators (`=`, `!=`, `<`, `>`, `<=`, `>=`)
 - Logical operators (`and`, `or`)
 - `has` expression - Boolean membership check
-- Note: Use `0`/`1` for boolean values (true/false not yet supported)
 
 **Real-world parallels:**
 - `if/else` in any programming language
