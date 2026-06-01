@@ -82,6 +82,8 @@ on command "hello":
 
 ## Step 5: Save Your Token
 
+> ⚠️ **Security Warning:** Your terminal saves command history. If you're streaming or sharing your screen, your token might be visible in your terminal history. Consider using the Discord token store instead. Learn more in [Token Security](./security.md).
+
 Save your Discord bot token so Newt can use it:
 
 ```bash
