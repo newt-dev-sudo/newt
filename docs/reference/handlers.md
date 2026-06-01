@@ -184,8 +184,6 @@ on command "help":
 
 ## on slash
 
-> ⚠️ **Not Implemented:** Slash commands are not yet implemented in the interpreter runtime. See the [Roadmap](../roadmap.md) for status.
-
 **Concept:** Event-driven programming (command pattern)
 
 **What it does:** Responds to Discord slash commands (commands starting with `/`)
@@ -230,8 +228,6 @@ on slash "ping":
 - Mobile-friendly - easier to use on phones
 
 ## on button click
-
-> ⚠️ **Not Implemented:** Button click handlers are not yet implemented in the interpreter runtime. See the [Roadmap](../roadmap.md) for status.
 
 **Concept:** Event-driven programming (interaction)
 
@@ -283,8 +279,6 @@ on button click "no":
 - Confirmation dialogs
 
 ## on select menu
-
-> ⚠️ **Not Implemented:** Select menu handlers are not yet implemented in the interpreter runtime. See the [Roadmap](../roadmap.md) for status.
 
 **Concept:** Event-driven programming (interaction)
 
