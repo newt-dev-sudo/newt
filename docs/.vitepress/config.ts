@@ -26,7 +26,8 @@ export default defineConfig({
           { text: 'Installation', link: '/installation' },
           { text: 'Token Security', link: '/security' },
           { text: 'Deployment', link: '/deployment' },
-          { text: 'Roadmap', link: '/roadmap' }
+          { text: 'Roadmap', link: '/roadmap' },
+          { text: 'Troubleshooting', link: '/troubleshooting' }
         ]
       },
       {

@@ -1,169 +1,292 @@
 # Troubleshooting
 
-Common issues and how to fix them.
+This page helps you solve common problems when working with Newt bots. Issues are organized by symptom to help you find the solution quickly.
 
-## Bot Issues
+## My Bot is Online But Doesn't Respond to Commands
 
-### Bot doesn't respond to commands
+**Symptom:** Your bot shows as online in Discord, but typing commands doesn't trigger any response.
 
 **Possible causes:**
-- Message Content Intent not enabled
-- Bot lacks permissions
-- Wrong command prefix
-- Bot not in the correct channel
+1. **Message Content Intent not enabled**
+   - Go to Discord Developer Portal → Your Application → Bot
+   - Enable "Message Content Intent" under Privileged Gateway Intents
+   - Save and restart your bot
 
-**Solutions:**
-1. Enable Message Content Intent in Discord Developer Portal
-2. Check bot has "Read Messages" and "Send Messages" permissions
-3. Verify your bot prefix matches what you're typing
-4. Ensure bot is in the channel you're testing in
+2. **Bot doesn't have permission to read messages**
+   - Go to Server Settings → Roles
+   - Find your bot's role
+   - Enable "Read Messages/View Channels" and "Send Messages" permissions
+   - Make sure these are enabled in the specific channel you're testing
 
-### Bot shows "undefined" instead of username
+3. **Wrong command prefix**
+   - Check your bot file: `bot prefix "!"`
+   - Make sure you're typing the correct prefix before commands
+   - Example: If prefix is `!`, type `!hello` not `hello`
 
-**Cause:** Discord.js v14 uses `user.username` not `user.name`
+4. **Token is incorrect or expired**
+   - Run `newt token` to check if a token is set
+   - If not, run `newt token YOUR_BOT_TOKEN` with your actual token
+   - Make sure you copied the token correctly from the Developer Portal
 
-**Solution:** Newt automatically handles this, but if you see this issue, ensure you're using the latest version:
+## I Get an Error When Running `newt run`
 
-```bash
-npm update -g @newt-dev/cli
-```
+**Symptom:** Running `newt run my-bot.newt` shows an error message.
 
-### Bot crashes on startup
+**Common errors:**
 
-**Check:**
-- DISCORD_TOKEN environment variable is set
-- Token is valid (not expired or revoked)
-- Node.js version is 20 or higher
+**"newt: command not found"**
+- Newt CLI isn't installed
+- Run: `npm install -g @newt-dev/cli`
+- Verify with: `newt --version`
 
-**Debug:**
-```bash
-DISCORD_TOKEN="your-token" npm start
-```
+**"Error: Node.js version too old"**
+- Newt requires Node.js 18 or higher
+- Check your version: `node --version`
+- Download the latest LTS from [nodejs.org](https://nodejs.org)
 
-## Build Issues
+**"No token is set"**
+- You haven't saved your Discord token
+- Run: `newt token YOUR_BOT_TOKEN`
+- Replace `YOUR_BOT_TOKEN` with your actual bot token
 
-### "Cannot find module @newt-dev/compiler"
+**"Syntax error in .newt file"**
+- There's a mistake in your bot code
+- Run: `newt check my-bot.newt` for detailed error information
+- Common issues:
+  - Missing colons after handlers (`on command "hello":`)
+  - Wrong indentation (use consistent spaces)
+  - Unclosed quotes in strings
 
-**Cause:** Compiler package not installed
+## Bot Says "Invalid Token"
+
+**Symptom:** Bot starts but immediately disconnects with an invalid token error.
+
+**Causes:**
+1. **Wrong token copied**
+   - Go to Discord Developer Portal → Your Application → Bot
+   - Click "Reset Token" to generate a new one
+   - Copy the new token and run: `newt token YOUR_NEW_TOKEN`
+
+2. **Token has extra spaces or characters**
+   - Make sure you copied only the token string
+   - No extra spaces, quotes, or newlines
+
+3. **Using client secret instead of bot token**
+   - The bot token is under the "Bot" tab
+   - The client secret is under "OAuth2" → General
+   - Use the bot token, not the client secret
+
+## Commands Work in DM But Not in Server
+
+**Symptom:** Bot responds to commands in DMs but not in your server.
+
+**Causes:**
+1. **Bot doesn't have server permissions**
+   - Re-invite the bot with proper permissions
+   - Go to Developer Portal → OAuth2 → URL Generator
+   - Select scopes: `bot`
+   - Select permissions: `Send Messages`, `Read Messages/View Channels`
+   - Use the generated URL to re-invite
+
+2. **Channel-specific permissions**
+   - Check the channel's permission settings
+   - Make sure the bot can read and send messages in that specific channel
+
+3. **Bot is in a different server**
+   - Make sure you invited the bot to the correct server
+   - Check the server's member list to confirm the bot is there
+
+## Bot Can't See Messages
+
+**Symptom:** Bot is online but doesn't react to any messages or commands.
+
+**Causes:**
+1. **Intents not enabled**
+   - Go to Developer Portal → Your Application → Bot
+   - Enable "Message Content Intent"
+   - Enable "Server Members Intent" if tracking joins/leaves
+   - Save and restart bot
+
+2. **Bot is in a channel it can't access**
+   - Check channel permissions
+   - Make sure bot has "Read Messages/View Channels" permission
+
+3. **Rate limiting**
+   - If you're testing rapidly, Discord may be rate-limiting your bot
+   - Wait a few minutes before testing again
+
+## Node.js Version Errors
+
+**Symptom:** Errors about Node.js version being too old or incompatible.
 
 **Solution:**
-```bash
-npm install -g @newt-dev/cli
-```
+- Newt requires Node.js 18 or higher
+- Check your version: `node --version`
+- If it's below 18, download the latest LTS from [nodejs.org](https://nodejs.org)
+- After installing, verify: `node --version` should show 18.x or higher
 
-### "Syntax error" in .newt file
+## npm install Fails
+
+**Symptom:** Running `npm install -g @newt-dev/cli` fails with errors.
 
 **Common issues:**
-- Inconsistent indentation (mix 2 and 4 spaces)
-- Missing colons after event handlers
-- Unclosed quotes in strings
 
-**Check with:**
-```bash
-newt check my-bot.newt
-```
+**"Permission denied" (Linux/Mac)**
+- Run with sudo: `sudo npm install -g @newt-dev/cli`
+- Or configure npm to use a different directory:
+  ```bash
+  mkdir ~/.npm-global
+  npm config set prefix '~/.npm-global'
+  export PATH=~/.npm-global/bin:$PATH
+  ```
 
-### "Token not found" error
+**"EACCES" error (Windows)**
+- Run PowerShell as Administrator
+- Then run: `npm install -g @newt-dev/cli`
 
-**Cause:** Token not set as environment variable
+**"Network timeout" or "ETIMEDOUT"**
+- Check your internet connection
+- Try again later (npm servers might be down)
+- Or use a different npm registry: `npm install -g @newt-dev/cli --registry=https://registry.npmjs.org`
 
-**Solution:**
-```bash
-# Windows PowerShell
-$env:DISCORD_TOKEN="your-token"
+## Bot Joins But Immediately Leaves
 
-# Linux/Mac
-export DISCORD_TOKEN="your-token"
-```
+**Symptom:** Bot appears in the server for a moment then disappears.
 
-## Installation Issues
+**Causes:**
+1. **Bot was kicked/banned**
+   - Check server audit logs
+   - Make sure no other admin kicked the bot
 
-### "Permission denied" on global install
+2. **Token used by another bot**
+   - Each bot needs its own unique token
+   - Don't reuse tokens across different bot applications
 
-**Linux/Mac:**
-```bash
-sudo npm install -g @newt-dev/cli
-```
+3. **Gateway connection issues**
+   - Restart your bot
+   - Check your internet connection
+   - Discord might be experiencing outages (check [Discord Status](https://status.discord.com))
 
-**Windows:**
-- Run terminal as Administrator
-- Or use a user-local install:
-```bash
-npm install @newt-dev/cli
-npx newt check my-bot.newt
-```
+## Rate Limit Errors
 
-### "Command not found" after install
+**Symptom:** Bot gets errors about sending messages too fast.
 
-**Check npm global bin location:**
-```bash
-npm config get prefix
-```
+**Causes:**
+- Discord limits how many messages a bot can send per second (typically 10 messages/second)
+- If you're using loops like `for each`, you might be hitting this limit
 
-Add that path to your system PATH, or use npx:
-```bash
-npx newt check my-bot.newt
-```
+**Solutions:**
+- Never loop through large collections like `server.members` and send a message for each
+- Use small, known lists with `for each`
+- Add delays between messages if sending multiple
+- See the [Statements Reference](./reference/statements.md) for rate limit warnings
 
-## Runtime Issues
+## Environment Variables Not Working
 
-### Database errors (points-bot)
+**Symptom:** Bot says it can't find `DISCORD_TOKEN` or other environment variables.
 
-**Cause:** SQLite database file permissions
+**Causes:**
+1. **Using `bot token from env` but token not set**
+   - Run: `newt token YOUR_BOT_TOKEN`
+   - Or create a `.env` file with: `DISCORD_TOKEN=your-token-here`
 
-**Solution:**
+2. **Wrong variable name**
+   - Check your bot file uses the correct variable name
+   - Common: `DISCORD_TOKEN` (all caps, underscore)
+
+3. **Platform-specific syntax**
+   - Windows: `set DISCORD_TOKEN=value` or use PowerShell
+   - Mac/Linux: `export DISCORD_TOKEN=value`
+   - Or use a `.env` file (recommended)
+
+## Bot Commands Show "Unknown Command"
+
+**Symptom:** Bot responds but says it doesn't recognize your commands.
+
+**Causes:**
+1. **Typo in command name**
+   - Check your bot file: `on command "hello":`
+   - Make sure you type exactly `!hello` (or your prefix + command)
+
+2. **Case sensitivity**
+   - Command names are case-sensitive
+   - If defined as `on command "Hello":`, type `!Hello` not `!hello`
+
+3. **Extra spaces**
+   - Don't add extra spaces in the command name
+   - Use: `on command "hello":` not `on command " hello ":`
+
+## File Not Found Errors
+
+**Symptom:** `newt run` says it can't find your `.newt` file.
+
+**Causes:**
+1. **Wrong file path**
+   - Make sure you're in the correct directory
+   - Use: `newt run my-bot.newt` (not the full path unless needed)
+   - Check the file exists: `ls` (Mac/Linux) or `dir` (Windows)
+
+2. **Wrong file extension**
+   - Newt files must end with `.newt`
+   - Not `.txt`, `.js`, or anything else
+
+3. **Typo in filename**
+   - Check the exact filename: `my-bot.newt` vs `my bot.newt`
+   - Filenames are case-sensitive on Mac/Linux
+
+## Database Errors
+
+**Symptom:** Bot has issues with persistent storage (points, etc.)
+
+**Causes:**
+- SQLite database file permissions
+- Disk space issues
+- Database corruption
+
+**Solutions:**
 - Ensure bot has write permissions in its directory
 - Delete `newt-store.sqlite` and let it recreate
-- Check disk space
+- Check available disk space
 
-### Rate limiting errors
+## Role Management Errors
 
-**Cause:** Sending messages too quickly
+**Symptom:** Bot can't give or remove roles.
 
-**Solution:**
-- Add `wait` statements between messages
-- Use `for each` with delays
-- Implement rate limiting in your bot logic
+**Causes:**
+- Bot lacks "Manage Roles" permission
+- Bot's role is lower than the role it's trying to assign
 
-### Role management errors
-
-**Cause:** Bot lacks "Manage Roles" permission
-
-**Solution:**
+**Solutions:**
 1. Go to Discord Developer Portal
 2. Enable "Manage Roles" in bot permissions
 3. Re-invite bot to server with new permissions
 4. Ensure bot's role is higher than roles it's trying to assign
 
-## Development Issues
+## VS Code Extension Not Working
 
-### VS Code extension not working
+**Symptom:** Syntax highlighting or extension features not working.
 
 **Solutions:**
-1. Reload VS Code window
+1. Reload VS Code window (Ctrl+Shift+P → "Reload Window")
 2. Check extension is installed
 3. Ensure file has `.newt` extension
-4. Check VS Code version (1.80+ required)
+4. Install from the [GitHub release](https://github.com/newt-dev-sudo/newt/releases/tag/v0.1.0)
 
-### Hot reload not working
+## Still Having Issues?
 
-**Cause:** Need to rebuild after code changes
+If you've tried these solutions and still have problems:
 
-**Solution:**
-```bash
-newt build my-bot.newt --out my-bot
-cd my-bot
-npm start
-```
+1. **Check the error message carefully** - It often tells you exactly what's wrong
+2. **Run `newt check`** - This validates your bot file for syntax errors
+3. **Ask for help** - Join our [Discord community](https://discord.gg/cXFCVz3VcR)
+4. **Search GitHub issues** - Someone might have had the same problem
+5. **Create a minimal example** - Test with the simplest possible bot to isolate the issue
 
 ## Getting Help
 
-If you're still stuck:
-
-1. Check the [Quickstart Guide](./quickstart.md)
-2. Review [Language Reference](./reference/bot-config.md)
-3. Look at [Examples](./examples/hello-world.md)
-4. Search existing issues on [GitHub](https://github.com/newt-dev-sudo/newt/issues)
+- **Discord Community:** [Join our server](https://discord.gg/cXFCVz3VcR) for real-time help
+- **GitHub Issues:** [Report bugs](https://github.com/newt-dev-sudo/newt/issues)
+- **Documentation:** Check the [Language Reference](./reference/bot-config.md) for detailed information
 
 ## Reporting Bugs
 
