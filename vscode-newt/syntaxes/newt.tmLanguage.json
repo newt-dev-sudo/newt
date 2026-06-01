@@ -50,7 +50,7 @@
       "patterns": [
         {
           "name": "constant.other.color.newt",
-          "match": "#[0-9A-Fa-f]{6}\\b"
+          "match": "#[\dA-Fa-f]{6}\\b"
         }
       ]
     },

@@ -171,7 +171,7 @@ class Lexer {
 
       if (char === "#") {
         const maybeColor = lineWithoutTrailing.slice(index, index + 7);
-        if (/^#[0-9a-fA-F]{6}$/u.test(maybeColor)) {
+        if (/^#[\da-fA-F]{6}$/u.test(maybeColor)) {
           this.push("HASH_COLOR", maybeColor, lineNumber, column);
           index += 7;
           continue;
@@ -186,7 +186,7 @@ class Lexer {
         continue;
       }
 
-      if (/[0-9]/u.test(char)) {
+      if (/[\d]/u.test(char)) {
         index = this.readNumber(lineWithoutTrailing, index, lineNumber);
         continue;
       }
@@ -313,7 +313,7 @@ class Lexer {
 
   private readNumber(line: string, start: number, lineNumber: number): number {
     let index = start;
-    while (/[0-9.]/u.test(line[index] ?? "")) {
+    while (/[\d.]/u.test(line[index] ?? "")) {
       index += 1;
     }
 
@@ -323,7 +323,7 @@ class Lexer {
 
   private readWord(line: string, start: number, lineNumber: number): number {
     let index = start;
-    while (/[A-Za-z0-9_]/u.test(line[index] ?? "")) {
+    while (/[\w]/u.test(line[index] ?? "")) {
       index += 1;
     }
 
