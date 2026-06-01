@@ -93,6 +93,7 @@ const keywords = new Set([
   "delete",
   "edit",
   "upload",
+  "update",
   "wait",
   "target",
   "to",

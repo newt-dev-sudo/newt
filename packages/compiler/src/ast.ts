@@ -29,6 +29,8 @@ export type Handler =
   | CommandHandler
   | SlashCommandHandler
   | MessageContainsHandler
+  | MessageUpdateHandler
+  | MessageDeleteHandler
   | JoinHandler
   | LeaveHandler
   | ReactionAddHandler
@@ -49,6 +51,16 @@ export interface CommandHandler extends BaseNode {
 export interface MessageContainsHandler extends BaseNode {
   type: "MessageContainsHandler";
   needle: StringLiteral;
+  body: Statement[];
+}
+
+export interface MessageUpdateHandler extends BaseNode {
+  type: "MessageUpdateHandler";
+  body: Statement[];
+}
+
+export interface MessageDeleteHandler extends BaseNode {
+  type: "MessageDeleteHandler";
   body: Statement[];
 }
 

@@ -93,9 +93,19 @@ class Parser {
         break;
       }
       case "message": {
-        this.consumeKeyword("contains");
-        const needle = this.parseStringLiteral();
-        handler = { type: "MessageContainsHandler", loc: this.loc(start), needle, body: [] };
+        if (this.checkKeyword("contains")) {
+          this.consumeKeyword("contains");
+          const needle = this.parseStringLiteral();
+          handler = { type: "MessageContainsHandler", loc: this.loc(start), needle, body: [] };
+        } else if (this.checkKeyword("update")) {
+          this.consumeKeyword("update");
+          handler = { type: "MessageUpdateHandler", loc: this.loc(start), body: [] };
+        } else if (this.checkKeyword("delete")) {
+          this.consumeKeyword("delete");
+          handler = { type: "MessageDeleteHandler", loc: this.loc(start), body: [] };
+        } else {
+          throw this.error(this.peek(), "Expected 'message contains', 'message update', or 'message delete'");
+        }
         break;
       }
       case "join": {

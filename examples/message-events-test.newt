@@ -1,0 +1,9 @@
+bot name "MessageEventsTest"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on message update:
+    reply "Message was edited!"
+
+on message delete:
+    reply "Message was deleted!"

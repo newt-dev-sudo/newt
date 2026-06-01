@@ -88,6 +88,14 @@ class Validator {
         return;
       }
 
+      case "MessageUpdateHandler":
+      case "MessageDeleteHandler": {
+        // Add built-in variables for message events
+        const messageScope = new Set(["user", "channel", "server", "message"]);
+        this.visitStatements(node.body, messageScope);
+        return;
+      }
+
       default: {
         this.visitStatements(node.body, new Set());
       }

@@ -117,6 +117,18 @@ ${emitStatements(node.body, "  ", "message")}
   const { author: user, channel, guild: server } = message;
 ${emitStatements(node.body, "  ", "message")}
 });`;
+    case "MessageUpdateHandler":
+      return `client.on("messageUpdate", async (oldMessage, newMessage) => {
+  if (!newMessage.author || newMessage.author.bot) return;
+  const { author: user, channel, guild: server } = newMessage;
+${emitStatements(node.body, "  ", "newMessage")}
+});`;
+    case "MessageDeleteHandler":
+      return `client.on("messageDelete", async (message) => {
+  if (!message.author || message.author.bot) return;
+  const { author: user, channel, guild: server } = message;
+${emitStatements(node.body, "  ", "message")}
+});`;
     case "JoinHandler":
       return `client.on("guildMemberAdd", async (member) => {
   const { user, guild: server } = member;
