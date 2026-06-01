@@ -39,7 +39,39 @@ $env:DISCORD_TOKEN="your-token-here"
 set DISCORD_TOKEN=your-token-here
 ```
 
-### 3. Use .env Files (Development Only)
+### 3. Use Newt's Token Management (Recommended)
+
+Newt provides a secure way to store your token using the CLI:
+
+**Save your token:**
+```bash
+newt token YOUR_BOT_TOKEN
+```
+
+**Check if token is set:**
+```bash
+newt token
+```
+
+**Clear saved token:**
+```bash
+newt token --clear
+```
+
+**How it works:**
+- Token is stored in a secure config file (not in your project)
+- Location: `%APPDATA%\newt\config.json` (Windows) or `~/.config/newt/config.json` (Unix)
+- Token is never committed to git
+- All your bots use the same saved token
+
+**In your .newt file:**
+```javascript
+bot token from env "DISCORD_TOKEN"
+```
+
+This tells Newt to use the token you saved with `newt token`.
+
+### 4. Use .env Files (Development Only)
 
 Create a `.env` file in your project:
 
@@ -60,7 +92,7 @@ npm install dotenv
 node -r dotenv/config bot.js
 ```
 
-### 4. Rotate Compromised Tokens
+### 5. Rotate Compromised Tokens
 
 If your token is accidentally exposed:
 
@@ -68,16 +100,23 @@ If your token is accidentally exposed:
 2. Select your application
 3. Go to the "Bot" tab
 4. Click "Reset Token"
-5. Update your environment variable with the new token
+5. Update your token with Newt:
+   ```bash
+   newt token YOUR_NEW_TOKEN
+   ```
 6. Restart your bot
 
-### 5. Use Different Tokens for Environments
+### 6. Use Different Tokens for Environments
 
 - **Development:** Separate token for testing
 - **Staging:** Separate token for pre-production
 - **Production:** Separate token for live deployment
 
 This prevents development mistakes from affecting production bots.
+
+**Note:** Newt's token management stores one token globally. For different environments, you'll need to:
+- Use environment variables instead
+- Or manually switch tokens with `newt token` when switching environments
 
 ## Common Mistakes
 
@@ -159,7 +198,7 @@ If you see suspicious activity, rotate your token immediately.
 
 ## Summary
 
-- ✅ Always use environment variables
+- ✅ Use Newt's token management (`newt token`)
 - ✅ Never commit tokens to git
 - ✅ Rotate compromised tokens immediately
 - ✅ Use different tokens per environment

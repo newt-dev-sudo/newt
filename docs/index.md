@@ -25,8 +25,8 @@ This creates a bot that responds to `!hello` with a personalized greeting.
 - **No programming experience needed** - Write in plain English
 - **Learn programming concepts** - Understand how bots work while building them
 - **Fast results** - Create a working bot in minutes
-- **Real Discord features** - Slash commands, buttons, roles, and more
-- **Professional results** - Compiles to production-ready code
+- **Real Discord features** - Commands, roles, storage, and more
+- **Simple workflow** - Run `.newt` files directly, no compilation needed
 
 ## What Can You Build?
 
@@ -40,7 +40,7 @@ This creates a bot that responds to `!hello` with a personalized greeting.
 
 [Quickstart Guide →](./quickstart.md)
 
-**Note:** Newt uses `.env` files to securely store your Discord token. The quickstart guide explains how to set this up step by step.
+**Note:** Newt now uses a simple 3-step workflow: install CLI, set token, run `.newt` file. No compilation or intermediate files needed.
 
 ## Features
 
@@ -53,6 +53,9 @@ This creates a bot that responds to `!hello` with a personalized greeting.
 - 🔘 **Buttons & menus** - Interactive message components
 - 🔀 **Conditional logic** - If/else statements
 - 🔄 **Loops** - For each operations
+- 🌐 **REST API** - Fetch user and guild information
+- 🎭 **Rich presence** - Set bot activity status
+- 🔒 **Secure token storage** - CLI-based token management
 
 ## Learning Path
 

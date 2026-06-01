@@ -71,6 +71,27 @@ npx newt check my-bot.newt
 
 **When to use this:** If you only want to use Newt in one project or don't have permission to install globally.
 
+### Option 3: Development Installation
+
+If you're developing Newt itself or want to use the latest development version:
+
+```bash
+# Clone the repository
+git clone https://github.com/newt-dev-sudo/newt.git
+cd newt
+
+# Install dependencies
+npm install
+
+# Build the CLI
+npm run build
+
+# Use the CLI directly
+node packages/cli/dist/src/index.js <command>
+```
+
+**When to use this:** If you're contributing to Newt or want to test the latest features before they're published.
+
 ## Troubleshooting Installation
 
 ### "Permission denied" (Linux/Mac)
