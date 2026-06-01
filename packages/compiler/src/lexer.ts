@@ -118,6 +118,17 @@ const keywords = new Set([
   "split"
 ]);
 
+const CHAR_TOKEN_TYPES: Record<string, TokenType> = {
+  ":": "COLON",
+  "=": "EQUALS",
+  "(": "LPAREN",
+  ")": "RPAREN",
+  "[": "LBRACKET",
+  "]": "RBRACKET",
+  ",": "COMMA",
+  ".": "DOT"
+};
+
 export function tokenize(source: string): Token[] {
   const lexer = new Lexer(source);
   return lexer.tokenize();
@@ -333,26 +344,7 @@ class Lexer {
   }
 
   private singleCharToken(char: string): TokenType | undefined {
-    switch (char) {
-      case ":":
-        return "COLON";
-      case "=":
-        return "EQUALS";
-      case "(":
-        return "LPAREN";
-      case ")":
-        return "RPAREN";
-      case "[":
-        return "LBRACKET";
-      case "]":
-        return "RBRACKET";
-      case ",":
-        return "COMMA";
-      case ".":
-        return "DOT";
-      default:
-        return undefined;
-    }
+    return CHAR_TOKEN_TYPES[char];
   }
 
   private push(type: TokenType, value: string, line: number, column: number, interpolated?: boolean): void {
