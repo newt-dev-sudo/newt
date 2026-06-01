@@ -184,7 +184,7 @@ on command "help":
 
 ## on slash
 
-> **Note:** Slash commands are not yet implemented in the interpreter runtime.
+> ⚠️ **Not Implemented:** Slash commands are not yet implemented in the interpreter runtime. See the [Roadmap](../roadmap.md) for status.
 
 **Concept:** Event-driven programming (command pattern)
 
@@ -231,7 +231,7 @@ on slash "ping":
 
 ## on button click
 
-> **Note:** Button click handlers are not yet implemented in the interpreter runtime.
+> ⚠️ **Not Implemented:** Button click handlers are not yet implemented in the interpreter runtime. See the [Roadmap](../roadmap.md) for status.
 
 **Concept:** Event-driven programming (interaction)
 
@@ -284,7 +284,7 @@ on button click "no":
 
 ## on select menu
 
-> **Note:** Select menu handlers are not yet implemented in the interpreter runtime.
+> ⚠️ **Not Implemented:** Select menu handlers are not yet implemented in the interpreter runtime. See the [Roadmap](../roadmap.md) for status.
 
 **Concept:** Event-driven programming (interaction)
 

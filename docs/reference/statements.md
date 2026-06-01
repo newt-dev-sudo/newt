@@ -682,7 +682,7 @@ on command "remind":
 
 ## edit
 
-> **Note:** Edit statement is implemented but has a syntax limitation - you cannot store message references from `reply` statements using `let`. Requires language design change.
+> ⚠️ **Known Limitation:** Edit statement is implemented but has a syntax limitation - you cannot store message references from `reply` statements using `let`. See the [Roadmap](../roadmap.md) for status.
 
 **Concept:** Message mutation and state management
 
@@ -721,7 +721,7 @@ on command "status":
 
 ## delete
 
-> **Note:** Delete statement is implemented but has a syntax limitation - you cannot store message references from `reply` statements using `let`. Requires language design change.
+> ⚠️ **Known Limitation:** Delete statement is implemented but has a syntax limitation - you cannot store message references from `reply` statements using `let`. See the [Roadmap](../roadmap.md) for status.
 
 **Concept:** Message cleanup and moderation
 
