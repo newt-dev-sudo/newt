@@ -277,7 +277,6 @@ function emitExpression(expression: Expression): string {
       }
       return JSON.stringify(expression.value);
     case "NumberLiteral":
-      return String(expression.value);
     case "BooleanLiteral":
       return String(expression.value);
     case "ColorLiteral":
