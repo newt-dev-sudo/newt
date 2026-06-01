@@ -2,6 +2,8 @@
 
 A moderation bot with content filtering and member management commands.
 
+> **Note:** This example uses `require role` and timers (`every`, `at`) which are not yet implemented in the interpreter.
+
 ## Code
 
 ```javascript
@@ -16,20 +18,22 @@ on message contains "spoiler":
     reply "Please keep spoilers in the spoiler channel."
 
 on command "mute":
-    require role "Moderator"
+    # Note: require role is not yet implemented
+    # Alternative: use if statements with store/load for permission checks
     mute target for 10 minutes
     reply "{target} has been muted for 10 minutes."
 
 on command "kick":
-    require role "Moderator"
+    # Note: require role is not yet implemented
     kick target
     reply "{target} was kicked."
 
-every 1 hour:
-    say "Moderation reminder: be kind and read the rules." in channel "general"
-
-at "09:00" daily:
-    say "Good morning! Today's mod queue is ready." in channel "moderation"
+# Note: timers (every, at) are not yet implemented
+# every 1 hour:
+#     say "Moderation reminder: be kind and read the rules." in channel "general"
+#
+# at "09:00" daily:
+#     say "Good morning! Today's mod queue is ready." in channel "moderation"
 ```
 
 ## What It Does

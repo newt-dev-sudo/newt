@@ -31,8 +31,10 @@ on command "test-load":
 # Test if statement
 on command "test-if":
     let points = load user.id points or 0
-    if points >= 0:
-        reply "If statement works"
+    if points > 0:
+        reply "You have points"
+    else:
+        reply "No points yet"
 
 # Test REST method - getUser
 on command "test-getuser":
@@ -70,3 +72,65 @@ on command "test-fetch":
         reply "Fetch successful"
     on error:
         reply "Fetch failed"
+
+# Test message editing (skipped - requires message reference syntax)
+# Test message deletion (skipped - requires message reference syntax)
+
+# Test file upload
+on command "test-upload":
+    upload "./test.txt" with message "Here's a file"
+
+# Test message update handler
+on message update:
+    reply "I noticed you edited a message!"
+
+# Test message delete handler
+on message delete:
+    say "I noticed a message was deleted!"
+
+# Test join handler
+on join:
+    say "Welcome to the server, {user.username}!" in channel "testing"
+
+# Test leave handler
+on leave:
+    say "Goodbye, {user.username}!" in channel "testing"
+
+# Test give role
+on command "test-giverole":
+    give target role "Member"
+    reply "Gave Member role"
+
+# Test remove role
+on command "test-removerole":
+    remove target role "Member"
+    reply "Removed Member role"
+
+# Test mute
+on command "test-mute":
+    mute target for 1 minute
+    reply "Muted for 1 minute"
+
+# Test kick
+on command "test-kick":
+    kick target
+    reply "Kicked user"
+
+# Test ban
+on command "test-ban":
+    ban target
+    reply "Banned user"
+
+# Test say embed
+on command "test-embed":
+    say embed:
+        title "Test Embed"
+        description "This is a test embed"
+        color #5865F2
+        field "Field 1" "Value 1"
+        field "Field 2" "Value 2"
+
+# Test say with components
+on command "test-components":
+    say with components "Click the button":
+        button "test-btn" label "Click Me"

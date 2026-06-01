@@ -15,11 +15,47 @@ This document outlines the features currently supported by the Newt interpreter 
 - Responds to user commands with the configured prefix
 - Provides context variables: `user`, `server`, `channel`, `message`, `target`, `args`
 
+✅ **Message Contains Handler** - `on message contains "text":`
+- Triggers when any message contains specific text
+- Useful for keyword detection and auto-responses
+
+✅ **Join Handler** - `on join:`
+- Triggers when a new member joins the server
+- Perfect for onboarding and auto-role assignment
+
+✅ **Leave Handler** - `on leave:`
+- Triggers when a member leaves the server
+- Useful for logging and cleanup
+
+✅ **Reaction Add Handler** - `on reaction add "emoji":`
+- Triggers when someone reacts to a message
+- Great for reaction-based commands and polls
+
+✅ **Message Update Handler** - `on message update:`
+- Triggers when a message is edited
+- Useful for message edit logging
+
+✅ **Message Delete Handler** - `on message delete:`
+- Triggers when a message is deleted
+- Useful for message deletion logging
+
 ### Statements
 
 ✅ **Reply Statement** - `reply "message"`
 - Sends a reply to the triggering message
 - Supports template string interpolation
+
+✅ **Say Statement** - `say "message"` or `say "message" in channel "name"`
+- Sends a message to current or specified channel
+- Channel targeting with `in channel "name"`
+
+✅ **Say Embed Statement** - `say embed:`
+- Sends rich embedded messages with formatting, colors, and structured content
+- Supports title, description, color, and fields
+
+✅ **Say Components Statement** - `say with components "message":`
+- Sends messages with interactive buttons or select menus
+- Supports buttons and select menus
 
 ✅ **Let Statement** - `let name = value`
 - Declares variables for use within a handler
@@ -36,13 +72,50 @@ This document outlines the features currently supported by the Newt interpreter 
 - Provides default value if data doesn't exist
 - Syntax: `let points = load user.id points or 0`
 
+✅ **If/Else Statement** - `if condition: ... else: ...`
+- Conditional logic for branching behavior
+- Supports comparison operators
+
+✅ **For Each Loop** - `for each item in collection:`
+- Iterates through collections (like server members)
+- Useful for bulk operations
+
+✅ **Give Role Statement** - `give user role "RoleName"`
+- Assigns a role to a user
+- Requires role to exist in server
+
+✅ **Remove Role Statement** - `remove user role "RoleName"`
+- Removes a role from a user
+- Requires role to exist in server
+
+✅ **Mute Statement** - `mute user for duration`
+- Gives user a "Muted" role for specified time
+- Requires "Muted" role to exist in server
+
+✅ **Kick Statement** - `kick user`
+- Kicks a user from the server
+- User can rejoin with invite
+
+✅ **Ban Statement** - `ban user`
+- Bans a user from the server
+- User cannot rejoin
+
+✅ **Upload Statement** - `upload "./file.png" with message "text"`
+- Uploads files to Discord
+- Supports optional message with file
+
 ✅ **Set Activity Statement** - `set activity "text"`
 - Sets the bot's rich presence status
 - Updates bot activity in Discord
 
-✅ **Say Statement** - `say "message"` or `say "message" in channel "name"`
-- Sends a message to current or specified channel
-- Channel targeting with `in channel "name"`
+✅ **Wait Statement** - `wait for duration`
+- Pauses execution for specified time
+- Supports seconds, minutes, hours, days
+
+✅ **Try/On Error** - `try: ... on error: ...`
+- Catches and handles errors gracefully
+- Prevents bot crashes from API failures
+- Provides user-friendly error messages
 
 ### Expressions
 
@@ -57,6 +130,9 @@ This document outlines the features currently supported by the Newt interpreter 
 ✅ **Boolean Literals** - `true`, `false`
 - Boolean values
 
+✅ **Color Literals** - `#5865F2`
+- Hex color codes for embeds
+
 ✅ **Identifier Expressions** - `user`, `server`, `channel`
 - Access to context variables
 - Property access: `user.username`, `server.name`
@@ -69,13 +145,6 @@ This document outlines the features currently supported by the Newt interpreter 
 - HTTP request functionality
 - Returns JSON or text based on content-type
 
-### Error Handling
-
-✅ **Try/On Error** - `try: ... on error: ...`
-- Catches and handles errors gracefully
-- Prevents bot crashes from API failures
-- Provides user-friendly error messages
-
 ### Context Variables
 
 Available in command handlers:
@@ -86,33 +155,25 @@ Available in command handlers:
 - `target` - The mentioned user (if any)
 - `args` - Array of command arguments
 
-## Implemented But Not Yet Tested
+## Not Yet Supported
 
-The following features are implemented in the interpreter but need testing:
+The following features are documented but not yet implemented in the interpreter:
 
-⚠️ **If/Else Statements** - `if condition: ... else: ...`
-- Conditional logic implemented
-- Syntax may need adjustment (currently has parsing issues)
+❌ **Slash Commands** - `on slash "name":`
+- Discord's modern slash commands
+- Requires Discord API registration
 
-⚠️ **For Each Loops** - `for each item in collection:`
-- Iteration functionality implemented
-- Needs testing with actual collections
+❌ **Button Click Handler** - `on button click "id":`
+- Handles button interactions
+- Requires interaction handling
 
-⚠️ **Message Editing/Deletion** - `edit message to "text"`, `delete message`
-- Message modification statements implemented
-- Needs testing with message references
+❌ **Select Menu Handler** - `on select menu "id":`
+- Handles dropdown menu selections
+- Requires interaction handling
 
-⚠️ **File Upload** - `upload "./file.png" with message "text"`
-- File attachment functionality implemented
-- Needs testing with actual files
-
-⚠️ **Message Update/Delete Handlers** - `on message update:`, `on message delete:`
-- Event handlers for message changes
-- Partially implemented but needs testing
-
-⚠️ **Other Event Handlers**
-- `on join:`, `on leave:`, `on reaction:`, etc.
-- Partially implemented but need testing
+⚠️ **Message Editing/Deletion Statements** - `edit message to "text"`, `delete message`
+- Implemented but syntax issue: `let botMessage = reply` not supported
+- Requires language design change for message references
 
 ## Architecture
 

@@ -2,6 +2,8 @@
 
 Automatically welcomes new members and assigns roles.
 
+> **Note:** This example uses `if user has role` which is not yet implemented in the interpreter. Use alternative logic for now.
+
 ## Code
 
 ```javascript
@@ -18,11 +20,10 @@ on join:
         field "Starter role" "I gave you the Member role."
 
 on command "role":
-    if user has role "Member":
-        reply "You already have the Member role!"
-    else:
-        give user role "Member"
-        reply "Done! Role given."
+    # Note: if user has role is not yet implemented
+    # Alternative: use store/load to track roles
+    give user role "Member"
+    reply "Done! Role given."
 
 on leave:
     say "{user.username} left the server. We'll miss them!" in channel "general"

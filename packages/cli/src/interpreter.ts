@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials } from "discord.js";
+import { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "discord.js";
 import Database from "better-sqlite3";
 import type {
   Program,
@@ -89,6 +89,7 @@ export class NewtInterpreter {
       switch (handler.type) {
         case "ReadyHandler":
           this.client.once("clientReady", async () => {
+            console.log(`Bot ${this.botName} is online!`);
             const context: ExecutionContext = {
               user: this.client.user,
               channel: null,
@@ -236,6 +237,20 @@ export class NewtInterpreter {
           await targetChannel.send(sayText);
           break;
 
+        case "SayEmbedStatement":
+          const embed = this.buildEmbed(stmt.embed, context);
+          await context.channel?.send({ embeds: [embed] });
+          break;
+
+        case "SayComponentsStatement":
+          const compMessage = await this.evaluateExpression(stmt.message, context);
+          const components = this.buildComponents(stmt.components);
+          await context.channel?.send({
+            content: compMessage,
+            components: components
+          });
+          break;
+
         case "LetDecl":
           const value = await this.evaluateExpression(stmt.value, context);
           context.variables.set(stmt.name, value);
@@ -310,6 +325,85 @@ export class NewtInterpreter {
           await new Promise((resolve) => setTimeout(resolve, duration * 1000));
           break;
 
+        case "GiveRoleStatement":
+          const giveSubject = await this.evaluateExpression(stmt.subject, context);
+          const role = this.findRole(context.server, stmt.role.value);
+          if (!role) {
+            console.error(`Role not found: ${stmt.role.value}`);
+            return;
+          }
+          if (!giveSubject) {
+            console.error(`Subject not found for give role`);
+            return;
+          }
+          try {
+            // User object doesn't have roles, need to get GuildMember
+            const member = giveSubject.roles ? giveSubject : await context.server.members.fetch(giveSubject.id);
+            await member.roles.add(role);
+          } catch (error) {
+            console.error(`Failed to add role: ${error}`);
+          }
+          break;
+
+        case "RemoveRoleStatement":
+          const removeSubject = await this.evaluateExpression(stmt.subject, context);
+          const removeRole = this.findRole(context.server, stmt.role.value);
+          if (!removeRole) {
+            console.error(`Role not found: ${stmt.role.value}`);
+            return;
+          }
+          if (!removeSubject) {
+            console.error(`Subject not found for remove role`);
+            return;
+          }
+          try {
+            // User object doesn't have roles, need to get GuildMember
+            const member = removeSubject.roles ? removeSubject : await context.server.members.fetch(removeSubject.id);
+            await member.roles.remove(removeRole);
+          } catch (error) {
+            console.error(`Failed to remove role: ${error}`);
+          }
+          break;
+
+        case "MuteStatement":
+          const muteSubject = await this.evaluateExpression(stmt.subject, context);
+          const muteRole = this.findRole(context.server, "Muted");
+          if (!muteRole) {
+            console.error(`Muted role not found`);
+            return;
+          }
+          if (!muteSubject) {
+            console.error(`Subject not found for mute`);
+            return;
+          }
+          await muteSubject.roles.add(muteRole);
+          if (stmt.duration) {
+            const muteDuration = this.parseDuration(stmt.duration);
+            setTimeout(async () => {
+              try {
+                const member = await context.server.members.fetch(muteSubject.id);
+                await member.roles.remove(muteRole);
+              } catch (error) {
+                console.error(`Failed to unmute user (may have left server): ${error}`);
+              }
+            }, muteDuration * 1000);
+          }
+          break;
+
+        case "KickStatement":
+          const kickSubject = await this.evaluateExpression(stmt.subject, context);
+          if (kickSubject) {
+            await kickSubject.kick();
+          }
+          break;
+
+        case "BanStatement":
+          const banSubject = await this.evaluateExpression(stmt.subject, context);
+          if (banSubject) {
+            await banSubject.ban();
+          }
+          break;
+
         case "ExpressionStatement":
           await this.evaluateExpression(stmt.expression, context);
           break;
@@ -351,7 +445,7 @@ export class NewtInterpreter {
               }
             }
             
-            return value !== undefined ? String(value) : match;
+            return value !== undefined && value !== null ? String(value) : match;
           });
           return result;
         }
@@ -492,6 +586,58 @@ export class NewtInterpreter {
 
   private findChannel(guild: any, name: string): any {
     return guild?.channels?.cache?.find((channel: any) => channel.name === name);
+  }
+
+  private findRole(guild: any, name: string): any {
+    return guild?.roles?.cache?.find((role: any) => role.name === name);
+  }
+
+  private buildEmbed(embed: any, context: ExecutionContext): any {
+    const built = new EmbedBuilder();
+    
+    if (embed.title) built.setTitle(embed.title.value);
+    if (embed.description) built.setDescription(embed.description.value);
+    if (embed.color) built.setColor(embed.color.value);
+    
+    for (const field of embed.fields) {
+      built.addFields({
+        name: field.name.value,
+        value: field.value.value
+      });
+    }
+    
+    return built;
+  }
+
+  private buildComponents(components: any[]): any {
+    const rows: any[] = [];
+    
+    for (const comp of components) {
+      if (comp.type === "ButtonComponent") {
+        const row = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId(comp.id.value)
+            .setLabel(comp.label?.value || "Button")
+            .setStyle(ButtonStyle.Primary)
+        );
+        rows.push(row);
+      } else if (comp.type === "SelectMenuComponent") {
+        const options = comp.options?.map((opt: any) =>
+          new StringSelectMenuOptionBuilder()
+            .setLabel(opt.label?.value || "Option")
+            .setValue(opt.value?.value || "value")
+        ) || [];
+        
+        const row = new ActionRowBuilder().addComponents(
+          new StringSelectMenuBuilder()
+            .setCustomId(comp.id.value)
+            .setOptions(options)
+        );
+        rows.push(row);
+      }
+    }
+    
+    return rows;
   }
 
   private saveValue(namespace: string, key: string, value: any): void {

@@ -682,6 +682,8 @@ on command "remind":
 
 ## edit
 
+> **Note:** Edit statement is implemented but has a syntax limitation - you cannot store message references from `reply` statements using `let`. Requires language design change.
+
 **Concept:** Message mutation and state management
 
 **What it does:** Changes the content of a message that was already sent
@@ -718,6 +720,8 @@ on command "status":
 - Progress indicators
 
 ## delete
+
+> **Note:** Delete statement is implemented but has a syntax limitation - you cannot store message references from `reply` statements using `let`. Requires language design change.
 
 **Concept:** Message cleanup and moderation
 
