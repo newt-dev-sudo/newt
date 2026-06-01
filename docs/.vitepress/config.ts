@@ -20,6 +20,7 @@ export default defineConfig({
       {
         text: 'Getting Started',
         items: [
+          { text: 'Setting Up Your Computer', link: '/getting-started/setup' },
           { text: 'Learning Philosophy', link: '/learning-philosophy' },
           { text: 'Programming Concepts', link: '/concepts' },
           { text: 'Quickstart', link: '/quickstart' },
