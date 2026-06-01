@@ -316,30 +316,32 @@ function emitExpression(expression: Expression): string {
   }
 }
 
+const DURATION_MULTIPLIERS: Record<string, number> = {
+  second: 1000,
+  seconds: 1000,
+  minute: 60000,
+  minutes: 60000,
+  hour: 3600000,
+  hours: 3600000,
+  day: 86400000,
+  days: 86400000
+};
+
 function durationMs(amount: number, unit: string): number {
-  const multipliers: Record<string, number> = {
-    second: 1000,
-    seconds: 1000,
-    minute: 60000,
-    minutes: 60000,
-    hour: 3600000,
-    hours: 3600000,
-    day: 86400000,
-    days: 86400000
-  };
-  return amount * (multipliers[unit] ?? 1000);
+  return amount * (DURATION_MULTIPLIERS[unit] ?? DURATION_MULTIPLIERS.second);
 }
 
+const OPTION_TYPES: Record<string, number> = {
+  string: 3,
+  number: 4,
+  boolean: 5,
+  user: 6,
+  channel: 7,
+  role: 8
+};
+
 function getOptionTypeValue(type: string): number {
-  const types: Record<string, number> = {
-    string: 3,
-    number: 4,
-    boolean: 5,
-    user: 6,
-    channel: 7,
-    role: 8
-  };
-  return types[type] ?? 3;
+  return OPTION_TYPES[type] ?? OPTION_TYPES.string;
 }
 
 function emitComponents(components: any[]): string {
