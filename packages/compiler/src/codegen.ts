@@ -24,7 +24,6 @@ export function generate(program: Program): GeneratedProject {
 
   const botJs = `import { Client, EmbedBuilder, GatewayIntentBits, Partials, ButtonBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonStyle } from "discord.js";
 import Database from "better-sqlite3";
-import axios from "axios";
 
 const client = new Client({
   intents: [
@@ -41,6 +40,16 @@ const db = new Database("newt-store.sqlite");
 db.exec("CREATE TABLE IF NOT EXISTS store (namespace TEXT NOT NULL, key TEXT NOT NULL, value TEXT, PRIMARY KEY(namespace, key))");
 const botName = ${JSON.stringify(botName)};
 const prefix = ${JSON.stringify(prefix)};
+
+async function processedFetch(url) {
+  const response = await fetch(url);
+
+  if (response.headers.get('content-type')?.toLowerCase() === 'application/json') {
+    return await response.json();
+  }
+
+  return await response.text();
+}
 
 function saveValue(namespace, key, value) {
   db.prepare("INSERT OR REPLACE INTO store(namespace, key, value) VALUES (?, ?, ?)").run(String(namespace), String(key), JSON.stringify(value));
@@ -70,7 +79,6 @@ client.login(${tokenExpr});
       type: "module",
       scripts: { start: "node bot.js" },
       dependencies: {
-        "axios": "^1.7.0",
         "better-sqlite3": "^11.0.0",
         "discord.js": "^14.15.0"
       }
@@ -311,7 +319,7 @@ function emitExpression(expression: Expression): string {
     case "LoadExpr":
       return `loadValue(${emitExpression(expression.namespace)}, ${JSON.stringify(expression.key)}${expression.fallback ? `, ${emitExpression(expression.fallback)}` : ""})`;
     case "FetchExpr":
-      return `(await axios.get(${emitExpression(expression.url)})).data`;
+      return `await processedFetch(${emitExpression(expression.url)})`;
     case "BinaryExpr":
       if (expression.operator === "or") {
         return `(${emitExpression(expression.left)} ?? ${emitExpression(expression.right)})`;
