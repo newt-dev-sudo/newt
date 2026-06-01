@@ -156,6 +156,13 @@ class Validator {
         case "BanStatement":
           this.visitExpression(statement.subject, scope, inTry);
           break;
+        case "EditMessageStatement":
+          this.visitExpression(statement.target, scope, inTry);
+          this.visitExpression(statement.newContent, scope, inTry);
+          break;
+        case "DeleteMessageStatement":
+          this.visitExpression(statement.target, scope, inTry);
+          break;
         case "TryCatchStatement":
           this.visitStatements(statement.body, new Set(scope), true);
           this.visitStatements(statement.errorHandler, new Set(scope), true);

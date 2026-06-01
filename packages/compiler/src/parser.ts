@@ -288,6 +288,22 @@ class Parser {
       return { type: "WaitStatement", loc: this.loc(start), duration };
     }
 
+    if (this.checkKeyword("edit")) {
+      const start = this.advance();
+      const target = this.parseAtom();
+      this.consumeKeyword("to");
+      const newContent = this.parseExpressionUntilLineEnd();
+      this.consumeLineEnd();
+      return { type: "EditMessageStatement", loc: this.loc(start), target, newContent };
+    }
+
+    if (this.checkKeyword("delete")) {
+      const start = this.advance();
+      const target = this.parseAtom();
+      this.consumeLineEnd();
+      return { type: "DeleteMessageStatement", loc: this.loc(start), target };
+    }
+
     const start = this.peek();
     const expression = this.parseExpressionUntilLineEnd();
     this.consumeLineEnd();

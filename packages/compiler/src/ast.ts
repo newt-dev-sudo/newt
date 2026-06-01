@@ -130,6 +130,8 @@ export type Statement =
   | BanStatement
   | PinStatement
   | DeleteKeyStatement
+  | EditMessageStatement
+  | DeleteMessageStatement
   | WaitStatement
   | TryCatchStatement
   | ExpressionStatement;
@@ -252,6 +254,17 @@ export interface DeleteKeyStatement extends BaseNode {
   type: "DeleteKeyStatement";
   namespace: Expression;
   key: string;
+}
+
+export interface EditMessageStatement extends BaseNode {
+  type: "EditMessageStatement";
+  target: Expression;
+  newContent: Expression;
+}
+
+export interface DeleteMessageStatement extends BaseNode {
+  type: "DeleteMessageStatement";
+  target: Expression;
 }
 
 export interface WaitStatement extends BaseNode {

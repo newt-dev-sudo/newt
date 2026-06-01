@@ -238,6 +238,10 @@ function emitStatement(statement: Statement, indent: string, triggerName: string
       return `${indent}await ${emitExpression(statement.subject)}?.kick?.();`;
     case "BanStatement":
       return `${indent}await ${emitExpression(statement.subject)}?.ban?.();`;
+    case "EditMessageStatement":
+      return `${indent}await ${emitExpression(statement.target)}?.edit?.(${emitExpression(statement.newContent)});`;
+    case "DeleteMessageStatement":
+      return `${indent}await ${emitExpression(statement.target)}?.delete?.();`;
     case "TryCatchStatement":
       return `${indent}try {\n${emitStatements(statement.body, `${indent}  `, triggerName)}\n${indent}} catch (error) {\n${emitStatements(statement.errorHandler, `${indent}  `, triggerName)}\n${indent}}`;
     case "WaitStatement":

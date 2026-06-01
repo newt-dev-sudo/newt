@@ -1,0 +1,13 @@
+bot name "EditDeleteTest"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on command "editme":
+    reply "Your message will be edited in 2 seconds"
+    wait for 2 seconds
+    edit message to "This message has been edited by the bot"
+
+on command "deleteme":
+    reply "Your message will be deleted in 2 seconds"
+    wait for 2 seconds
+    delete message
