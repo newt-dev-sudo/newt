@@ -18,6 +18,16 @@ export default defineConfig({
     ],
     sidebar: [
       {
+        text: 'Learning Path',
+        items: [
+          { text: '1. Events', link: '/reference/handlers' },
+          { text: '2. Conditions', link: '/reference/statements#conditional-logic' },
+          { text: '3. Actions', link: '/reference/statements#actions' },
+          { text: '4. State', link: '/reference/statements#data-persistence' },
+          { text: '5. Iteration', link: '/reference/statements#iteration' }
+        ]
+      },
+      {
         text: 'Getting Started',
         items: [
           { text: 'Setting Up Your Computer', link: '/getting-started/setup' },
