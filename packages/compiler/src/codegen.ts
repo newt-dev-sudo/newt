@@ -261,7 +261,7 @@ function emitExpression(expression: Expression): string {
     case "StringLiteral":
       if (expression.interpolated) {
         // Replace {expr} placeholders with properly emitted expressions
-        let result = expression.value.replace(/`/g, "\\`");
+        let result = expression.value.replaceAll("`", "\\`");
         // Find all {expr} patterns and replace them
         result = result.replace(/\{([^}]+)\}/g, (match, exprContent) => {
           // Map user.name to user.username for Discord.js v14 compatibility

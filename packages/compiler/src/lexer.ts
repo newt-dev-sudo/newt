@@ -130,7 +130,7 @@ class Lexer {
   private readonly lines: string[];
 
   constructor(private readonly source: string) {
-    this.lines = source.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+    this.lines = source.replaceAll("\r\n", "\n").replaceAll("\r", "\n").split("\n");
   }
 
   tokenize(): Token[] {
