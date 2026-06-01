@@ -1,9 +1,0 @@
-bot name "UploadTest"
-bot prefix "!"
-bot token from env "DISCORD_TOKEN"
-
-on command "sendimage":
-    upload "./image.png" with message "Here's an image!"
-
-on command "sendfile":
-    upload "./document.pdf"
