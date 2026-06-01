@@ -754,6 +754,49 @@ on command "cleanup":
 - Removing sensitive information
 - Moderation
 
+## upload
+
+**Concept:** File I/O and multimedia handling
+
+**What it does:** Sends a file to the channel
+
+**When to use it:** When you need to share images, documents, or other files
+
+**How it works:**
+- Takes a file path (relative to the bot's directory)
+- Optionally includes a message with the file
+- The file is uploaded to Discord and displayed in the channel
+
+```javascript
+upload "./image.png" with message "Here's an image!"
+```
+
+**Without a message:**
+```javascript
+upload "./document.pdf"
+```
+
+**Example:**
+```javascript
+on command "sendimage":
+    upload "./welcome.png" with message "Welcome to the server!"
+```
+
+**What this does:**
+- User types: `!sendimage`
+- Bot uploads the file `./welcome.png` with the message "Welcome to the server!"
+
+**Use cases:**
+- Sharing images
+- Sending documents
+- Uploading logs
+- Multimedia content
+
+**Important notes:**
+- File paths are relative to where the bot is running
+- The file must exist at the specified path
+- File size limits apply (Discord's upload limits)
+
 ## Common Questions
 
 ### Can I use multiple statements in one handler?
