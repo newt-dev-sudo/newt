@@ -300,6 +300,8 @@ export type Expression =
   | ArgsIndexExpr
   | LoadExpr
   | FetchExpr
+  | GetUserExpr
+  | GetGuildExpr
   | BinaryExpr
   | UnaryExpr
   | CallExpr;
@@ -350,6 +352,16 @@ export interface LoadExpr extends BaseNode {
 export interface FetchExpr extends BaseNode {
   type: "FetchExpr";
   url: Expression;
+}
+
+export interface GetUserExpr extends BaseNode {
+  type: "GetUserExpr";
+  userId: Expression;
+}
+
+export interface GetGuildExpr extends BaseNode {
+  type: "GetGuildExpr";
+  guildId: Expression;
 }
 
 export interface BinaryExpr extends BaseNode {

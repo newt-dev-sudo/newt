@@ -312,6 +312,10 @@ function emitExpression(expression: Expression): string {
       return `loadValue(${emitExpression(expression.namespace)}, ${JSON.stringify(expression.key)}${expression.fallback ? `, ${emitExpression(expression.fallback)}` : ""})`;
     case "FetchExpr":
       return `await processedFetch(${emitExpression(expression.url)})`;
+    case "GetUserExpr":
+      return `await client.users.fetch(${emitExpression(expression.userId)})`;
+    case "GetGuildExpr":
+      return `await client.guilds.fetch(${emitExpression(expression.guildId)})`;
     case "BinaryExpr":
       if (expression.operator === "or") {
         return `(${emitExpression(expression.left)} ?? ${emitExpression(expression.right)})`;

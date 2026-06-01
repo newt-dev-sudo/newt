@@ -16,9 +16,12 @@ const builtIns = new Set([
   "message.content",
   "channel.name",
   "server.name",
+  "server.id",
   "server.members",
   "args",
-  "target"
+  "target",
+  "target.id",
+  "target.username"
 ]);
 
 export function validate(program: Program, source = ""): NewtError[] {
@@ -210,6 +213,18 @@ class Validator {
           this.errors.push(makeCatalogError("NEWT_E011", expression.loc.line, expression.loc.column, this.line(expression.loc.line)));
         }
         this.visitExpression(expression.url, scope, inTry);
+        break;
+      case "GetUserExpr":
+        if (!inTry) {
+          this.errors.push(makeCatalogError("NEWT_E011", expression.loc.line, expression.loc.column, this.line(expression.loc.line)));
+        }
+        this.visitExpression(expression.userId, scope, inTry);
+        break;
+      case "GetGuildExpr":
+        if (!inTry) {
+          this.errors.push(makeCatalogError("NEWT_E011", expression.loc.line, expression.loc.column, this.line(expression.loc.line)));
+        }
+        this.visitExpression(expression.guildId, scope, inTry);
         break;
       case "BinaryExpr":
         this.visitExpression(expression.left, scope, inTry);

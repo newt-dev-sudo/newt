@@ -111,6 +111,8 @@ const keywords = new Set([
   "days",
   "day",
   "args",
+  "getUser",
+  "getGuild",
   "random",
   "between",
   "round",

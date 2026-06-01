@@ -541,6 +541,22 @@ class Parser {
       return { type: "FetchExpr", loc: this.loc(start), url: this.parseAtom() };
     }
 
+    if (this.checkKeyword("getUser")) {
+      const start = this.advance();
+      this.consumeType("LPAREN", "getUser needs an opening parenthesis.");
+      const userId = this.parseExpressionUntil(["RPAREN"]);
+      this.consumeType("RPAREN", "getUser needs a closing parenthesis.");
+      return { type: "GetUserExpr", loc: this.loc(start), userId };
+    }
+
+    if (this.checkKeyword("getGuild")) {
+      const start = this.advance();
+      this.consumeType("LPAREN", "getGuild needs an opening parenthesis.");
+      const guildId = this.parseExpressionUntil(["RPAREN"]);
+      this.consumeType("RPAREN", "getGuild needs a closing parenthesis.");
+      return { type: "GetGuildExpr", loc: this.loc(start), guildId };
+    }
+
     if (this.match("LPAREN")) {
       const expression = this.parseExpressionUntil(["RPAREN"]);
       this.consumeType("RPAREN", "Close this expression with ).");
