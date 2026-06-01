@@ -13,7 +13,7 @@ This guide will help you install Newt on your computer so you can start building
 2. Download the LTS (Long Term Support) version - it's the most stable
 3. Run the installer and follow the prompts
 
-**Why version 20 or higher?** Newt uses modern JavaScript features that require newer versions of Node.js.
+**Why version 18 or higher?** Newt uses Node.js native fetch() for HTTP requests, which requires Node.js 18 or later.
 
 ### npm
 

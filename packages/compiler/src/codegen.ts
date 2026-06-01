@@ -44,6 +44,10 @@ const prefix = ${JSON.stringify(prefix)};
 async function processedFetch(url) {
   const response = await fetch(url);
 
+  if (!response.ok) {
+    throw new Error("HTTP error! status: " + response.status);
+  }
+
   if (response.headers.get('content-type')?.toLowerCase() === 'application/json') {
     return await response.json();
   }

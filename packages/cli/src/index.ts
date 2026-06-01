@@ -5,6 +5,15 @@ import { deployCommand } from "./commands/deploy.js";
 import { newCommand } from "./commands/new.js";
 import { runCommand } from "./commands/run.js";
 
+// Check Node.js version (requires 18+ for native fetch)
+const nodeVersion = process.version;
+const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
+if (majorVersion < 18) {
+  console.error(`Error: Newt requires Node.js 18 or higher. You are running Node.js ${nodeVersion}.`);
+  console.error('Please upgrade Node.js: https://nodejs.org/');
+  process.exit(1);
+}
+
 const [, , command, ...args] = process.argv;
 
 function help(): void {
