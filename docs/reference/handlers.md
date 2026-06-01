@@ -78,6 +78,8 @@ Each handler has access to specific variables (context) that provide information
 | `on button click` | user, channel, server, interaction |
 | `on select menu` | user, channel, server, values, interaction |
 | `on message contains` | user, message, channel, server |
+| `on message update` | user, message, channel, server |
+| `on message delete` | user, message, channel, server |
 | `on join` | user, member, server |
 | `on leave` | user, server |
 | `on reaction add` | user, channel, server |
@@ -369,6 +371,84 @@ on message contains "hello":
 - This triggers on ANY message containing the text, not just commands
 - Be careful with common words - you might get too many triggers
 - Case-sensitive by default
+
+## on message update
+
+**Concept:** Event-driven programming (state change detection)
+
+**What it does:** Triggers when a message is edited
+
+**When it triggers:** When someone edits a message
+
+**How it works:**
+- Detects when a message's content changes
+- Provides access to the updated message
+- Useful for tracking message edits
+
+```javascript
+on message update:
+    reply "Message was edited!"
+```
+
+**Use cases:**
+- Message edit logging
+- Content change tracking
+- Moderation of edited messages
+- Audit trails
+
+**Example:**
+```javascript
+on message update:
+    reply "I noticed you edited your message!"
+```
+
+**What this does:**
+- User edits a message
+- Bot responds: "I noticed you edited your message!"
+
+**Important notes:**
+- Only triggers on actual edits, not new messages
+- Bot messages are ignored
+- Requires appropriate intents
+
+## on message delete
+
+**Concept:** Event-driven programming (state change detection)
+
+**What it does:** Triggers when a message is deleted
+
+**When it triggers:** When a message is removed from the channel
+
+**How it works:**
+- Detects when a message is deleted
+- Provides access to the deleted message (if cached)
+- Useful for tracking message deletions
+
+```javascript
+on message delete:
+    reply "Message was deleted!"
+```
+
+**Use cases:**
+- Message deletion logging
+- Content moderation
+- Audit trails
+- Tracking deleted content
+
+**Example:**
+```javascript
+on message delete:
+    reply "A message was deleted in this channel"
+```
+
+**What this does:**
+- A message is deleted
+- Bot responds: "A message was deleted in this channel"
+
+**Important notes:**
+- Only triggers if the message was in the bot's cache
+- Bot messages are ignored
+- May not work for very old messages (not cached)
 
 ## on join
 
