@@ -40,6 +40,10 @@ This document outlines the features currently supported by the Newt interpreter 
 - Sets the bot's rich presence status
 - Updates bot activity in Discord
 
+✅ **Say Statement** - `say "message"` or `say "message" in channel "name"`
+- Sends a message to current or specified channel
+- Channel targeting with `in channel "name"`
+
 ### Expressions
 
 ✅ **String Literals** - `"text"`
@@ -61,6 +65,10 @@ This document outlines the features currently supported by the Newt interpreter 
 - `getUser(userId)` - Fetch user information from Discord API
 - `getGuild(guildId)` - Fetch guild information from Discord API
 
+✅ **Fetch Expression** - `fetch "url"`
+- HTTP request functionality
+- Returns JSON or text based on content-type
+
 ### Error Handling
 
 ✅ **Try/On Error** - `try: ... on error: ...`
@@ -78,39 +86,31 @@ Available in command handlers:
 - `target` - The mentioned user (if any)
 - `args` - Array of command arguments
 
-## Not Yet Supported
+## Implemented But Not Yet Tested
 
-The following features are documented but not yet implemented in the interpreter:
+The following features are implemented in the interpreter but need testing:
 
-❌ **Say Statement** - `say "message" in channel "name"`
-- Channel targeting functionality
-- Requires channel lookup implementation
+⚠️ **If/Else Statements** - `if condition: ... else: ...`
+- Conditional logic implemented
+- Syntax may need adjustment (currently has parsing issues)
 
-❌ **If/Else Statements** - `if condition: ... else: ...`
-- Conditional logic
-- Requires expression comparison implementation
+⚠️ **For Each Loops** - `for each item in collection:`
+- Iteration functionality implemented
+- Needs testing with actual collections
 
-❌ **Message Update/Delete Handlers** - `on message update:`, `on message delete:`
+⚠️ **Message Editing/Deletion** - `edit message to "text"`, `delete message`
+- Message modification statements implemented
+- Needs testing with message references
+
+⚠️ **File Upload** - `upload "./file.png" with message "text"`
+- File attachment functionality implemented
+- Needs testing with actual files
+
+⚠️ **Message Update/Delete Handlers** - `on message update:`, `on message delete:`
 - Event handlers for message changes
 - Partially implemented but needs testing
 
-❌ **File Upload** - `upload "./file.png" with message "text"`
-- File attachment functionality
-- Requires file handling implementation
-
-❌ **Message Editing/Deletion** - `edit message to "text"`, `delete message`
-- Message modification statements
-- Requires message reference tracking
-
-❌ **Fetch Expression** - `fetch "url"`
-- HTTP request functionality
-- Requires fetch implementation
-
-❌ **For Each Loops** - `for each item in collection:`
-- Iteration functionality
-- Requires loop implementation
-
-❌ **Other Event Handlers**
+⚠️ **Other Event Handlers**
 - `on join:`, `on leave:`, `on reaction:`, etc.
 - Partially implemented but need testing
 

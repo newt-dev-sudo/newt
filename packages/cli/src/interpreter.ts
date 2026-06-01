@@ -58,6 +58,9 @@ export class NewtInterpreter {
       partials: [Partials.Message, Partials.Channel, Partials.Reaction],
     });
 
+    // Increase max listeners to avoid warnings with multiple command handlers
+    this.client.setMaxListeners(20);
+
     // Handle unhandled errors
     this.client.on('error', (error) => {
       console.error('Discord client error:', error.message);
@@ -226,7 +229,11 @@ export class NewtInterpreter {
           const targetChannel = stmt.channel
             ? this.findChannel(context.server, stmt.channel.value)
             : context.channel;
-          await targetChannel?.send(sayText);
+          if (!targetChannel) {
+            console.error(`Channel not found: ${stmt.channel?.value || 'current'}`);
+            return;
+          }
+          await targetChannel.send(sayText);
           break;
 
         case "LetDecl":

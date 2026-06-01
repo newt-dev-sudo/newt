@@ -9,6 +9,10 @@ on ready:
 on command "test-reply":
     reply "This is a reply test"
 
+# Test say statement
+on command "test-say":
+    say "This is a say test"
+
 # Test let statement and variables
 on command "test-let":
     let greeting = "Hello"
@@ -26,7 +30,9 @@ on command "test-load":
 
 # Test if statement
 on command "test-if":
-    reply "If statement test (skipped for now)"
+    let points = load user.id points or 0
+    if points >= 0:
+        reply "If statement works"
 
 # Test REST method - getUser
 on command "test-getuser":
@@ -56,3 +62,11 @@ on command "test-error":
 on command "test-activity":
     set activity "Custom activity"
     reply "Activity set"
+
+# Test fetch expression
+on command "test-fetch":
+    try:
+        let data = fetch "https://httpbin.org/get"
+        reply "Fetch successful"
+    on error:
+        reply "Fetch failed"
