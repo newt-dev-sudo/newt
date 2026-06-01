@@ -4,63 +4,9 @@ Deploy your Newt bot to cloud hosting for 24/7 uptime.
 
 ## Prerequisites
 
-- Built bot from `newt build`
+- Newt CLI installed
 - Discord bot token
-- Hosting account (Heroku, Railway, Render, etc.)
-
-## Heroku
-
-### 1. Install Heroku CLI
-
-```bash
-# Windows
-npm install -g heroku
-
-# Mac
-brew tap heroku/brew && brew install heroku
-
-# Linux
-sudo snap install heroku --classic
-```
-
-### 2. Login to Heroku
-
-```bash
-heroku login
-```
-
-### 3. Create Heroku App
-
-```bash
-heroku create my-newt-bot
-```
-
-### 4. Set Environment Variables
-
-```bash
-heroku config:set DISCORD_TOKEN=your-token-here
-```
-
-### 5. Deploy
-
-```bash
-# Initialize git if needed
-git init
-git add .
-git commit -m "Initial bot"
-
-# Add Heroku remote
-heroku git:remote -a my-newt-bot
-
-# Deploy
-git push heroku main
-```
-
-### 6. Scale Up
-
-```bash
-heroku ps:scale web=1
-```
+- Hosting account (Railway, Render, etc.)
 
 ## Railway
 
@@ -79,7 +25,13 @@ Sign up at [railway.app](https://railway.app)
 In Railway dashboard:
 - Add `DISCORD_TOKEN` = your bot token
 
-### 4. Deploy
+### 4. Configure Build and Start
+
+Since Newt uses the CLI directly, configure Railway to:
+- **Build Command:** `npm install -g @newt-dev/cli`
+- **Start Command:** `newt run your-bot.newt`
+
+### 5. Deploy
 
 Railway auto-deploys on push. Your bot will be live at `your-app.railway.app`
 
@@ -97,8 +49,8 @@ Sign up at [render.com](https://render.com)
 
 ### 3. Configure
 
-- **Build Command:** `npm install`
-- **Start Command:** `npm start`
+- **Build Command:** `npm install -g @newt-dev/cli`
+- **Start Command:** `newt run your-bot.newt`
 
 ### 4. Set Environment Variables
 
@@ -107,41 +59,6 @@ Add `DISCORD_TOKEN` in the environment variables section
 ### 5. Deploy
 
 Click "Create Web Service" - Render auto-deploys
-
-## Docker
-
-### 1. Create Dockerfile
-
-```dockerfile
-FROM node:20-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-CMD ["npm", "start"]
-```
-
-### 2. Build Image
-
-```bash
-docker build -t my-newt-bot .
-```
-
-### 3. Run Container
-
-```bash
-docker run -d \
-  -e DISCORD_TOKEN=your-token \
-  --name my-bot \
-  my-newt-bot
-```
-
-### 4. Deploy to Docker Hub
-
-```bash
-docker tag my-newt-bot username/my-newt-bot
-docker push username/my-newt-bot
-```
 
 ## VPS (DigitalOcean, Linode, etc.)
 
@@ -158,74 +75,40 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-### 3. Upload Bot Files
+### 3. Install Newt CLI
 
 ```bash
-scp -r my-bot user@your-server-ip:/home/user/
+npm install -g @newt-dev/cli
 ```
 
-### 4. Install Dependencies
+### 4. Upload Bot Files
 
 ```bash
-cd /home/user/my-bot
-npm install
+scp your-bot.newt user@your-server-ip:/home/user/
 ```
 
-### 5. Set Environment Variable
+### 5. Set Token
 
 ```bash
-echo 'export DISCORD_TOKEN="your-token"' >> ~/.bashrc
-source ~/.bashrc
+newt token YOUR_BOT_TOKEN
 ```
 
 ### 6. Run with PM2 (for uptime)
 
 ```bash
 npm install -g pm2
-pm2 start npm --name "newt-bot" -- start
+pm2 start "newt run /home/user/your-bot.newt" --name "newt-bot"
 pm2 save
 pm2 startup
 ```
-
-## GitHub Actions (CI/CD)
-
-### 1. Create Workflow
-
-Create `.github/workflows/deploy.yml`:
-
-```yaml
-name: Deploy Bot
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v3.12.12
-        with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: "my-newt-bot"
-          heroku_email: "your-email@example.com"
-```
-
-### 2. Add Secrets
-
-In GitHub repository settings:
-- `HEROKU_API_KEY`
-- `DISCORD_TOKEN`
 
 ## Choosing a Platform
 
 | Platform | Best For | Cost | Difficulty |
 |----------|----------|------|------------|
-| Heroku | Beginners | Free tier available | Easy |
 | Railway | Quick deployment | Free tier available | Very Easy |
 | Render | Simple apps | Free tier available | Easy |
 | VPS | Full control | $5-10/month | Medium |
-| Docker | Portability | Varies | Medium |
 
 ## Keeping Bots Running
 
@@ -234,9 +117,9 @@ In GitHub repository settings:
 **PM2 (Node.js):**
 ```bash
 npm install -g pm2
-pm2 start npm --name "bot" -- start
-pm2 startup
+pm2 start "newt run your-bot.newt" --name "newt-bot"
 pm2 save
+pm2 startup
 ```
 
 **Systemd (Linux):**
@@ -249,7 +132,7 @@ After=network.target
 Type=simple
 User=your-user
 WorkingDirectory=/path/to/bot
-ExecStart=/usr/bin/npm start
+ExecStart=/usr/bin/newt run your-bot.newt
 Restart=always
 
 [Install]
@@ -266,18 +149,15 @@ pm2 status
 
 # Systemd
 systemctl status newt-bot
-
-# Docker
-docker ps
 ```
 
 ## Troubleshooting Deployment
 
 ### Bot crashes immediately
 
-- Check logs: `heroku logs --tail` (Heroku)
-- Verify DISCORD_TOKEN is set
-- Check Node.js version compatibility
+- Check logs (platform-specific)
+- Verify DISCORD_TOKEN is set correctly
+- Check Node.js version compatibility (18+)
 
 ### Bot goes offline
 
@@ -294,5 +174,4 @@ docker ps
 ## Next Steps
 
 - [Token Security](./security.md) - Secure your deployment
-- [Troubleshooting](./troubleshooting.md) - Common deployment issues
 - [Examples](./examples/hello-world.md) - More bot examples

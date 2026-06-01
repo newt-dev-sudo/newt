@@ -9,17 +9,15 @@ on message contains "spoiler":
     reply "Please keep spoilers in the spoiler channel."
 
 on command "mute":
-    require role "Moderator"
-    mute target for 10 minutes
-    reply "{target} has been muted for 10 minutes."
+    if user has role "Moderator":
+        mute target for 10 minutes
+        reply "{target} has been muted for 10 minutes."
+    else:
+        reply "You don't have permission to use this command."
 
 on command "kick":
-    require role "Moderator"
-    kick target
-    reply "{target} was kicked."
-
-every 1 hour:
-    say "Moderation reminder: be kind and read the rules." in channel "general"
-
-at "09:00" daily:
-    say "Good morning! Today's mod queue is ready." in channel "moderation"
+    if user has role "Moderator":
+        kick target
+        reply "{target} was kicked."
+    else:
+        reply "You don't have permission to use this command."
