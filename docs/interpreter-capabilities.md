@@ -209,7 +209,7 @@ The interpreter runtime:
 
 ## Testing
 
-For comprehensive testing instructions, see [Testing Full Feature Bot](./comprehensive-test.md).
+For comprehensive testing instructions, see [Testing Full Feature Bot](./testing/comprehensive-test.md).
 
 ## Migration from Compilation
 
