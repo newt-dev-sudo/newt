@@ -32,6 +32,7 @@ Newt is designed to teach fundamental programming concepts through Discord bot d
 - Comparison operators (`=`, `!=`, `<`, `>`, `<=`, `>=`)
 - Logical operators (`and`, `or`)
 - `has` expression - Boolean membership check
+- Note: Use `0`/`1` for boolean values (true/false not yet supported)
 
 **Real-world parallels:**
 - `if/else` in any programming language

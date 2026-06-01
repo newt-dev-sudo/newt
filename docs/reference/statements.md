@@ -264,14 +264,14 @@ on command "status":
 - You can load it back later with `load`
 
 ```javascript
-store user.id points 100
-store server.id "last_announcement" "Welcome message"
+store user.id points = 100
+store server.id "last_announcement" = "Welcome message"
 ```
 
 **Example:**
 ```javascript
 on command "setpoints":
-    store user.id points args[0]
+    store user.id points = args[0]
     reply "Set your points to {args[0]}"
 ```
 
@@ -307,7 +307,7 @@ on command "setpoints":
 
 ```javascript
 let points = load user.id points or 0
-let config = load server.id "setting" or "default"
+let config = load server.id setting or "default"
 ```
 
 **Example:**
@@ -853,7 +853,7 @@ Yes! Just put them one after another:
 on command "status":
     let points = load user.id points or 0
     reply "You have {points} points"
-    store user.id "last_check" "now"
+    store user.id last_check = "now"
 ```
 
 ### What's the difference between `reply` and `say`?

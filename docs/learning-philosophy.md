@@ -62,8 +62,8 @@ say "This is a message" in channel "general"
 **Concept:** Key-value storage and memory
 
 ```javascript
-let points = load user.id "points" or 0
-store user.id "points" points + 10
+let points = load user.id points or 0
+store user.id points points + 10
 ```
 
 **What you learn:**

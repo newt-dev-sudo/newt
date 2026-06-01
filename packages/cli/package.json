@@ -1,6 +1,6 @@
 {
   "name": "@newt-dev/cli",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Command-line tools for the Newt Discord bot DSL.",
   "type": "module",
   "bin": {
@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/newt-dev-sudo/newt#readme",
   "dependencies": {
-    "@newt-dev/compiler": "0.2.0",
+    "@newt-dev/compiler": "0.3.0",
     "discord.js": "^14.15.0",
     "better-sqlite3": "^11.0.0"
   },
