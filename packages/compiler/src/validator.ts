@@ -7,7 +7,7 @@ import type {
   TimerDecl,
   TopLevelNode
 } from "./ast.js";
-import { makeCatalogError, NewtError } from "./errors.js";
+import { makeCatalogError, type NewtError } from "./errors.js";
 
 const builtIns = new Set([
   "user.name",

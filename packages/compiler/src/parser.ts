@@ -1,22 +1,22 @@
-import {
-  type BinaryExpr,
-  type BotDecl,
-  type CommandHandler,
-  type DailyTimerDecl,
-  type DurationLiteral,
-  type EmbedBlock,
-  type EveryTimerDecl,
-  type Expression,
-  type Handler,
-  type SlashOption,
-  type MessageContainsHandler,
-  type Program,
-  type Statement,
-  type StringLiteral,
-  type TimeUnit,
-  type TopLevelNode,
-  type Component,
-  type SelectOption
+import type {
+  BinaryExpr,
+  BotDecl,
+  CommandHandler,
+  DailyTimerDecl,
+  DurationLiteral,
+  EmbedBlock,
+  EveryTimerDecl,
+  Expression,
+  Handler,
+  SlashOption,
+  MessageContainsHandler,
+  Program,
+  Statement,
+  StringLiteral,
+  TimeUnit,
+  TopLevelNode,
+  Component,
+  SelectOption
 } from "./ast.js";
 import { makeCatalogError, NewtError } from "./errors.js";
 import type { Token, TokenType } from "./lexer.js";
