@@ -132,9 +132,9 @@ function interpolateEmbed(embed: SimulatedEmbed, userName: string): SimulatedEmb
 
 function interpolate(text: string, userName: string): string {
   return text
-    .replace(/\{user\.name\}/g, userName)
-    .replace(/\{user\.mention\}/g, `@${userName}`)
-    .replace(/\{target\}/g, "@TargetUser");
+    .replaceAll("{user.name}", userName)
+    .replaceAll("{user.mention}", `@${userName}`)
+    .replaceAll("{target}", "@TargetUser");
 }
 
 function unquote(text: string): string {
