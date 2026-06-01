@@ -85,5 +85,5 @@ export function SimulatedChat({ messages, onSendMessage, onJoin, onReaction }: S
 }
 
 function initials(name: string): string {
-  return name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+  return (name.match(/\b\S/g) ?? []).slice(0, 2).join("").toUpperCase();
 }
