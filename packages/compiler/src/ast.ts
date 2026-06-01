@@ -145,6 +145,7 @@ export type Statement =
   | EditMessageStatement
   | DeleteMessageStatement
   | UploadStatement
+  | SetActivityStatement
   | WaitStatement
   | TryCatchStatement
   | ExpressionStatement;
@@ -284,6 +285,12 @@ export interface UploadStatement extends BaseNode {
   type: "UploadStatement";
   filePath: Expression;
   message?: Expression;
+}
+
+export interface SetActivityStatement extends BaseNode {
+  type: "SetActivityStatement";
+  activity: Expression;
+  activityType?: StringLiteral;
 }
 
 export interface WaitStatement extends BaseNode {

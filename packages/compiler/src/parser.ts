@@ -326,6 +326,14 @@ class Parser {
       return { type: "UploadStatement", loc: this.loc(start), filePath, message };
     }
 
+    if (this.checkKeyword("set")) {
+      const start = this.advance();
+      this.consumeKeyword("activity");
+      const activity = this.parseExpressionUntilLineEnd();
+      this.consumeLineEnd();
+      return { type: "SetActivityStatement", loc: this.loc(start), activity };
+    }
+
     const start = this.peek();
     const expression = this.parseExpressionUntilLineEnd();
     this.consumeLineEnd();

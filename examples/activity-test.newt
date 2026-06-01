@@ -1,0 +1,10 @@
+bot name "ActivityTest"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on ready:
+    set activity "Helping users with commands"
+
+on command "status":
+    set activity "Processing commands"
+    reply "Status updated!"

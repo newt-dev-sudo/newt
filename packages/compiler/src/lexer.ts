@@ -94,6 +94,8 @@ const keywords = new Set([
   "edit",
   "upload",
   "update",
+  "set",
+  "activity",
   "wait",
   "target",
   "to",
