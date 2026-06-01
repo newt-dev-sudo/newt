@@ -680,6 +680,80 @@ on command "remind":
 - `minute` / `minutes`
 - `hour` / `hours`
 
+## edit
+
+**Concept:** Message mutation and state management
+
+**What it does:** Changes the content of a message that was already sent
+
+**When to use it:** When you need to update a message after sending it
+
+**How it works:**
+- Takes a message reference and new content
+- Replaces the message's text with the new content
+- Useful for status updates, corrections, or timed changes
+
+```javascript
+edit message to "Updated content"
+```
+
+**Example:**
+```javascript
+on command "status":
+    reply "Checking status..."
+    wait 2 seconds
+    edit message to "Status: All systems operational"
+```
+
+**What this does:**
+- User types: `!status`
+- Bot replies: "Checking status..."
+- Bot waits 2 seconds
+- Bot edits the reply to: "Status: All systems operational"
+
+**Use cases:**
+- Status updates
+- Correcting mistakes
+- Timed message changes
+- Progress indicators
+
+## delete
+
+**Concept:** Message cleanup and moderation
+
+**What it does:** Removes a message from the channel
+
+**When to use it:** When you need to clean up messages or remove inappropriate content
+
+**How it works:**
+- Takes a message reference
+- Permanently removes the message from the channel
+- Cannot be undone (except by message logs)
+
+```javascript
+delete message
+```
+
+**Example:**
+```javascript
+on command "cleanup":
+    reply "This message will self-destruct in 5 seconds"
+    wait 5 seconds
+    delete message
+```
+
+**What this does:**
+- User types: `!cleanup`
+- Bot replies: "This message will self-destruct in 5 seconds"
+- Bot waits 5 seconds
+- Bot deletes its own message
+
+**Use cases:**
+- Temporary messages
+- Auto-cleanup
+- Removing sensitive information
+- Moderation
+
 ## Common Questions
 
 ### Can I use multiple statements in one handler?
