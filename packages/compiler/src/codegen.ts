@@ -246,14 +246,14 @@ function emitStatement(statement: Statement, indent: string, triggerName: string
 }
 
 function emitEmbed(embed: { title?: Expression; description?: Expression; color?: { value: string }; fields: { name: Expression; value: Expression }[] }): string {
-  const lines = ["new EmbedBuilder()"];
-  if (embed.title) lines.push(`.setTitle(${emitExpression(embed.title)})`);
-  if (embed.description) lines.push(`.setDescription(${emitExpression(embed.description)})`);
-  if (embed.color) lines.push(`.setColor(${JSON.stringify(embed.color.value)})`);
+  let lines = "new EmbedBuilder()";
+  if (embed.title) lines += `.setTitle(${emitExpression(embed.title)})`;
+  if (embed.description) lines += `.setDescription(${emitExpression(embed.description)})`;
+  if (embed.color) lines += `.setColor(${JSON.stringify(embed.color.value)})`;
   for (const field of embed.fields) {
-    lines.push(`.addFields({ name: ${emitExpression(field.name)}, value: ${emitExpression(field.value)} })`);
+    lines += `.addFields({ name: ${emitExpression(field.name)}, value: ${emitExpression(field.value)} })`;
   }
-  return lines.join("");
+  return lines;
 }
 
 function emitExpression(expression: Expression): string {
