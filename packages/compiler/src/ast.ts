@@ -132,6 +132,7 @@ export type Statement =
   | DeleteKeyStatement
   | EditMessageStatement
   | DeleteMessageStatement
+  | UploadStatement
   | WaitStatement
   | TryCatchStatement
   | ExpressionStatement;
@@ -265,6 +266,12 @@ export interface EditMessageStatement extends BaseNode {
 export interface DeleteMessageStatement extends BaseNode {
   type: "DeleteMessageStatement";
   target: Expression;
+}
+
+export interface UploadStatement extends BaseNode {
+  type: "UploadStatement";
+  filePath: Expression;
+  message?: Expression;
 }
 
 export interface WaitStatement extends BaseNode {

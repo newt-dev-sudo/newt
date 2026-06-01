@@ -304,6 +304,18 @@ class Parser {
       return { type: "DeleteMessageStatement", loc: this.loc(start), target };
     }
 
+    if (this.checkKeyword("upload")) {
+      const start = this.advance();
+      const filePath = this.parseAtom();
+      let message: Expression | undefined;
+      if (this.matchKeyword("with")) {
+        this.consumeKeyword("message");
+        message = this.parseExpressionUntilLineEnd();
+      }
+      this.consumeLineEnd();
+      return { type: "UploadStatement", loc: this.loc(start), filePath, message };
+    }
+
     const start = this.peek();
     const expression = this.parseExpressionUntilLineEnd();
     this.consumeLineEnd();

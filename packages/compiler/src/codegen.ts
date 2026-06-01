@@ -242,6 +242,11 @@ function emitStatement(statement: Statement, indent: string, triggerName: string
       return `${indent}await ${emitExpression(statement.target)}?.edit?.(${emitExpression(statement.newContent)});`;
     case "DeleteMessageStatement":
       return `${indent}await ${emitExpression(statement.target)}?.delete?.();`;
+    case "UploadStatement":
+      if (statement.message) {
+        return `${indent}await ${triggerName}.channel.send({ files: [${emitExpression(statement.filePath)}], content: ${emitExpression(statement.message)} });`;
+      }
+      return `${indent}await ${triggerName}.channel.send({ files: [${emitExpression(statement.filePath)}] });`;
     case "TryCatchStatement":
       return `${indent}try {\n${emitStatements(statement.body, `${indent}  `, triggerName)}\n${indent}} catch (error) {\n${emitStatements(statement.errorHandler, `${indent}  `, triggerName)}\n${indent}}`;
     case "WaitStatement":

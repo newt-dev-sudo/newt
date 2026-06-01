@@ -163,6 +163,10 @@ class Validator {
         case "DeleteMessageStatement":
           this.visitExpression(statement.target, scope, inTry);
           break;
+        case "UploadStatement":
+          this.visitExpression(statement.filePath, scope, inTry);
+          if (statement.message) this.visitExpression(statement.message, scope, inTry);
+          break;
         case "TryCatchStatement":
           this.visitStatements(statement.body, new Set(scope), true);
           this.visitStatements(statement.errorHandler, new Set(scope), true);
