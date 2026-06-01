@@ -172,9 +172,9 @@ sudo apt-get install -y nodejs
 
 Now that your computer is set up:
 
-1. **Install Newt** - Go to the [Installation Guide](./installation.md)
-2. **Create your first bot** - Follow the [Quickstart Guide](./quickstart.md)
-3. **Learn the basics** - Check out [Programming Concepts](./concepts.md)
+1. **Install Newt** - Go to the [Installation Guide](../installation.md)
+2. **Create your first bot** - Follow the [Quickstart Guide](../quickstart.md)
+3. **Learn the basics** - Check out [Programming Concepts](../concepts.md)
 
 ## Need Help?
 

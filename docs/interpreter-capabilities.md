@@ -210,7 +210,7 @@ The interpreter runtime:
 
 ## Testing
 
-For comprehensive testing instructions, see [Testing Full Feature Bot](./testing/comprehensive-test.md).
+To test your bot, run it with `newt run` and verify the features work as expected in your Discord server.
 
 ## Migration from Compilation
 

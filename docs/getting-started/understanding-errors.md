@@ -181,7 +181,7 @@ on command "hello":
     reply "Hi, {user.username}!"
 ```
 
-**Rule:** Check the [Expressions Reference](./reference/expressions.md) for the correct variable names.
+**Rule:** Check the [Expressions Reference](../reference/expressions.md) for the correct variable names.
 
 ---
 
@@ -256,7 +256,7 @@ on command "hello":
     reply "Hi!"
 ```
 
-**Rule:** Check the [Roadmap](./roadmap.md) to see which features are implemented.
+**Rule:** Check the [Roadmap](../roadmap.md) to see which features are implemented.
 
 ---
 
@@ -316,7 +316,7 @@ on command "hello":
 2. **Use consistent indentation** - Pick 2 or 4 spaces and stick with it
 3. **Save frequently** - Save your file after changes before checking
 4. **Read error messages carefully** - They usually tell you exactly what's wrong and where
-5. **Check the reference** - Look at the [Language Reference](./reference/bot-config.md) for correct syntax
+5. **Check the reference** - Look at the [Language Reference](../reference/bot-config.md) for correct syntax
 
 ## Still Seeing Errors?
 
