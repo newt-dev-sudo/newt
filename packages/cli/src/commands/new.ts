@@ -40,7 +40,7 @@ bot token from env "DISCORD_TOKEN"
 };
 
 export function newCommand(name = "mybot", template = "hello"): number {
-  const safeName = basename(name).replace(/[^A-Za-z0-9_-]/g, "-").replace(/\.newt$/i, "");
+  const safeName = basename(name).replace(/[^\w-]/g, "-").replace(/\.newt$/i, "");
   const filename = `${safeName || "mybot"}.newt`;
   if (existsSync(filename)) {
     console.error(`${filename} already exists. Pick another name or move the existing file.`);

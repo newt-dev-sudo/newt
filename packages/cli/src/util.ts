@@ -13,8 +13,7 @@ export function readSource(file: string): { filename: string; source: string } {
 
 export function printErrors(errors: NewtError[], source: string): void {
   for (const error of errors) {
-    console.error(formatError(error, source));
-    console.error("");
+    console.error(`${formatError(error, source)}\n`);
   }
 }
 

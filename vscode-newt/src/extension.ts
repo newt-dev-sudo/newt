@@ -10,7 +10,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const runCommand = vscode.commands.registerCommand("newt.run", () => {
     const editor = vscode.window.activeTextEditor;
-    if (!editor || editor.document.languageId !== "newt") {
+    if (editor?.document?.languageId !== "newt") {
       vscode.window.showInformationMessage("Open a .newt file before running Newt.");
       return;
     }

@@ -18,8 +18,7 @@ const source = readFileSync(sourcePath, "utf8");
 const result = compile(source, example);
 if (!result.success) {
   for (const error of result.errors) {
-    console.error(formatError(error, source));
-    console.error("");
+    console.error(`${formatError(error, source)})}\n`);
   }
   process.exit(1);
 }
