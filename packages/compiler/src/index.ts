@@ -3,9 +3,11 @@ import { formatError, NewtError } from "./errors.js";
 import { tokenize } from "./lexer.js";
 import { parse } from "./parser.js";
 import { validate } from "./validator.js";
+import type { Program } from "./ast.js";
 
 export interface CompileSuccess extends GeneratedProject {
   success: true;
+  program: Program;
 }
 
 export interface CompileFailure {
@@ -31,7 +33,7 @@ export function compile(source: string, filename = "input.newt"): CompileResult 
       return { success: false, errors };
     }
 
-    return { success: true, ...generate(program) };
+    return { success: true, program, ...generate(program) };
   } catch (error) {
     if (error instanceof NewtError) {
       return { success: false, errors: [new NewtError({ ...error, filename })] };

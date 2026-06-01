@@ -1,0 +1,58 @@
+bot name "FullTest"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on ready:
+    set activity "Testing all features"
+
+# Test reply statement
+on command "test-reply":
+    reply "This is a reply test"
+
+# Test let statement and variables
+on command "test-let":
+    let greeting = "Hello"
+    reply "{greeting}, {user.username}!"
+
+# Test store and load statements
+on command "test-store":
+    let current = load user.id points or 0
+    store user.id points = current + 100
+    reply "Data stored"
+
+on command "test-load":
+    let data = load user.id points or 0
+    reply "Loaded: {data}"
+
+# Test if statement
+on command "test-if":
+    reply "If statement test (skipped for now)"
+
+# Test REST method - getUser
+on command "test-getuser":
+    try:
+        let userInfo = getUser(target.id)
+        reply "User: {userInfo.username}"
+    on error:
+        reply "Mention a user first"
+
+# Test REST method - getGuild
+on command "test-getguild":
+    try:
+        let guildInfo = getGuild(server.id)
+        reply "Guild: {guildInfo.name}"
+    on error:
+        reply "Could not fetch guild"
+
+# Test error handling
+on command "test-error":
+    try:
+        let bad = getUser("invalid-id")
+        reply "This should not show"
+    on error:
+        reply "Error caught successfully"
+
+# Test set activity
+on command "test-activity":
+    set activity "Custom activity"
+    reply "Activity set"

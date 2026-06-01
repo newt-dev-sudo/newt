@@ -1,38 +1,41 @@
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { spawnSync } from "node:child_process";
-import { buildCommand } from "./build.js";
+import { compile } from "@newt-dev/compiler";
+import { printErrors, readSource } from "../util.js";
+import { getToken, setToken } from "../token-store.js";
+import { NewtInterpreter } from "../interpreter.js";
 
 export interface RunOptions {
   safe?: boolean;
 }
 
-export function runCommand(file: string, options: RunOptions = {}): number {
-  if (!process.env.DISCORD_TOKEN) {
-    console.error("DISCORD_TOKEN is not set. Newt bots read tokens from the environment by default.");
+export async function runCommand(file: string, options: RunOptions = {}): Promise<number> {
+  const { filename, source } = readSource(file);
+  const result = compile(source, filename);
+
+  if (!result.success) {
+    printErrors(result.errors, source);
     return 1;
   }
 
-  const outDir = mkdtempSync(join(tmpdir(), "newt-run-"));
-  const built = buildCommand(file, { outDir });
-  if (built !== 0) {
-    rmSync(outDir, { recursive: true, force: true });
-    return built;
+  // Check for token
+  let token = getToken();
+  if (!token) {
+    console.log("No Discord token found. Please enter your bot token:");
+    console.log("(You can get this from https://discord.com/developers/applications)");
+    console.log("Or use: newt token <your-token>");
+    return 1;
   }
 
-  console.log("Installing generated bot dependencies...");
-  const install = spawnSync("npm.cmd", ["install", "--omit=dev"], { cwd: outDir, stdio: "inherit", shell: false });
-  if (install.status !== 0) {
-    return install.status ?? 1;
-  }
-
-  console.log("Starting Newt bot...");
-  const child = spawnSync("node", ["bot.js"], {
-    cwd: outDir,
-    stdio: "inherit",
-    env: { ...process.env, NEWT_SAFE_MODE: options.safe ? "1" : process.env.NEWT_SAFE_MODE ?? "" }
+  // Run interpreter
+  const interpreter = new NewtInterpreter({
+    token,
+    program: result.program
   });
 
-  return child.status ?? 0;
+  try {
+    await interpreter.run();
+    return 0;
+  } catch (error) {
+    console.error("Bot error:", (error as Error).message);
+    return 1;
+  }
 }

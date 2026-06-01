@@ -80,72 +80,36 @@ on command "hello":
 - **Variables** - `{user.username}` is a placeholder that gets replaced with the actual username
 - **Indentation** - The spaces at the start of lines show which code belongs to which handler
 
-## Step 5: Build and Run Your Bot
+## Step 5: Save Your Token
 
-Now let's turn your Newt code into a running bot:
+Save your Discord bot token so Newt can use it:
 
 ```bash
-# Check your code for errors
-newt check my-bot.newt
-
-# Build the bot (converts Newt to JavaScript)
-newt build my-bot.newt --out my-bot
-
-# Go into the bot folder
-cd my-bot
-
-# Install the bot's dependencies
-npm install
+newt token YOUR_BOT_TOKEN
 ```
 
-**What's happening so far:**
-1. `newt check` - Makes sure your code has no mistakes
-2. `newt build` - Converts your Newt code into JavaScript that Discord understands
-3. `npm install` - Downloads the tools your bot needs to run
-
-## Step 6: Set Up Your Token (.env File)
-
-Your bot needs your Discord token to log in. We store this in a `.env` file for security.
-
-**What is a .env file?**
-A `.env` file is a simple text file that stores environment variables (like your token) so your bot can read them. It keeps sensitive information separate from your code.
-
-**Create the .env file:**
-
-**On Windows (PowerShell):**
-```bash
-echo "DISCORD_TOKEN=your-bot-token-here" > .env
-```
-
-**On Mac/Linux:**
-```bash
-echo "DISCORD_TOKEN=your-bot-token-here" > .env
-```
-
-**Or create it manually:**
-1. Create a new file named `.env` in your bot folder
-2. Add this line (replace with your actual token):
-   ```
-   DISCORD_TOKEN=your-bot-token-here
-   ```
-3. Save the file
+**What this does:**
+- Stores your token securely in Newt's configuration
+- You only need to do this once
+- Newt will automatically use this token when running bots
 
 **Important:**
-- Replace `your-bot-token-here` with the actual token you copied from the Discord Developer Portal
-- Don't share this file with anyone - it's like your bot's password
-- The `.env` file should be in the same folder as `bot.js` and `package.json`
+- Replace `YOUR_BOT_TOKEN` with the actual token you copied from the Discord Developer Portal
+- Don't share this token with anyone - it's like your bot's password
+- You can clear the token later with `newt token --clear`
 
-## Step 7: Run Your Bot
+## Step 6: Run Your Bot
 
 Now start your bot:
 
 ```bash
-npm start
+newt run my-bot.newt
 ```
 
 **What this does:**
-- Reads your token from the `.env` file
-- Connects to Discord
+- Reads your Newt code
+- Executes it directly (no compilation needed)
+- Connects to Discord using your saved token
 - Your bot comes online!
 
 **You should see:**
@@ -155,7 +119,7 @@ Logged in as YourBot#1234!
 
 If you see this, your bot is running successfully!
 
-## Step 8: Test Your Bot
+## Step 7: Test Your Bot
 
 Go to your Discord server and type `!hello`. Your bot should reply with "Hey there, [your username]!"
 

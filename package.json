@@ -4,7 +4,8 @@
   "private": true,
   "description": "Newt monorepo: a beginner-friendly DSL for Discord bots.",
   "workspaces": [
-    "packages/*"
+    "packages/cli",
+    "packages/compiler"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",

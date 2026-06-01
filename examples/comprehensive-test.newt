@@ -1,0 +1,27 @@
+bot name "ComprehensiveTest"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on ready:
+    set activity "Testing all new features"
+
+on command "userinfo":
+    try:
+        let userInfo = getUser(target.id)
+        reply "User: {userInfo.username} (ID: {userInfo.id})"
+    on error:
+        reply "Could not fetch user info. Mention a user first."
+
+on command "guildinfo":
+    try:
+        let guildInfo = getGuild(server.id)
+        reply "Guild: {guildInfo.name} (Members: {guildInfo.memberCount})"
+    on error:
+        reply "Could not fetch guild info"
+
+on command "status":
+    set activity "Processing your request"
+    reply "Bot status updated!"
+
+on command "hello":
+    reply "Hello from the interpreter!"
