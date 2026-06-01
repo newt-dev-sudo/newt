@@ -101,8 +101,7 @@ ${emitStatements(node.body, "    ", "guild")}
 });`;
     case "CommandHandler":
       return `client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-  if (!message.content.startsWith(prefix + ${JSON.stringify(node.command)})) return;
+  if (message.author.bot || !message.content.startsWith(prefix + ${JSON.stringify(node.command)})) return;
   const args = message.content.slice((prefix + ${JSON.stringify(node.command)}).length).trim().split(/\\s+/).filter(Boolean);
   const user = message.author;
   const channel = message.channel;
@@ -112,8 +111,7 @@ ${emitStatements(node.body, "  ", "message")}
 });`;
     case "MessageContainsHandler":
       return `client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-  if (!message.content.includes(${emitExpression(node.needle)})) return;
+  if (message.author.bot || !message.content.includes(${emitExpression(node.needle)})) return;
   const user = message.author;
   const channel = message.channel;
   const server = message.guild;
@@ -163,8 +161,7 @@ ${emitStatements(node.body, "  ", "message")}
 });`;
       
       const commandHandler = `client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
-  if (interaction.commandName !== "${node.command}") return;
+  if (!interaction.isChatInputCommand() || interaction.commandName !== "${node.command}") return;
   const user = interaction.user;
   const channel = interaction.channel;
   const server = interaction.guild;
@@ -175,8 +172,7 @@ ${emitStatements(node.body, "  ", "interaction")}
       return commandReg + "\n\n" + commandHandler;
     case "ButtonClickHandler":
       return `client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isButton()) return;
-  if (interaction.customId !== ${emitExpression(node.buttonId)}) return;
+  if (!interaction.isButton() || interaction.customId !== ${emitExpression(node.buttonId)}) return;
   const user = interaction.user;
   const channel = interaction.channel;
   const server = interaction.guild;
@@ -184,8 +180,7 @@ ${emitStatements(node.body, "  ", "interaction")}
 });`;
     case "SelectMenuHandler":
       return `client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isStringSelectMenu()) return;
-  if (interaction.customId !== ${emitExpression(node.menuId)}) return;
+  if (!interaction.isStringSelectMenu() || interaction.customId !== ${emitExpression(node.menuId)}) return;
   const user = interaction.user;
   const channel = interaction.channel;
   const server = interaction.guild;
