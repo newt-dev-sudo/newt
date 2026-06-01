@@ -797,6 +797,49 @@ on command "sendimage":
 - The file must exist at the specified path
 - File size limits apply (Discord's upload limits)
 
+## set activity
+
+**Concept:** Rich presence and bot status management
+
+**What it does:** Sets the bot's activity status (what users see under the bot's name)
+
+**When to use it:** When you want to show what your bot is doing
+
+**How it works:**
+- Changes the bot's "Playing..." status
+- Visible to all users who can see the bot
+- Can be changed dynamically as the bot runs
+
+```javascript
+set activity "Helping users"
+```
+
+**Example:**
+```javascript
+on ready:
+    set activity "Online and ready"
+
+on command "busy":
+    set activity "Processing requests"
+    reply "I'm now busy!"
+```
+
+**What this does:**
+- When the bot starts, it shows "Online and ready"
+- When someone types `!busy`, the bot changes to "Processing requests"
+
+**Use cases:**
+- Showing bot status
+- Indicating availability
+- Displaying helpful information
+- Dynamic status updates
+
+**Important notes:**
+- The activity is visible to all users
+- Can be changed at any time
+- Only shows text (no complex activities like streaming)
+- Updates immediately
+
 ## Common Questions
 
 ### Can I use multiple statements in one handler?
