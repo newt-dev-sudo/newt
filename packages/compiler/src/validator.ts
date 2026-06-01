@@ -49,40 +49,46 @@ class Validator {
   }
 
   private visitTopLevel(node: TopLevelNode): void {
-    if (node.type === "BotDecl") {
-      this.visitBotDecl(node);
-      return;
-    }
+    switch (node.type) {
+      case "BotDecl": {
+        this.visitBotDecl(node);
+        return;
+      }
 
-    if (node.type === "EveryTimerDecl" || node.type === "DailyTimerDecl") {
-      this.visitTimer(node);
-      return;
-    }
+      case "EveryTimerDecl":
+      case "DailyTimerDecl": {
+        this.visitTimer(node);
+        return;
+      }
 
-    // Handle new handler types
-    if (node.type === "SlashCommandHandler") {
-      if (node.options) {
-        for (const option of node.options) {
-          this.visitExpression(option.description, new Set(), false);
+      // Handle new handler types
+      case "SlashCommandHandler": {
+        if (node.options) {
+          for (const option of node.options) {
+            this.visitExpression(option.description, new Set(), false);
+          }
         }
+        if (node.description) {
+          this.visitExpression(node.description, new Set(), false);
+        }
+        // Add built-in variables for slash commands
+        const slashScope = new Set(["user", "channel", "server", "args", "interaction"]);
+        this.visitStatements(node.body, slashScope);
+        return;
       }
-      if (node.description) {
-        this.visitExpression(node.description, new Set(), false);
+
+      case "ButtonClickHandler":
+      case "SelectMenuHandler": {
+        // Add built-in variables for interactions
+        const interactionScope = new Set(["user", "channel", "server", "interaction", "values"]);
+        this.visitStatements(node.body, interactionScope);
+        return;
       }
-      // Add built-in variables for slash commands
-      const slashScope = new Set(["user", "channel", "server", "args", "interaction"]);
-      this.visitStatements(node.body, slashScope);
-      return;
-    }
 
-    if (node.type === "ButtonClickHandler" || node.type === "SelectMenuHandler") {
-      // Add built-in variables for interactions
-      const interactionScope = new Set(["user", "channel", "server", "interaction", "values"]);
-      this.visitStatements(node.body, interactionScope);
-      return;
+      default: {
+        this.visitStatements(node.body, new Set());
+      }
     }
-
-    this.visitStatements(node.body, new Set());
   }
 
   private visitBotDecl(node: BotDecl): void {

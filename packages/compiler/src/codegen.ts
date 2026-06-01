@@ -140,7 +140,7 @@ ${emitStatements(node.body, "  ", "message")}
           required: ${opt.required.value}
         }`
       ).join(",\n          ") : "";
-      
+
       const commandReg = `client.on("ready", async () => {
   try {
     await client.application.commands.create({
@@ -347,7 +347,7 @@ function getOptionTypeValue(type: string): number {
 function emitComponents(components: any[]): string {
   const rows: string[] = [];
   let currentRow: string[] = [];
-  
+
   for (const component of components) {
     if (component.type === "ButtonComponent") {
       currentRow.push(`new ButtonBuilder()
@@ -364,10 +364,10 @@ function emitComponents(components: any[]): string {
         ).join(", ")})`);
     }
   }
-  
+
   if (currentRow.length > 0) {
     rows.push(`new ActionRowBuilder().addComponents(${currentRow.join(", ")})`);
   }
-  
+
   return rows.join(", ");
 }

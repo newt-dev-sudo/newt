@@ -81,67 +81,88 @@ class Parser {
     const event = this.consumeType("KEYWORD", "Handlers need an event name after on.");
 
     let handler: Handler;
-    if (event.value === "ready") {
-      handler = { type: "ReadyHandler", loc: this.loc(start), body: [] };
-    } else if (event.value === "command") {
-      const command = this.parseStringLiteral();
-      handler = { type: "CommandHandler", loc: this.loc(start), command: command.value, body: [] };
-    } else if (event.value === "message") {
-      this.consumeKeyword("contains");
-      const needle = this.parseStringLiteral();
-      handler = { type: "MessageContainsHandler", loc: this.loc(start), needle, body: [] };
-    } else if (event.value === "join") {
-      handler = { type: "JoinHandler", loc: this.loc(start), body: [] };
-    } else if (event.value === "leave") {
-      handler = { type: "LeaveHandler", loc: this.loc(start), body: [] };
-    } else if (event.value === "reaction") {
-      this.consumeKeyword("add");
-      const emoji = this.parseStringLiteral();
-      handler = { type: "ReactionAddHandler", loc: this.loc(start), emoji, body: [] };
-    } else if (event.value === "slash") {
-      const command = this.parseStringLiteral();
-      let description: StringLiteral | undefined;
-      let options: SlashOption[] | undefined;
-      
-      if (this.matchKeyword("description")) {
-        description = this.parseStringLiteral();
+
+    switch (event.value) {
+      case "ready": {
+        handler = { type: "ReadyHandler", loc: this.loc(start), body: [] };
+        break;
       }
-      
-      if (this.matchKeyword("with")) {
-        this.consumeKeyword("options");
-        options = [];
-        while (this.check("IDENTIFIER")) {
-          const name = this.consumeType("IDENTIFIER", "Expected option name").value;
-          this.consumeKeyword("as");
-          const optionType = this.consumeType("IDENTIFIER", "Expected option type").value;
-          this.consumeKeyword("description");
-          const optDescription = this.parseStringLiteral();
-          const required = this.matchKeyword("required") ? 
-            { type: "BooleanLiteral" as const, loc: this.loc(start), value: true } :
-            { type: "BooleanLiteral" as const, loc: this.loc(start), value: false };
-          
-          options.push({
-            type: "SlashOption",
-            loc: this.loc(start),
-            name,
-            description: optDescription,
-            required,
-            optionType: optionType as any
-          });
+      case "command": {
+        const command = this.parseStringLiteral();
+        handler = { type: "CommandHandler", loc: this.loc(start), command: command.value, body: [] };
+        break;
+      }
+      case "message": {
+        this.consumeKeyword("contains");
+        const needle = this.parseStringLiteral();
+        handler = { type: "MessageContainsHandler", loc: this.loc(start), needle, body: [] };
+        break;
+      }
+      case "join": {
+        handler = { type: "JoinHandler", loc: this.loc(start), body: [] };
+        break;
+      }
+      case "leave": {
+        handler = { type: "LeaveHandler", loc: this.loc(start), body: [] };
+        break;
+      }
+      case "reaction": {
+        this.consumeKeyword("add");
+        const emoji = this.parseStringLiteral();
+        handler = { type: "ReactionAddHandler", loc: this.loc(start), emoji, body: [] };
+        break;
+      }
+      case "slash": {
+        const command = this.parseStringLiteral();
+        let description: StringLiteral | undefined;
+        let options: SlashOption[] | undefined;
+
+        if (this.matchKeyword("description")) {
+          description = this.parseStringLiteral();
         }
+
+        if (this.matchKeyword("with")) {
+          this.consumeKeyword("options");
+          options = [];
+          while (this.check("IDENTIFIER")) {
+            const name = this.consumeType("IDENTIFIER", "Expected option name").value;
+            this.consumeKeyword("as");
+            const optionType = this.consumeType("IDENTIFIER", "Expected option type").value;
+            this.consumeKeyword("description");
+            const optDescription = this.parseStringLiteral();
+            const required = this.matchKeyword("required") ?
+              { type: "BooleanLiteral" as const, loc: this.loc(start), value: true } :
+              { type: "BooleanLiteral" as const, loc: this.loc(start), value: false };
+
+            options.push({
+              type: "SlashOption",
+              loc: this.loc(start),
+              name,
+              description: optDescription,
+              required,
+              optionType: optionType as any
+            });
+          }
+        }
+
+        handler = { type: "SlashCommandHandler", loc: this.loc(start), command: command.value, description, options, body: [] };
+        break;
       }
-      
-      handler = { type: "SlashCommandHandler", loc: this.loc(start), command: command.value, description, options, body: [] };
-    } else if (event.value === "button") {
-      this.consumeKeyword("click");
-      const buttonId = this.parseStringLiteral();
-      handler = { type: "ButtonClickHandler", loc: this.loc(start), buttonId, body: [] };
-    } else if (event.value === "select") {
-      this.consumeKeyword("menu");
-      const menuId = this.parseStringLiteral();
-      handler = { type: "SelectMenuHandler", loc: this.loc(start), menuId, body: [] };
-    } else {
-      throw makeCatalogError("NEWT_E003", event.line, event.column, this.sourceLineHint(event));
+      case "button": {
+        this.consumeKeyword("click");
+        const buttonId = this.parseStringLiteral();
+        handler = { type: "ButtonClickHandler", loc: this.loc(start), buttonId, body: [] };
+        break;
+      }
+      case "select": {
+        this.consumeKeyword("menu");
+        const menuId = this.parseStringLiteral();
+        handler = { type: "SelectMenuHandler", loc: this.loc(start), menuId, body: [] };
+        break;
+      }
+      default: {
+        throw makeCatalogError("NEWT_E003", event.line, event.column, this.sourceLineHint(event));
+      }
     }
 
     this.consumeBlockStart();
