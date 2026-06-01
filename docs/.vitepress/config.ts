@@ -49,6 +49,12 @@ export default defineConfig({
           { text: 'Welcome Bot', link: '/examples/welcome-bot' },
           { text: 'Moderation Bot', link: '/examples/moderation-bot' }
         ]
+      },
+      {
+        text: 'Learning',
+        items: [
+          { text: 'Graduating to Discord.js', link: '/learning/graduating-to-discordjs' }
+        ]
       }
     ],
     socialLinks: [
