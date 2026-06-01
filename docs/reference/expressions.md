@@ -427,6 +427,96 @@ member.user.username
 
 This means: "the username property of the user object, which is a property of the member object"
 
+## getUser
+
+**Concept:** REST API calls and external data fetching
+
+**What it does:** Fetches a user from Discord by their ID
+
+**When to use it:** When you need information about a user who isn't in the current server
+
+**How it works:**
+- Takes a user ID (snowflake)
+- Returns a user object with properties like username, discriminator, avatar
+- Must be used in a try/catch block in case the user doesn't exist
+
+```javascript
+getUser(userId)
+```
+
+**Example:**
+```javascript
+on command "userinfo":
+    try:
+        let userInfo = getUser(target.id)
+        reply "User: {userInfo.username}"
+    on error:
+        reply "Could not fetch user info"
+```
+
+**What this does:**
+- User types: `!userinfo @someone`
+- Bot fetches the user's information from Discord's API
+- Bot replies with the username
+- If the fetch fails, bot replies with an error message
+
+**Use cases:**
+- Looking up users outside the server
+- Getting user details for moderation
+- Fetching user avatars
+- Cross-server user information
+
+**Important notes:**
+- Requires the user ID (snowflake)
+- Must be wrapped in try/catch
+- Can fetch users not in the current server
+- Rate limits apply
+
+## getGuild
+
+**Concept:** REST API calls and external data fetching
+
+**What it does:** Fetches a guild (server) from Discord by its ID
+
+**When to use it:** When you need information about a server the bot isn't in
+
+**How it works:**
+- Takes a guild ID (snowflake)
+- Returns a guild object with properties like name, member count, icon
+- Must be used in a try/catch block in case the guild doesn't exist
+
+```javascript
+getGuild(guildId)
+```
+
+**Example:**
+```javascript
+on command "guildinfo":
+    try:
+        let guildInfo = getGuild(server.id)
+        reply "Guild: {guildInfo.name}"
+    on error:
+        reply "Could not fetch guild info"
+```
+
+**What this does:**
+- User types: `!guildinfo`
+- Bot fetches the server's information from Discord's API
+- Bot replies with the server name
+- If the fetch fails, bot replies with an error message
+
+**Use cases:**
+- Looking up server information
+- Getting member counts
+- Fetching server icons
+- Cross-server information
+
+**Important notes:**
+- Requires the guild ID (snowflake)
+- Must be wrapped in try/catch
+- Can fetch servers the bot isn't in
+- Rate limits apply
+
 ## Common Questions
 
 ### What's the difference between `user` and `member`?
