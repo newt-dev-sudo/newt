@@ -10,7 +10,22 @@ Syntax highlighting and basic run command support for `.newt` Discord bot files.
 
 ## Installation
 
-Install the [Newt CLI](https://github.com/newt-dev-sudo/newt) first, then this extension will provide syntax highlighting for your `.newt` files.
+### Option 1: Install from VSIX (Recommended)
+
+1. Download the latest `.vsix` file from the [GitHub releases](https://github.com/newt-dev-sudo/newt/releases)
+2. Open VS Code
+3. Go to Extensions (Ctrl+Shift+X)
+4. Click the "..." menu in the top right
+5. Select "Install from VSIX..."
+6. Choose the downloaded `.vsix` file
+
+### Option 2: Install from VS Code Marketplace
+
+Coming soon!
+
+## Requirements
+
+Install the [Newt CLI](https://github.com/newt-dev-sudo/newt) first to run your bots.
 
 ## GitHub
 

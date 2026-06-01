@@ -50,5 +50,10 @@
     "@types/vscode": "^1.80.0",
     "typescript": "^5.5.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/newt-dev-sudo/newt.git",
+    "directory": "vscode-newt"
+  },
   "license": "MIT"
 }
