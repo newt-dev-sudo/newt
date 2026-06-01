@@ -176,7 +176,7 @@ class Lexer {
       const column = index + 1;
 
       if (char === " " || char === "\t") {
-        index += 1;
+        index++;
         continue;
       }
 
@@ -210,7 +210,7 @@ class Lexer {
       const singleToken = this.singleCharToken(char);
       if (singleToken) {
         this.push(singleToken, char, lineNumber, column);
-        index += 1;
+        index++;
         continue;
       }
 
@@ -271,7 +271,7 @@ class Lexer {
     let count = 0;
     for (const char of line) {
       if (char === " ") {
-        count += 1;
+        count++;
       } else if (char === "\t") {
         count += 4;
       } else {
@@ -292,13 +292,13 @@ class Lexer {
       if (escaped) {
         value += char;
         escaped = false;
-        index += 1;
+        index++;
         continue;
       }
 
       if (char === "\\") {
         escaped = true;
-        index += 1;
+        index++;
         continue;
       }
 
@@ -308,7 +308,7 @@ class Lexer {
       }
 
       value += char;
-      index += 1;
+      index++;
     }
 
     throw new NewtError({
@@ -325,7 +325,7 @@ class Lexer {
   private readNumber(line: string, start: number, lineNumber: number): number {
     let index = start;
     while (/[\d.]/u.test(line[index] ?? "")) {
-      index += 1;
+      index++;
     }
 
     this.push("NUMBER", line.slice(start, index), lineNumber, start + 1);
@@ -335,7 +335,7 @@ class Lexer {
   private readWord(line: string, start: number, lineNumber: number): number {
     let index = start;
     while (/[\w]/u.test(line[index] ?? "")) {
-      index += 1;
+      index++;
     }
 
     const value = line.slice(start, index);

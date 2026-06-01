@@ -600,7 +600,7 @@ class Parser {
 
   private advance(): Token {
     if (!this.isAtEnd()) {
-      this.current += 1;
+      this.current++;
     }
     return this.previous();
   }
