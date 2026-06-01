@@ -1,12 +1,11 @@
 # Newt Language Support
 
-Syntax highlighting and basic run command support for `.newt` Discord bot files.
+Syntax highlighting for `.newt` Discord bot files.
 
 ## Features
 
-- TextMate syntax highlighting for Newt keywords, strings, comments, built-in variables, colors, and numbers.
-- Newt language configuration for comments, brackets, and indentation after `:`.
-- `Newt: Run Bot` command that runs `newt run <current-file>` in a VS Code terminal.
+- TextMate syntax highlighting for Newt keywords, strings, comments, built-in variables, colors, and numbers
+- Newt language configuration for comments, brackets, and indentation after `:`
 
 ## Installation
 
@@ -18,6 +17,7 @@ Syntax highlighting and basic run command support for `.newt` Discord bot files.
 4. Click the "..." menu in the top right
 5. Select "Install from VSIX..."
 6. Choose the downloaded `.vsix` file
+7. Reload VS Code when prompted
 
 ### Option 2: Install from VS Code Marketplace
 
@@ -25,7 +25,7 @@ Coming soon!
 
 ## Requirements
 
-Install the [Newt CLI](https://github.com/newt-dev-sudo/newt) first to run your bots.
+Install the [Newt CLI](https://github.com/newt-dev-sudo/newt) to run your bots.
 
 ## GitHub
 

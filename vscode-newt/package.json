@@ -10,10 +10,6 @@
   "categories": [
     "Programming Languages"
   ],
-  "activationEvents": [
-    "onLanguage:newt"
-  ],
-  "main": "./dist/extension.js",
   "contributes": {
     "languages": [
       {
@@ -32,12 +28,6 @@
         "language": "newt",
         "scopeName": "source.newt",
         "path": "./syntaxes/newt.tmLanguage.json"
-      }
-    ],
-    "commands": [
-      {
-        "command": "newt.run",
-        "title": "Newt: Run Bot"
       }
     ]
   },
