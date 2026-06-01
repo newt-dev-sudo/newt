@@ -103,39 +103,32 @@ ${emitStatements(node.body, "    ", "guild")}
       return `client.on("messageCreate", async (message) => {
   if (message.author.bot || !message.content.startsWith(prefix + ${JSON.stringify(node.command)})) return;
   const args = message.content.slice((prefix + ${JSON.stringify(node.command)}).length).trim().split(/\\s+/).filter(Boolean);
-  const user = message.author;
-  const channel = message.channel;
-  const server = message.guild;
+  const { author: user, channel, guild: server } = message;
   const target = message.mentions.members.first();
 ${emitStatements(node.body, "  ", "message")}
 });`;
     case "MessageContainsHandler":
       return `client.on("messageCreate", async (message) => {
   if (message.author.bot || !message.content.includes(${emitExpression(node.needle)})) return;
-  const user = message.author;
-  const channel = message.channel;
-  const server = message.guild;
+  const { author: user, channel, guild: server } = message;
 ${emitStatements(node.body, "  ", "message")}
 });`;
     case "JoinHandler":
       return `client.on("guildMemberAdd", async (member) => {
-  const user = member.user;
-  const server = member.guild;
+  const { user, guild: server } = member;
   const channel = findChannel(server, "general");
 ${emitStatements(node.body, "  ", "member")}
 });`;
     case "LeaveHandler":
       return `client.on("guildMemberRemove", async (member) => {
-  const user = member.user;
-  const server = member.guild;
+  const { user, guild: server } = member;
 ${emitStatements(node.body, "  ", "member")}
 });`;
     case "ReactionAddHandler":
       return `client.on("messageReactionAdd", async (reaction, user) => {
   if (reaction.emoji.name !== ${emitExpression(node.emoji)}) return;
-  const message = reaction.message;
-  const channel = message.channel;
-  const server = message.guild;
+  const { message } = reaction;
+  const { channel, guild: server } = message;
 ${emitStatements(node.body, "  ", "message")}
 });`;
     case "SlashCommandHandler":
@@ -162,10 +155,7 @@ ${emitStatements(node.body, "  ", "message")}
       
       const commandHandler = `client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand() || interaction.commandName !== "${node.command}") return;
-  const user = interaction.user;
-  const channel = interaction.channel;
-  const server = interaction.guild;
-  const args = interaction.options;
+  const { user, channel, guild: server, options: args } = interaction;
 ${emitStatements(node.body, "  ", "interaction")}
 });`;
       
@@ -173,18 +163,13 @@ ${emitStatements(node.body, "  ", "interaction")}
     case "ButtonClickHandler":
       return `client.on("interactionCreate", async (interaction) => {
   if (!interaction.isButton() || interaction.customId !== ${emitExpression(node.buttonId)}) return;
-  const user = interaction.user;
-  const channel = interaction.channel;
-  const server = interaction.guild;
+  const { user, channel, guild: server } = interaction;
 ${emitStatements(node.body, "  ", "interaction")}
 });`;
     case "SelectMenuHandler":
       return `client.on("interactionCreate", async (interaction) => {
   if (!interaction.isStringSelectMenu() || interaction.customId !== ${emitExpression(node.menuId)}) return;
-  const user = interaction.user;
-  const channel = interaction.channel;
-  const server = interaction.guild;
-  const values = interaction.values;
+  const { user, channel, guild: server, values } = interaction;
 ${emitStatements(node.body, "  ", "interaction")}
 });`;
     case "EveryTimerDecl":
