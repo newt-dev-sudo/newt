@@ -112,7 +112,7 @@ export class NewtInterpreter {
       console.error('Discord client error:', error.message);
     });
 
-    this.db = new Database(":memory:");
+    this.db = new Database("newt-store.sqlite");
     this.db.exec(
       "CREATE TABLE IF NOT EXISTS store (namespace TEXT NOT NULL, key TEXT NOT NULL, value TEXT, PRIMARY KEY(namespace, key))"
     );
@@ -200,12 +200,20 @@ export class NewtInterpreter {
             if (message.author.bot) return;
             if (!message.content.startsWith(this.prefix + handler.command)) return;
 
+            // Extract args from message content
+            const args = message.content
+              .slice(this.prefix.length + handler.command.length)
+              .trim()
+              .split(/\s+/)
+              .filter(arg => arg.length > 0);
+
             const context: ExecutionContext = {
               user: message.author,
               channel: message.channel,
               server: message.guild,
               message,
               target: message.mentions.members?.first(),
+              args,
               variables: new Map(),
             };
             await this.executeStatements(handler.body, context);
@@ -1566,8 +1574,18 @@ export class NewtInterpreter {
     );
     
     if (tokenDecl?.fromEnv) {
-      // Use the token passed to the interpreter (from CLI storage)
-      await this.client.login(this.token);
+      const envVarName = tokenDecl.value.value;
+      const envToken = process.env[envVarName];
+      
+      if (envToken) {
+        // Use environment variable
+        await this.client.login(envToken);
+      } else {
+        // Fall back to saved CLI token with deprecation warning
+        console.warn(`Warning: ${envVarName} is not set. Falling back to token saved by \`newt token\`.`);
+        console.warn(`This fallback is deprecated; set ${envVarName} instead.`);
+        await this.client.login(this.token);
+      }
     } else {
       // Use the literal token value from the .newt file
       await this.client.login(tokenDecl?.value.value || "");

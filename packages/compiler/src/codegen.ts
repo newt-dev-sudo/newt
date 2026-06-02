@@ -350,7 +350,7 @@ function emitStatement(statement: Statement, indent: string, triggerName: string
     case "ExpressionStatement":
       return `${indent}${emitExpression(statement.expression)};`;
     default:
-      return `${indent}// TODO: ${statement.type}`;
+      throw new Error(`Statement type "${statement.type}" is not supported in generated code. This feature may be available in 'newt run' but not in 'newt build'.`);
   }
 }
 
