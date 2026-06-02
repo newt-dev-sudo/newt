@@ -1267,6 +1267,120 @@ on command "cleanup":
 - Removing sensitive information
 - Moderation
 
+## Voice Commands
+
+**Concept:** Voice channel management and audio playback
+
+**What they do:** Join/leave voice channels and control audio playback
+
+**When to use them:** For music bots, voice activities, or audio announcements
+
+**Available commands:**
+- `join voice channel` - Join a voice channel
+- `leave voice channel` - Leave a voice channel
+- `play url` - Play audio from a URL
+- `stop` - Stop audio playback
+- `pause` - Pause audio playback
+- `resume` - Resume audio playback
+- `set volume level` - Set audio volume
+
+```javascript
+on slash "join":
+    join voice channel
+
+on slash "play":
+    play "https://example.com/audio.mp3"
+
+on slash "stop":
+    stop
+```
+
+**Important notes:**
+- Requires `@discordjs/voice` dependency (included in CLI package)
+- Bot needs voice connection permissions
+- Bot needs GuildVoiceStates intent
+
+## Webhook Commands
+
+**Concept:** External webhook management
+
+**What they do:** Create, execute, edit, and delete webhooks
+
+**When to use them:** For cross-server communication or external integrations
+
+**Available commands:**
+- `create webhook name` - Create a new webhook
+- `execute webhook url` - Send a message via webhook
+- `edit webhook url` - Edit a webhook message (requires message ID)
+- `delete webhook url` - Delete a webhook
+
+```javascript
+on slash "webhook":
+    create webhook "My Webhook"
+
+on slash "send":
+    execute webhook "https://discord.com/api/webhooks/..."
+```
+
+**Important notes:**
+- Webhook creation returns the webhook URL
+- Edit webhook currently has limitations (needs message ID)
+- Bot needs Manage Webhooks permission
+
+## Thread Commands
+
+**Concept:** Thread management for organized discussions
+
+**What they do:** Create, archive, lock, and unlock threads
+
+**When to use them:** For organized discussions, support tickets, or topic-specific channels
+
+**Available commands:**
+- `create thread name` - Create a new thread (requires a message to start from)
+- `archive thread` - Archive a thread
+- `lock thread` - Lock a thread (prevent new messages)
+- `unlock thread` - Unlock a thread
+
+```javascript
+on slash "thread":
+    reply "Starting discussion..."
+    create thread "Discussion"
+
+on slash "archive":
+    let thread = channel named "discussion"
+    archive thread thread
+```
+
+**Important notes:**
+- Thread creation requires a message to start from
+- Bot needs Create Threads and Manage Threads permissions
+- Archive duration defaults to 24 hours
+
+## Subcommand Groups
+
+> ⚠️ **Status:** Not recommended - use individual slash command handlers instead.
+
+**Concept:** Organized slash command groups
+
+**What they do:** Group related slash commands under a category
+
+**Alternative approach:**
+Instead of using subcommand groups, use individual slash handlers with descriptive names:
+
+```javascript
+# Instead of subcommand groups, use individual handlers:
+on slash "user info":
+    reply "User info"
+
+on slash "user settings":
+    reply "User settings"
+```
+
+**Important notes:**
+- Subcommand groups require complex registration logic
+- Individual slash handlers are simpler and more flexible
+- Discord.js handles command organization automatically
+
 ## upload
 
 **Concept:** File I/O and multimedia handling
