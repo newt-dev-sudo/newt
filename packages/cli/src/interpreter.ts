@@ -29,6 +29,22 @@ import type {
   FindChannelExpr,
   FindUserExpr,
   ReplyExpr,
+  JoinVoiceStatement,
+  LeaveVoiceStatement,
+  PlayAudioStatement,
+  StopAudioStatement,
+  PauseAudioStatement,
+  ResumeAudioStatement,
+  SetVolumeStatement,
+  CreateWebhookStatement,
+  ExecuteWebhookStatement,
+  EditWebhookStatement,
+  DeleteWebhookStatement,
+  CreateThreadStatement,
+  ArchiveThreadStatement,
+  LockThreadStatement,
+  UnlockThreadStatement,
+  SubcommandGroupStatement,
 } from "@newt-dev/compiler";
 
 interface InterpreterOptions {
@@ -651,6 +667,88 @@ export class NewtInterpreter {
           this.client.user?.setActivity(activity);
           break;
 
+        case "JoinVoiceStatement":
+          const voiceTarget = await this.evaluateExpression(stmt.target, context);
+          if (voiceTarget && voiceTarget.channel) {
+            await this.joinVoiceChannel(voiceTarget.channel);
+          }
+          break;
+
+        case "LeaveVoiceStatement":
+          const leaveTarget = await this.evaluateExpression(stmt.target, context);
+          if (leaveTarget && leaveTarget.channel) {
+            await this.leaveVoiceChannel(leaveTarget.channel);
+          }
+          break;
+
+        case "PlayAudioStatement":
+          const audioUrl = await this.evaluateExpression(stmt.url, context);
+          await this.playAudio(audioUrl);
+          break;
+
+        case "StopAudioStatement":
+          await this.stopAudio();
+          break;
+
+        case "PauseAudioStatement":
+          await this.pauseAudio();
+          break;
+
+        case "ResumeAudioStatement":
+          await this.resumeAudio();
+          break;
+
+        case "SetVolumeStatement":
+          const volume = await this.evaluateExpression(stmt.volume, context);
+          await this.setVolume(volume);
+          break;
+
+        case "CreateWebhookStatement":
+          const webhookName = await this.evaluateExpression(stmt.name, context);
+          await this.createWebhook(webhookName, context);
+          break;
+
+        case "ExecuteWebhookStatement":
+          const webhookUrl = await this.evaluateExpression(stmt.url, context);
+          const webhookMessage = await this.evaluateExpression(stmt.message, context);
+          await this.executeWebhook(webhookUrl, webhookMessage);
+          break;
+
+        case "EditWebhookStatement":
+          const editWebhookUrl = await this.evaluateExpression(stmt.url, context);
+          const editWebhookMessage = await this.evaluateExpression(stmt.message, context);
+          await this.editWebhook(editWebhookUrl, editWebhookMessage);
+          break;
+
+        case "DeleteWebhookStatement":
+          const deleteWebhookUrl = await this.evaluateExpression(stmt.url, context);
+          await this.deleteWebhook(deleteWebhookUrl);
+          break;
+
+        case "CreateThreadStatement":
+          const threadName = await this.evaluateExpression(stmt.name, context);
+          await this.createThread(threadName, context);
+          break;
+
+        case "ArchiveThreadStatement":
+          const archiveTarget = await this.evaluateExpression(stmt.target, context);
+          await this.archiveThread(archiveTarget);
+          break;
+
+        case "LockThreadStatement":
+          const lockTarget = await this.evaluateExpression(stmt.target, context);
+          await this.lockThread(lockTarget);
+          break;
+
+        case "UnlockThreadStatement":
+          const unlockTarget = await this.evaluateExpression(stmt.target, context);
+          await this.unlockThread(unlockTarget);
+          break;
+
+        case "SubcommandGroupStatement":
+          await this.executeSubcommandGroup(stmt, context);
+          break;
+
         case "TryCatchStatement":
           try {
             await this.executeStatements(stmt.body, context);
@@ -1056,6 +1154,70 @@ export class NewtInterpreter {
       default:
         return value;
     }
+  }
+
+  private async joinVoiceChannel(channel: any): Promise<void> {
+    throw new Error("Voice support requires @discordjs/voice dependency. See documentation for setup instructions.");
+  }
+
+  private async leaveVoiceChannel(channel: any): Promise<void> {
+    throw new Error("Voice support requires @discordjs/voice dependency. See documentation for setup instructions.");
+  }
+
+  private async playAudio(url: string): Promise<void> {
+    throw new Error("Voice support requires @discordjs/voice dependency. See documentation for setup instructions.");
+  }
+
+  private async stopAudio(): Promise<void> {
+    throw new Error("Voice support requires @discordjs/voice dependency. See documentation for setup instructions.");
+  }
+
+  private async pauseAudio(): Promise<void> {
+    throw new Error("Voice support requires @discordjs/voice dependency. See documentation for setup instructions.");
+  }
+
+  private async resumeAudio(): Promise<void> {
+    throw new Error("Voice support requires @discordjs/voice dependency. See documentation for setup instructions.");
+  }
+
+  private async setVolume(volume: number): Promise<void> {
+    throw new Error("Voice support requires @discordjs/voice dependency. See documentation for setup instructions.");
+  }
+
+  private async createWebhook(name: string, context: ExecutionContext): Promise<void> {
+    throw new Error("Webhook support is not yet fully implemented. See documentation for status.");
+  }
+
+  private async executeWebhook(url: string, message: string): Promise<void> {
+    throw new Error("Webhook support is not yet fully implemented. See documentation for status.");
+  }
+
+  private async editWebhook(url: string, message: string): Promise<void> {
+    throw new Error("Webhook support is not yet fully implemented. See documentation for status.");
+  }
+
+  private async deleteWebhook(url: string): Promise<void> {
+    throw new Error("Webhook support is not yet fully implemented. See documentation for status.");
+  }
+
+  private async createThread(name: string, context: ExecutionContext): Promise<void> {
+    throw new Error("Thread support is not yet fully implemented. See documentation for status.");
+  }
+
+  private async archiveThread(target: any): Promise<void> {
+    throw new Error("Thread support is not yet fully implemented. See documentation for status.");
+  }
+
+  private async lockThread(target: any): Promise<void> {
+    throw new Error("Thread support is not yet fully implemented. See documentation for status.");
+  }
+
+  private async unlockThread(target: any): Promise<void> {
+    throw new Error("Thread support is not yet fully implemented. See documentation for status.");
+  }
+
+  private async executeSubcommandGroup(stmt: any, context: ExecutionContext): Promise<void> {
+    throw new Error("Subcommand groups are not yet fully implemented. See documentation for status.");
   }
 
   private findChannel(guild: any, name: string): any {

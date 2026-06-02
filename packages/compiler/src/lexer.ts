@@ -175,7 +175,23 @@ const keywords = new Set([
   "of",
   "named",
   "length",
-  "trim"
+  "trim",
+  "join",
+  "leave",
+  "play",
+  "stop",
+  "pause",
+  "resume",
+  "volume",
+  "webhook",
+  "create",
+  "execute",
+  "send",
+  "thread",
+  "archive",
+  "lock",
+  "unlock",
+  "subcommand"
 ]);
 
 const CHAR_TOKEN_TYPES: Record<string, TokenType> = {

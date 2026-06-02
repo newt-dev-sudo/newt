@@ -512,6 +512,129 @@ class Parser {
       return { type: "SetActivityStatement", loc: this.loc(start), activity };
     }
 
+    if (this.checkKeyword("join")) {
+      const start = this.advance();
+      this.consumeKeyword("voice");
+      const target = this.parseAtom();
+      this.consumeLineEnd();
+      return { type: "JoinVoiceStatement", loc: this.loc(start), target };
+    }
+
+    if (this.checkKeyword("leave")) {
+      const start = this.advance();
+      this.consumeKeyword("voice");
+      const target = this.parseAtom();
+      this.consumeLineEnd();
+      return { type: "LeaveVoiceStatement", loc: this.loc(start), target };
+    }
+
+    if (this.checkKeyword("play")) {
+      const start = this.advance();
+      const url = this.parseExpressionUntilLineEnd();
+      this.consumeLineEnd();
+      return { type: "PlayAudioStatement", loc: this.loc(start), url };
+    }
+
+    if (this.checkKeyword("stop")) {
+      const start = this.advance();
+      this.consumeLineEnd();
+      return { type: "StopAudioStatement", loc: this.loc(start) };
+    }
+
+    if (this.checkKeyword("pause")) {
+      const start = this.advance();
+      this.consumeLineEnd();
+      return { type: "PauseAudioStatement", loc: this.loc(start) };
+    }
+
+    if (this.checkKeyword("resume")) {
+      const start = this.advance();
+      this.consumeLineEnd();
+      return { type: "ResumeAudioStatement", loc: this.loc(start) };
+    }
+
+    if (this.checkKeyword("set")) {
+      const start = this.advance();
+      this.consumeKeyword("volume");
+      const volume = this.parseExpressionUntilLineEnd();
+      this.consumeLineEnd();
+      return { type: "SetVolumeStatement", loc: this.loc(start), volume };
+    }
+
+    if (this.checkKeyword("create")) {
+      const start = this.advance();
+      this.consumeKeyword("webhook");
+      const name = this.parseExpressionUntilLineEnd();
+      this.consumeLineEnd();
+      return { type: "CreateWebhookStatement", loc: this.loc(start), name };
+    }
+
+    if (this.checkKeyword("execute")) {
+      const start = this.advance();
+      this.consumeKeyword("webhook");
+      const url = this.parseExpressionUntilLineEnd();
+      this.consumeLineEnd();
+      return { type: "ExecuteWebhookStatement", loc: this.loc(start), url, message: url };
+    }
+
+    if (this.checkKeyword("edit")) {
+      const start = this.advance();
+      this.consumeKeyword("webhook");
+      const url = this.parseExpressionUntilLineEnd();
+      this.consumeLineEnd();
+      return { type: "EditWebhookStatement", loc: this.loc(start), url, message: url };
+    }
+
+    if (this.checkKeyword("delete")) {
+      const start = this.advance();
+      this.consumeKeyword("webhook");
+      const url = this.parseExpressionUntilLineEnd();
+      this.consumeLineEnd();
+      return { type: "DeleteWebhookStatement", loc: this.loc(start), url };
+    }
+
+    if (this.checkKeyword("create")) {
+      const start = this.advance();
+      this.consumeKeyword("thread");
+      const name = this.parseExpressionUntilLineEnd();
+      this.consumeLineEnd();
+      return { type: "CreateThreadStatement", loc: this.loc(start), name };
+    }
+
+    if (this.checkKeyword("archive")) {
+      const start = this.advance();
+      this.consumeKeyword("thread");
+      const target = this.parseAtom();
+      this.consumeLineEnd();
+      return { type: "ArchiveThreadStatement", loc: this.loc(start), target };
+    }
+
+    if (this.checkKeyword("lock")) {
+      const start = this.advance();
+      this.consumeKeyword("thread");
+      const target = this.parseAtom();
+      this.consumeLineEnd();
+      return { type: "LockThreadStatement", loc: this.loc(start), target };
+    }
+
+    if (this.checkKeyword("unlock")) {
+      const start = this.advance();
+      this.consumeKeyword("thread");
+      const target = this.parseAtom();
+      this.consumeLineEnd();
+      return { type: "UnlockThreadStatement", loc: this.loc(start), target };
+    }
+
+    if (this.checkKeyword("subcommand")) {
+      const start = this.advance();
+      const name = this.consumeWord("subcommand needs a name").value;
+      this.consumeKeyword("group");
+      const description = this.parseStringLiteral().value;
+      this.consumeBlockStart();
+      const subcommands = this.parseBlock();
+      return { type: "SubcommandGroupStatement", loc: this.loc(start), name, description, subcommands };
+    }
+
     const start = this.peek();
     const expression = this.parseExpressionUntilLineEnd();
     this.consumeLineEnd();

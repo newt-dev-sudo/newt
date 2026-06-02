@@ -187,7 +187,23 @@ export type Statement =
   | SetActivityStatement
   | WaitStatement
   | TryCatchStatement
-  | ExpressionStatement;
+  | ExpressionStatement
+  | JoinVoiceStatement
+  | LeaveVoiceStatement
+  | PlayAudioStatement
+  | StopAudioStatement
+  | PauseAudioStatement
+  | ResumeAudioStatement
+  | SetVolumeStatement
+  | CreateWebhookStatement
+  | ExecuteWebhookStatement
+  | EditWebhookStatement
+  | DeleteWebhookStatement
+  | CreateThreadStatement
+  | ArchiveThreadStatement
+  | LockThreadStatement
+  | UnlockThreadStatement
+  | SubcommandGroupStatement;
 
 export interface ReplyStatement extends BaseNode {
   type: "ReplyStatement";
@@ -429,6 +445,89 @@ export interface SetActivityStatement extends BaseNode {
 export interface WaitStatement extends BaseNode {
   type: "WaitStatement";
   duration: DurationLiteral;
+}
+
+export interface JoinVoiceStatement extends BaseNode {
+  type: "JoinVoiceStatement";
+  target: Expression;
+}
+
+export interface LeaveVoiceStatement extends BaseNode {
+  type: "LeaveVoiceStatement";
+  target: Expression;
+}
+
+export interface PlayAudioStatement extends BaseNode {
+  type: "PlayAudioStatement";
+  url: Expression;
+}
+
+export interface StopAudioStatement extends BaseNode {
+  type: "StopAudioStatement";
+}
+
+export interface PauseAudioStatement extends BaseNode {
+  type: "PauseAudioStatement";
+}
+
+export interface ResumeAudioStatement extends BaseNode {
+  type: "ResumeAudioStatement";
+}
+
+export interface SetVolumeStatement extends BaseNode {
+  type: "SetVolumeStatement";
+  volume: Expression;
+}
+
+export interface CreateWebhookStatement extends BaseNode {
+  type: "CreateWebhookStatement";
+  name: Expression;
+  channel?: Expression;
+}
+
+export interface ExecuteWebhookStatement extends BaseNode {
+  type: "ExecuteWebhookStatement";
+  url: Expression;
+  message: Expression;
+}
+
+export interface EditWebhookStatement extends BaseNode {
+  type: "EditWebhookStatement";
+  url: Expression;
+  message: Expression;
+}
+
+export interface DeleteWebhookStatement extends BaseNode {
+  type: "DeleteWebhookStatement";
+  url: Expression;
+}
+
+export interface CreateThreadStatement extends BaseNode {
+  type: "CreateThreadStatement";
+  name: Expression;
+  channel?: Expression;
+}
+
+export interface ArchiveThreadStatement extends BaseNode {
+  type: "ArchiveThreadStatement";
+  target: Expression;
+}
+
+export interface LockThreadStatement extends BaseNode {
+  type: "LockThreadStatement";
+  target: Expression;
+}
+
+export interface UnlockThreadStatement extends BaseNode {
+  type: "UnlockThreadStatement";
+  target: Expression;
+}
+
+export interface SubcommandGroupStatement extends BaseNode {
+  type: "SubcommandGroupStatement";
+  name: string;
+  description: string;
+  subcommands: Statement[];
 }
 
 export interface TryCatchStatement extends BaseNode {
