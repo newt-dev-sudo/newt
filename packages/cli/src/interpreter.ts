@@ -25,6 +25,7 @@ import type {
   ObjectLiteral,
   ObjectProperty,
   StringMethodExpr,
+  ArrayLengthExpr,
   ArrayAccessExpr,
   FindRoleExpr,
   FindChannelExpr,
@@ -1082,8 +1083,6 @@ export class NewtInterpreter {
             return str.toUpperCase();
           case "lowercase":
             return str.toLowerCase();
-          case "length":
-            return str.length;
           case "split":
             const separator = expr.args ? await this.evaluateExpression(expr.args[0], context) : " ";
             return str.split(separator);
@@ -1092,6 +1091,13 @@ export class NewtInterpreter {
           default:
             throw new Error(`Unknown string method: ${expr.method}`);
         }
+
+      case "ArrayLengthExpr":
+        const arrayTarget = await this.evaluateExpression(expr.target, context);
+        if (Array.isArray(arrayTarget)) {
+          return arrayTarget.length;
+        }
+        throw new Error("length of can only be used with arrays");
 
       case "ArrayAccessExpr":
         const array = await this.evaluateExpression(expr.target, context);

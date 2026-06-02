@@ -1054,9 +1054,9 @@ class Parser {
     }
 
     // String methods: uppercase of text, lowercase of text, etc.
-    if (this.matchKeyword("uppercase") || this.matchKeyword("lowercase") || this.matchKeyword("length") || this.matchKeyword("split") || this.matchKeyword("trim")) {
+    if (this.matchKeyword("uppercase") || this.matchKeyword("lowercase") || this.matchKeyword("split") || this.matchKeyword("trim")) {
       const start = this.previous();
-      const method = start.value as "uppercase" | "lowercase" | "length" | "split" | "trim";
+      const method = start.value as "uppercase" | "lowercase" | "split" | "trim";
       this.consumeKeyword("of");
       const target = this.parseAtom();
       let args: Expression[] | undefined;
@@ -1064,6 +1064,14 @@ class Parser {
         args = [this.parseAtom()];
       }
       return { type: "StringMethodExpr", loc: this.loc(start), target, method, args };
+    }
+
+    // Array length: length of array
+    if (this.matchKeyword("length")) {
+      const start = this.previous();
+      this.consumeKeyword("of");
+      const target = this.parseAtom();
+      return { type: "ArrayLengthExpr", loc: this.loc(start), target };
     }
 
     // Array access: first of items, second of items, etc.

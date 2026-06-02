@@ -577,6 +577,7 @@ export type Expression =
   | UnaryExpr
   | CallExpr
   | StringMethodExpr
+  | ArrayLengthExpr
   | ArrayAccessExpr
   | FindRoleExpr
   | FindChannelExpr
@@ -693,6 +694,11 @@ export interface StringMethodExpr extends BaseNode {
   target: Expression;
   method: "uppercase" | "lowercase" | "length" | "split" | "trim";
   args?: Expression[];
+}
+
+export interface ArrayLengthExpr extends BaseNode {
+  type: "ArrayLengthExpr";
+  target: Expression;
 }
 
 export interface ArrayAccessExpr extends BaseNode {
