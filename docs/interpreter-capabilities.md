@@ -94,6 +94,12 @@ This document outlines the features currently supported by the Newt interpreter 
 - Iterates through collections (like server members)
 - Useful for bulk operations
 
+✅ **Timer Statements** - `every X minutes:`, `at "HH:MM" daily:`
+- Schedule recurring tasks with `every`
+- Schedule daily tasks at specific times with `at`
+- Runs independently of user interactions
+- Useful for reminders, announcements, automated tasks
+
 ✅ **Give Role Statement** - `give user role "RoleName"`
 - Assigns a role to a user
 - Requires role to exist in server
@@ -106,6 +112,7 @@ This document outlines the features currently supported by the Newt interpreter 
 - Checks if user has the specified role
 - Sends error message if role is missing or not found
 - Useful for restricting commands to specific user groups
+- **Note:** You can also use `if user has role "RoleName":` for more flexible permission checks
 
 ✅ **Mute Statement** - `mute user for duration`
 - Gives user a "Muted" role for specified time
