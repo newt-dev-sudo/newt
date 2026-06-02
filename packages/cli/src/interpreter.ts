@@ -1134,9 +1134,11 @@ export class NewtInterpreter {
         if (context.interaction) {
           if (!context.interaction.replied && !context.interaction.deferred) {
             if (expr.ephemeral) {
-              sentMessage = await context.interaction.reply({ content: replyText, ephemeral: true, fetchReply: true });
+              sentMessage = await context.interaction.reply({ content: replyText, ephemeral: true });
+              sentMessage = await sentMessage.fetch();
             } else {
-              sentMessage = await context.interaction.reply({ content: replyText, fetchReply: true });
+              sentMessage = await context.interaction.reply({ content: replyText });
+              sentMessage = await sentMessage.fetch();
             }
           } else {
             sentMessage = await context.channel?.send(replyText);

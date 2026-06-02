@@ -363,6 +363,25 @@ on command "status":
 - Use camelCase (first letter lowercase, capitalize subsequent words)
 - Make names meaningful so you remember what they store
 
+**Supported variable types:**
+- **Strings:** Text values (e.g., `"hello"`, user.username)
+- **Numbers:** Numeric values (e.g., `42`, `3.14`)
+- **Booleans:** true/false values (e.g., `true`, `false`)
+- **Arrays:** Lists of values (e.g., `[1, 2, 3]`, `["a", "b", "c"]`)
+- **Objects:** Key-value pairs (e.g., `{name: "John", age: 25}`)
+- **2D Arrays:** Arrays of arrays (e.g., `[[1, 2], [3, 4]]`)
+
+**Variable scoping:**
+- Variables are scoped to their handler
+- They don't persist between different events
+- Use `store`/`load` for persistence across handlers
+
+**Message references:**
+- When using `let msg = reply`, the variable stores a reference to the message
+- You can use this reference to edit the message later: `edit msg to "new content"`
+- Each `reply` creates a new message, so use variables to track specific messages you need to edit later
+- Example: `let msg1 = reply "First message"`, `let msg2 = reply "Second message"`, then `edit msg1 to "Updated"`
+
 ## store
 
 **Concept:** Key-value storage and persistence
@@ -404,6 +423,54 @@ on command "setpoints":
 - First argument: Namespace (like user.id or server.id)
 - Second argument: Key (like "points" or "last_announcement")
 - Third argument: Value (what to store)
+
+**Arrays:**
+- You can store arrays using array literal syntax: `store "giveaway" participants = []`
+- Arrays support indexing: `participants[0]` gets the first element
+- Use the `push` statement to add elements to arrays
+
+## push
+
+**Concept:** Add elements to arrays in storage
+
+**What it does:** Appends a value to an array stored in the database
+
+**When to use it:** When you need to track multiple items (like participants, logs, etc.)
+
+**How it works:**
+- Loads the existing array from storage
+- Appends the new value to the end
+- Saves the updated array back to storage
+
+```javascript
+push user.username to "giveaway" participants
+push "log entry" to "server" logs
+```
+
+**Example:**
+```javascript
+on reaction add "🎉":
+    let active = load "giveaway" active or 0
+    if active > 0:
+        push user.username to "giveaway" participants
+```
+
+**What this does:**
+- When someone reacts with 🎉
+- Checks if a giveaway is active
+- Adds their username to the participants array
+
+**Use cases:**
+- Tracking giveaway participants
+- Building log arrays
+- Collecting user inputs
+- Creating lists of items
+
+**Array operations:**
+- `push value to namespace key` - Add to array
+- `array[index]` - Access element at index
+- `length of array` - Get array length
+- `random(0, length of array - 1)` - Get random index
 
 ## load
 

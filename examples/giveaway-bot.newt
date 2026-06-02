@@ -34,7 +34,7 @@ on slash "end-giveaway":
         let prize = load "giveaway" prize or "Prize"
         
         if participants:
-            let winnerIndex = random(1, length of participants)
+            let winnerIndex = random(0, length of participants - 1)
             let winner = participants[winnerIndex]
             reply "🎊 **GIVEAWAY ENDED** 🎊"
             reply "Prize: {prize}"
