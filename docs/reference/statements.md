@@ -620,6 +620,8 @@ on command "userinfo":
 
 ## for each
 
+> **Experimental:** This feature is available in `newt run` but the iterable expression is currently ignored in generated builds. The loop always iterates over server members.
+
 **Concept:** Iteration and collections
 
 **What it does:** Loops through a collection (like all server members)
@@ -1380,6 +1382,8 @@ on command "cleanup":
 
 ## Voice Commands
 
+> **Experimental:** Voice features are available in `newt run` but are not currently supported in generated builds (`newt build`).
+
 **Concept:** Voice channel management and audio playback
 
 **What they do:** Join/leave voice channels and control audio playback
@@ -1413,6 +1417,8 @@ on slash "stop":
 
 ## Webhook Commands
 
+> **Experimental:** Webhook features are available in `newt run` but are not currently supported in generated builds (`newt build`).
+
 **Concept:** External webhook management
 
 **What they do:** Create, execute, edit, and delete webhooks
@@ -1439,6 +1445,8 @@ on slash "send":
 - Bot needs Manage Webhooks permission
 
 ## Thread Commands
+
+> **Experimental:** Thread features are available in `newt run` but are not currently supported in generated builds (`newt build`).
 
 **Concept:** Thread management for organized discussions
 

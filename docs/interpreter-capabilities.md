@@ -95,9 +95,12 @@ This document outlines the features currently supported by the Newt interpreter 
 - Useful for bulk operations
 
 ✅ **Timer Statements** - `every X minutes:`, `at "HH:MM" daily:`
-- Schedule recurring tasks with `every`
-- Schedule daily tasks at specific times with `at`
-- Runs independently of user interactions
+
+> **Experimental:** Timer statements are available in `newt run` but are not currently supported in generated builds (`newt build`).
+
+Schedule recurring tasks with `every`
+Schedule daily tasks at specific times with `at`
+Runs independently of user interactions
 - Useful for reminders, announcements, automated tasks
 
 ✅ **Give Role Statement** - `give user role "RoleName"`
