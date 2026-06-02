@@ -2,6 +2,9 @@
 
 This matrix tracks the implementation status of Newt language features across all components.
 
+**Stable** means implemented consistently across check, run, build, and covered by tests.
+Rows marked stable but Tests=no should be treated as provisional until test coverage lands.
+
 | Feature | Syntax | Docs | Lexer | Parser | Validator | Run | Build | Tests | Status | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|
 
@@ -11,7 +14,7 @@ This matrix tracks the implementation status of Newt language features across al
 |---|---|---|---|---|---|---|---|---|---|---|
 | bot name | `bot name "MyBot"` | yes | yes | yes | yes | yes | yes | no | stable | |
 | bot prefix | `bot prefix "!"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| bot token from env | `bot token from env "NAME"` | yes | yes | yes | yes | partial | yes | no | experimental | Run uses saved token, not env |
+| bot token from env | `bot token from env "NAME"` | yes | yes | yes | yes | yes | yes | no | stable | Env-first with saved-token fallback |
 
 ## Handlers
 
@@ -44,8 +47,8 @@ This matrix tracks the implementation status of Newt language features across al
 | say with components | `say with components "text":` | yes | yes | yes | yes | yes | yes | no | stable | |
 | show modal | `show modal:` | yes | yes | yes | yes | yes | yes | no | experimental | Generated modals use unimported builders |
 | let | `let x = value` | yes | yes | yes | yes | yes | yes | no | stable | |
-| store | `store namespace key = value` | yes | yes | yes | yes | yes | yes | no | experimental | Run uses in-memory, build uses SQLite |
-| load | `let x = load namespace key or default` | yes | yes | yes | yes | yes | yes | no | experimental | Run uses in-memory, build uses SQLite |
+| store | `store namespace key = value` | yes | yes | yes | yes | yes | yes | no | stable | Both run and build use persistent SQLite |
+| load | `let x = load namespace key or default` | yes | yes | yes | yes | yes | yes | no | stable | Both run and build use persistent SQLite |
 | if/else | `if condition: ... else: ...` | yes | yes | yes | yes | yes | yes | no | stable | |
 | for each | `for each item in iterable:` | yes | yes | yes | yes | partial | partial | no | experimental | Iterable ignored in codegen |
 | require role | `require role "RoleName"` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
@@ -78,13 +81,13 @@ This matrix tracks the implementation status of Newt language features across al
 | numbers | `123`, `45.67` | yes | yes | yes | yes | yes | yes | no | stable | |
 | booleans | `true`, `false` | yes | yes | yes | yes | yes | yes | no | stable | |
 | member paths | `user.username` | yes | yes | yes | yes | yes | yes | no | stable | |
-| args | `args` | yes | yes | yes | yes | partial | yes | no | experimental | Not populated in interpreter |
+| args | `args` | yes | yes | yes | yes | yes | yes | yes | stable | Populated in interpreter |
 | target | `target` | yes | yes | yes | yes | yes | yes | no | stable | |
 | load fallback | `load x y or z` | yes | yes | yes | yes | yes | yes | no | stable | Treated as special syntax |
 | fetch | `fetch "url"` | yes | yes | yes | yes | yes | yes | no | stable | JSON detection too strict |
 | getUser | `getUser(id)` | yes | yes | yes | yes | yes | yes | no | stable | |
 | getGuild | `getGuild(id)` | yes | yes | yes | yes | yes | yes | no | stable | |
-| getReactionUsers | `getReactionUsers(msg, emoji)` | yes | no | yes | yes | yes | no | no | experimental | Not a keyword in lexer |
+| getReactionUsers | `getReactionUsers(msg, emoji)` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
 | random | `random(min, max)` | yes | yes | yes | yes | yes | yes | no | stable | |
 | arrays | `[1, 2, 3]` | yes | yes | yes | yes | yes | yes | no | stable | |
 | string methods | `text.uppercase()` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
@@ -98,12 +101,12 @@ This matrix tracks the implementation status of Newt language features across al
 
 | Feature | Syntax | Docs | Lexer | Parser | Validator | Run | Build | Tests | Status | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|
-| and | `a and b` | yes | yes | yes | yes | yes | no | no | experimental | Codegen emits invalid JS |
-| or | `a or b` | yes | yes | yes | yes | yes | yes | no | experimental | Different behavior in run vs build |
-| not | `not a` | yes | yes | yes | yes | yes | yes | no | stable | |
-| comparison | `<`, `<=`, `>`, `>=` | yes | yes | yes | yes | yes | yes | no | experimental | No operator precedence |
+| and | `a and b` | yes | yes | yes | yes | yes | no | yes | experimental | Codegen emits invalid JS |
+| or | `a or b` | yes | yes | yes | yes | yes | yes | yes | experimental | Different behavior in run vs build |
+| not | `not a` | yes | yes | yes | yes | yes | yes | yes | stable | |
+| comparison | `<`, `<=`, `>`, `>=` | yes | yes | yes | yes | yes | yes | yes | experimental | No operator precedence |
 | equality | `==`, `!=` | yes | yes | yes | yes | yes | yes | no | experimental | No operator precedence |
-| arithmetic | `+`, `-`, `*`, `/` | yes | yes | yes | yes | yes | yes | no | experimental | No operator precedence |
+| arithmetic | `+`, `-`, `*`, `/` | yes | yes | yes | yes | yes | yes | yes | experimental | No operator precedence |
 
 ## Advanced Features
 
