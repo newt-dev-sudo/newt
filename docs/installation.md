@@ -2,6 +2,24 @@
 
 This guide will help you install Newt on your computer so you can start building Discord bots.
 
+## What is a Discord Bot?
+
+A Discord bot is like an automated user that can respond to messages, perform actions, and interact with your server. Think of it as a custom assistant that follows rules you define.
+
+**What can bots do?**
+- Automatically welcome new members
+- Play music in voice channels
+- Moderate content and enforce rules
+- Run games and point systems
+- Send scheduled announcements
+- And much more!
+
+**How it works:**
+1. You write instructions in plain English using Newt
+2. Newt translates your instructions into code
+3. Your bot runs on your computer and connects to Discord
+4. When something happens in your server, your bot responds according to your instructions
+
 ## What You Need Before Installing
 
 ### Node.js
@@ -210,6 +228,91 @@ npm uninstall -g @newt-dev/cli
 ```
 
 **Note:** This won't delete any bots you've created - just the Newt tool itself.
+
+## Getting Your Bot Token
+
+Before you can run a bot, you need a bot token from Discord. This token is like a password that lets your bot connect to Discord.
+
+### Step 1: Go to Discord Developer Portal
+
+1. Visit [discord.com/developers/applications](https://discord.com/developers/applications)
+2. Log in with your Discord account
+
+### Step 2: Create a New Application
+
+1. Click "New Application" in the top right corner
+2. Give it a name (e.g., "MyBot")
+3. Click "Create"
+
+### Step 3: Create a Bot User
+
+1. Click "Bot" in the left sidebar
+2. Click "Add Bot"
+3. Confirm by clicking "Yes, do it!"
+
+### Step 4: Get Your Token
+
+1. Click "Reset Token" (or "Copy Token" if available)
+2. **Important:** Keep this token secret! Never share it or commit it to GitHub
+3. Copy the token - you'll need it in the next step
+
+### Step 5: Enable Intents
+
+Intents are permissions that tell Discord what events your bot needs to know about:
+
+1. Still on the Bot page
+2. Scroll to "Privileged Gateway Intents"
+3. Enable "Message Content Intent" - lets your bot read message content
+4. Enable "Server Members Intent" - lets your bot know when members join/leave
+5. Click "Save Changes"
+
+### Step 6: Save Your Token
+
+Once you have your token, save it securely:
+
+```bash
+newt token YOUR_BOT_TOKEN_HERE
+```
+
+This stores your token in Newt's secure configuration. You won't have to type it every time.
+
+**Security Note:** Never share your bot token publicly. If someone gets your token, they can control your bot.
+
+## Inviting Your Bot to a Server
+
+Your bot needs to be invited to a server to work. Here's how:
+
+### Step 1: Generate an Invite Link
+
+1. In the Developer Portal, go to your application
+2. Click "OAuth2" in the left sidebar
+3. Click "URL Generator"
+4. Under "Scopes", check "bot"
+5. Under "Bot Permissions", check these basic permissions:
+   - Send Messages
+   - Read Messages/View Channels
+   - Add Reactions
+   - Embed Links (if you want rich embeds)
+   - Attach Files (if you want file uploads)
+6. Copy the generated URL at the bottom
+
+### Step 2: Invite Your Bot
+
+1. Paste the URL in your browser
+2. Select the server you want to add the bot to
+3. Click "Authorize"
+4. Complete the CAPTCHA if needed
+
+### Step 3: Your Bot is Now in the Server!
+
+- You should see it in the member list (it will be offline until you run it)
+- You can now run your bot with `newt run your-bot.newt`
+- Once running, your bot will appear online
+
+**Troubleshooting:**
+- If you don't see the bot in the member list, try refreshing Discord
+- Make sure you have "Manage Server" permission in the server
+- If the invite link doesn't work, regenerate it and try again
 
 ## Next Steps
 
