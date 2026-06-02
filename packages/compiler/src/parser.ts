@@ -635,6 +635,31 @@ class Parser {
       return { type: "SubcommandGroupStatement", loc: this.loc(start), name, description, subcommands };
     }
 
+    if (this.checkKeyword("push")) {
+      const start = this.advance();
+      const value = this.parseExpressionUntil(["NEWLINE", "EOF"], ["to"]);
+      this.consumeKeyword("to");
+      const targetExpr = this.parseExpressionUntilLineEnd();
+      // targetExpr should be namespace.key (MemberExpr) or just namespace
+      let namespace = targetExpr;
+      let key = "value";
+      if (targetExpr.type === "MemberExpr") {
+        const path = targetExpr.path;
+        key = path[path.length - 1];
+        namespace = { type: "StringLiteral", loc: targetExpr.loc, value: path[0], interpolated: false };
+      }
+      return { type: "PushStatement", loc: this.loc(start), value, namespace, key };
+    }
+
+    if (this.checkKeyword("random")) {
+      const start = this.advance();
+      this.consumeKeyword("from");
+      const namespace = this.parseAtom();
+      const key = this.consumeWord("random from needs a key name").value;
+      this.consumeLineEnd();
+      return { type: "RandomPickStatement", loc: this.loc(start), namespace, key, variable: undefined };
+    }
+
     const start = this.peek();
     const expression = this.parseExpressionUntilLineEnd();
     this.consumeLineEnd();
@@ -1063,14 +1088,6 @@ class Parser {
       this.consumeKeyword("named");
       const channelName = this.parseAtom();
       return { type: "FindChannelExpr", loc: this.loc(start), channelName };
-    }
-
-    if (this.matchKeyword("user")) {
-      const start = this.previous();
-      this.consumeKeyword("with");
-      this.consumeKeyword("id");
-      const userId = this.parseAtom();
-      return { type: "FindUserExpr", loc: this.loc(start), userId };
     }
 
     if (this.match("LPAREN")) {

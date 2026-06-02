@@ -15,7 +15,7 @@ on slash "giveaway":
     # Store giveaway data
     store "giveaway" active = 1
     store "giveaway" prize = "Prize"
-    store "giveaway" participantCount = 0
+    store "giveaway" participants = []
     store "giveaway" messageId = msg.id
 
 # Track participants via reactions
@@ -23,26 +23,27 @@ on reaction add "🎉":
     let active = load "giveaway" active or 0
     
     if active > 0:
-        let count = load "giveaway" participantCount or 0
-        store "giveaway" participantCount = count + 1
+        push user.username to "giveaway" participants
 
 # End giveaway and pick winner
 on slash "end-giveaway":
     let active = load "giveaway" active or 0
     
     if active > 0:
-        let count = load "giveaway" participantCount or 0
+        let participants = load "giveaway" participants or []
         let prize = load "giveaway" prize or "Prize"
         
-        if count > 0:
+        if participants:
+            let winnerIndex = random(1, length of participants)
+            let winner = participants[winnerIndex]
             reply "🎊 **GIVEAWAY ENDED** 🎊"
             reply "Prize: {prize}"
-            reply "Total entries: {count}"
-            reply "🏆 Winner: Entry #{random(1, count)} 🏆"
+            reply "Total entries: {length of participants}"
+            reply "🏆 Winner: {winner} 🏆"
             
             # Reset giveaway
             store "giveaway" active = 0
-            store "giveaway" participantCount = 0
+            store "giveaway" participants = []
         else:
             reply "Giveaway ended with no participants."
             store "giveaway" active = 0
@@ -55,7 +56,7 @@ on slash "cancel-giveaway":
     
     if active > 0:
         store "giveaway" active = 0
-        store "giveaway" participantCount = 0
+        store "giveaway" participants = []
         reply "Giveaway cancelled!"
     else:
         reply "No active giveaway to cancel."
@@ -65,11 +66,11 @@ on slash "giveaway-status":
     let active = load "giveaway" active or 0
     
     if active > 0:
-        let count = load "giveaway" participantCount or 0
+        let participants = load "giveaway" participants or []
         let prize = load "giveaway" prize or "Prize"
         reply "📊 **Giveaway Status**"
         reply "Prize: {prize}"
-        reply "Total entries: {count}"
+        reply "Total entries: {length of participants}"
         reply "React with 🎉 to enter!"
     else:
         reply "No active giveaway. Use /giveaway to start one."

@@ -46,6 +46,8 @@ import type {
   LockThreadStatement,
   UnlockThreadStatement,
   SubcommandGroupStatement,
+  PushStatement,
+  RandomPickStatement,
 } from "@newt-dev/compiler";
 
 interface InterpreterOptions {
@@ -758,6 +760,18 @@ export class NewtInterpreter {
 
         case "SubcommandGroupStatement":
           await this.executeSubcommandGroup(stmt, context);
+          break;
+
+        case "PushStatement":
+          const pushValue = await this.evaluateExpression(stmt.value, context);
+          const pushNamespace = await this.evaluateExpression(stmt.namespace, context);
+          this.pushToArray(pushNamespace, stmt.key, pushValue);
+          break;
+
+        case "RandomPickStatement":
+          const randomNamespace = await this.evaluateExpression(stmt.namespace, context);
+          const randomPick = this.randomFromArray(randomNamespace, stmt.key);
+          context.variables.set("_randomPick", randomPick);
           break;
 
         case "TryCatchStatement":
@@ -1496,6 +1510,24 @@ export class NewtInterpreter {
       .prepare("SELECT value FROM store WHERE namespace = ? AND key = ?")
       .get(String(namespace), String(key)) as { value: string } | undefined;
     return row ? JSON.parse(row.value) : fallback;
+  }
+
+  private pushToArray(namespace: string, key: string, value: any): void {
+    let current = this.loadValue(namespace, key, []);
+    if (!Array.isArray(current)) {
+      current = [];
+    }
+    current.push(value);
+    this.saveValue(namespace, key, current);
+  }
+
+  private randomFromArray(namespace: string, key: string): any {
+    const current = this.loadValue(namespace, key, []);
+    if (!Array.isArray(current) || current.length === 0) {
+      return null;
+    }
+    const randomIndex = Math.floor(Math.random() * current.length);
+    return current[randomIndex];
   }
 
   private translateError(error: Error): Error {

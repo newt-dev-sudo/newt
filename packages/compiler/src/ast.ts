@@ -203,7 +203,9 @@ export type Statement =
   | ArchiveThreadStatement
   | LockThreadStatement
   | UnlockThreadStatement
-  | SubcommandGroupStatement;
+  | SubcommandGroupStatement
+  | PushStatement
+  | RandomPickStatement;
 
 export interface ReplyStatement extends BaseNode {
   type: "ReplyStatement";
@@ -528,6 +530,20 @@ export interface SubcommandGroupStatement extends BaseNode {
   name: string;
   description: string;
   subcommands: Statement[];
+}
+
+export interface PushStatement extends BaseNode {
+  type: "PushStatement";
+  value: Expression;
+  namespace: Expression;
+  key: string;
+}
+
+export interface RandomPickStatement extends BaseNode {
+  type: "RandomPickStatement";
+  namespace: Expression;
+  key: string;
+  variable?: string; // Optional variable name to store the result
 }
 
 export interface TryCatchStatement extends BaseNode {

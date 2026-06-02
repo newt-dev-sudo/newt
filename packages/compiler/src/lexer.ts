@@ -55,7 +55,6 @@ const keywords = new Set([
   "required",
   "channel",
   "role",
-  "user",
   "mentionable",
   "join",
   "leave",
@@ -191,7 +190,9 @@ const keywords = new Set([
   "archive",
   "lock",
   "unlock",
-  "subcommand"
+  "subcommand",
+  "push",
+  "random"
 ]);
 
 const CHAR_TOKEN_TYPES: Record<string, TokenType> = {
