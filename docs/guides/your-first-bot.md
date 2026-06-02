@@ -54,4 +54,4 @@ Go to your Discord server and type `!hello`. Your bot should reply with "Hello, 
 
 - Learn about [variables and expressions](../reference/expressions.md)
 - Explore [handlers](../reference/handlers.md) for different events
-- Check out [examples](../examples/) for more complex bots
+- Check out [Building Interactive Bots](./building-interactive-bots.md)
