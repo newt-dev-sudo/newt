@@ -2,8 +2,6 @@
 
 Automatically welcomes new members and assigns roles.
 
-> **Note:** This example uses `if user has role` which is not yet implemented in the interpreter. Use alternative logic for now.
-
 ## Code
 
 ```javascript
@@ -20,10 +18,11 @@ on join:
         field "Starter role" "I gave you the Member role."
 
 on command "role":
-    # Note: if user has role is not yet implemented
-    # Alternative: use store/load to track roles
-    give user role "Member"
-    reply "Done! Role given."
+    if user has role "Member":
+        reply "You already have the Member role!"
+    else:
+        give user role "Member"
+        reply "Done! Role given."
 
 on leave:
     say "{user.username} left the server. We'll miss them!" in channel "general"
@@ -34,6 +33,7 @@ on leave:
 - Automatically gives new members a "Member" role
 - Sends a welcome embed with server information
 - Allows users to request the Member role via `!role`
+- Checks if user already has the role before assigning
 - Announces when members leave the server
 
 ## Key Concepts
@@ -78,10 +78,7 @@ else:
 ## How to Run
 
 ```bash
-newt build welcome-bot.newt --out welcome-bot
-cd welcome-bot
-npm install
-DISCORD_TOKEN="your-token" npm start
+newt run welcome-bot.newt
 ```
 
 ## Use Cases
