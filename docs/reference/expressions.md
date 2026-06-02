@@ -565,12 +565,28 @@ third of items      # Third element (index 2)
 last of items       # Last element
 ```
 
+**Array length:** Get the number of elements in an array
+
+```javascript
+length of items     # Returns 3 for ["apple", "banana", "cherry"]
+```
+
+**Array indexing:** Access elements by index (0-based)
+
+```javascript
+items[0]            # First element
+items[1]            # Second element
+items[length of items - 1]  # Last element
+```
+
 **Example:**
 ```javascript
 on command "list":
     let fruits = ["apple", "banana", "cherry"]
     reply "First: {first of fruits}"
     reply "Last: {last of fruits}"
+    reply "Count: {length of fruits}"
+    reply "Second: {fruits[1]}"
 ```
 
 **What this does:**
@@ -590,7 +606,6 @@ on command "list":
 **Available methods:**
 - `uppercase of text` - Convert to uppercase
 - `lowercase of text` - Convert to lowercase
-- `length of text` - Get the number of characters
 - `split text by "separator"` - Split into an array
 - `trim of text` - Remove whitespace from ends
 
@@ -598,7 +613,6 @@ on command "list":
 let greeting = "Hello World"
 reply uppercase of greeting      # "HELLO WORLD"
 reply lowercase of greeting      # "hello world"
-reply length of greeting          # 11
 ```
 
 **Example:**
