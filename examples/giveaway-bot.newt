@@ -3,75 +3,73 @@ bot prefix "!"
 bot token from env "DISCORD_TOKEN"
 
 on ready:
-    set activity "Giveaways! Use /giveaway"
+    set activity "🎉 Giveaways! Use /giveaway"
 
-# Start a giveaway
+# Start a giveaway with prize
 on slash "giveaway":
-    say "🎉 **GIVEAWAY STARTED** 🎉"
-    say "React with 🎉 to enter!"
-    say "Use /end-giveaway to pick a winner"
+    let msg = reply "🎉 **GIVEAWAY STARTED** 🎉"
+    reply "React with 🎉 to enter!"
+    reply "Prize: Prize"
+    add reaction to msg with "🎉"
     
-    # Store giveaway data using bot's user ID as namespace
-    store user.id active = 1
-    store user.id prize = "Prize"
-    store user.id participantCount = 0
+    # Store giveaway data
+    store "giveaway" active = 1
+    store "giveaway" prize = "Prize"
+    store "giveaway" participantCount = 0
+    store "giveaway" messageId = msg.id
 
 # Track participants via reactions
 on reaction add "🎉":
-    let active = load user.id active or 0
-    let dummy = 0
+    let active = load "giveaway" active or 0
     
     if active > 0:
-        # Increment participant count
-        let count = load user.id participantCount or 0
-        store user.id participantCount = count + 1
-        reply "{user.username} entered the giveaway! Total entries: {count + 1}"
+        let count = load "giveaway" participantCount or 0
+        store "giveaway" participantCount = count + 1
 
-# End giveaway manually
+# End giveaway and pick winner
 on slash "end-giveaway":
-    let active = load user.id active or 0
-    let dummy = 0
+    let active = load "giveaway" active or 0
     
     if active > 0:
-        let count = load user.id participantCount or 0
+        let count = load "giveaway" participantCount or 0
+        let prize = load "giveaway" prize or "Prize"
         
         if count > 0:
-            # Pick a random number between 1 and count
-            let winnerNumber = random(1, count)
-            say "🎊 **GIVEAWAY ENDED** 🎊"
-            say "Total entries: {count}"
-            say "🏆 Random winner number: {winnerNumber} 🏆"
-            say "Note: This selects a random entry number. Full winner selection with usernames requires participant list iteration (not yet supported in Newt)."
+            reply "🎊 **GIVEAWAY ENDED** 🎊"
+            reply "Prize: {prize}"
+            reply "Total entries: {count}"
+            reply "🏆 Winner: Entry #{random(1, count)} 🏆"
             
             # Reset giveaway
-            store user.id active = 0
-            store user.id participantCount = 0
+            store "giveaway" active = 0
+            store "giveaway" participantCount = 0
         else:
-            say "Giveaway ended with no participants."
-            store user.id active = 0
+            reply "Giveaway ended with no participants."
+            store "giveaway" active = 0
     else:
         reply "No active giveaway to end."
 
-# Cancel a giveaway
+# Cancel giveaway
 on slash "cancel-giveaway":
-    let active = load user.id active or 0
-    let dummy = 0
+    let active = load "giveaway" active or 0
     
     if active > 0:
-        store user.id active = 0
-        store user.id participantCount = 0
+        store "giveaway" active = 0
+        store "giveaway" participantCount = 0
         reply "Giveaway cancelled!"
     else:
         reply "No active giveaway to cancel."
 
 # Check giveaway status
 on slash "giveaway-status":
-    let active = load user.id active or 0
-    let dummy = 0
+    let active = load "giveaway" active or 0
     
     if active > 0:
-        let count = load user.id participantCount or 0
-        say "📊 **Giveaway Status**"
-        say "Total entries: {count}"
+        let count = load "giveaway" participantCount or 0
+        let prize = load "giveaway" prize or "Prize"
+        reply "📊 **Giveaway Status**"
+        reply "Prize: {prize}"
+        reply "Total entries: {count}"
+        reply "React with 🎉 to enter!"
     else:
-        reply "No active giveaway."
+        reply "No active giveaway. Use /giveaway to start one."
