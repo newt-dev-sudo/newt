@@ -147,9 +147,8 @@ This document outlines the features currently supported by the Newt interpreter 
 ✅ **Number Literals** - `123`, `45.67`
 - Integer and floating-point numbers
 
-✅ **Boolean Values** - Use `0` for false, `1` for true
-- Note: `true`/`false` keywords not yet supported
-- Boolean values
+✅ **Boolean Values** - `true`, `false`, `0`, `1`
+- Boolean values for conditions
 
 ✅ **Color Literals** - `#5865F2`
 - Hex color codes for embeds

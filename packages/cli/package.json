@@ -24,9 +24,8 @@
   },
   "homepage": "https://github.com/newt-dev-sudo/newt#readme",
   "dependencies": {
-    "@newt-dev/compiler": "0.4.0",
-    "discord.js": "^14.15.0",
-    "better-sqlite3": "^11.0.0"
+    "better-sqlite3": "^11.0.0",
+    "discord.js": "^14.15.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",

@@ -34,8 +34,12 @@ export type Handler =
   | JoinHandler
   | LeaveHandler
   | ReactionAddHandler
+  | ReactionRemoveHandler
+  | GuildMemberUpdateHandler
+  | PresenceUpdateHandler
   | ButtonClickHandler
-  | SelectMenuHandler;
+  | SelectMenuHandler
+  | ModalSubmitHandler;
 
 export interface ReadyHandler extends BaseNode {
   type: "ReadyHandler";
@@ -80,6 +84,22 @@ export interface ReactionAddHandler extends BaseNode {
   body: Statement[];
 }
 
+export interface ReactionRemoveHandler extends BaseNode {
+  type: "ReactionRemoveHandler";
+  emoji: StringLiteral;
+  body: Statement[];
+}
+
+export interface GuildMemberUpdateHandler extends BaseNode {
+  type: "GuildMemberUpdateHandler";
+  body: Statement[];
+}
+
+export interface PresenceUpdateHandler extends BaseNode {
+  type: "PresenceUpdateHandler";
+  body: Statement[];
+}
+
 export interface SlashCommandHandler extends BaseNode {
   type: "SlashCommandHandler";
   command: string;
@@ -108,6 +128,12 @@ export interface SelectMenuHandler extends BaseNode {
   body: Statement[];
 }
 
+export interface ModalSubmitHandler extends BaseNode {
+  type: "ModalSubmitHandler";
+  modalId: StringLiteral;
+  body: Statement[];
+}
+
 export type TimerDecl = EveryTimerDecl | DailyTimerDecl;
 
 export interface EveryTimerDecl extends BaseNode {
@@ -130,6 +156,7 @@ export type Statement =
   | SayStatement
   | SayEmbedStatement
   | SayComponentsStatement
+  | ShowModalStatement
   | LetDecl
   | StoreStatement
   | IfStatement
@@ -140,7 +167,19 @@ export type Statement =
   | MuteStatement
   | KickStatement
   | BanStatement
+  | UnbanStatement
   | PinStatement
+  | UnpinStatement
+  | AddReactionStatement
+  | RemoveReactionStatement
+  | RemoveAllReactionsStatement
+  | CreateChannelStatement
+  | DeleteChannelStatement
+  | EditChannelStatement
+  | CreateRoleStatement
+  | DeleteRoleStatement
+  | EditRoleStatement
+  | SendDMStatement
   | DeleteKeyStatement
   | EditMessageStatement
   | DeleteMessageStatement
@@ -153,6 +192,7 @@ export type Statement =
 export interface ReplyStatement extends BaseNode {
   type: "ReplyStatement";
   message: Expression;
+  ephemeral: boolean;
 }
 
 export interface SayStatement extends BaseNode {
@@ -172,11 +212,31 @@ export interface SayComponentsStatement extends BaseNode {
   components: Component[];
 }
 
+export interface ShowModalStatement extends BaseNode {
+  type: "ShowModalStatement";
+  modalId: StringLiteral;
+  title: StringLiteral;
+  inputs: TextInput[];
+}
+
 export interface Component extends BaseNode {
-  type: "ButtonComponent" | "SelectMenuComponent";
+  type: "ButtonComponent" | "SelectMenuComponent" | "ModalComponent";
   id: StringLiteral;
   label?: StringLiteral;
+  style?: StringLiteral;
+  url?: StringLiteral;
+  menuType?: StringLiteral;
   options?: SelectOption[];
+  title?: StringLiteral;
+  inputs?: TextInput[];
+}
+
+export interface TextInput extends BaseNode {
+  type: "TextInput";
+  id: StringLiteral;
+  label: StringLiteral;
+  style?: StringLiteral;
+  required?: boolean;
 }
 
 export interface SelectOption extends BaseNode {
@@ -190,6 +250,12 @@ export interface EmbedBlock extends BaseNode {
   title?: StringLiteral;
   description?: StringLiteral;
   color?: ColorLiteral;
+  author?: StringLiteral;
+  footer?: StringLiteral;
+  image?: StringLiteral;
+  thumbnail?: StringLiteral;
+  url?: StringLiteral;
+  timestamp?: boolean;
   fields: EmbedField[];
 }
 
@@ -259,9 +325,75 @@ export interface BanStatement extends BaseNode {
   subject: Expression;
 }
 
+export interface UnbanStatement extends BaseNode {
+  type: "UnbanStatement";
+  subject: Expression;
+}
+
 export interface PinStatement extends BaseNode {
   type: "PinStatement";
   target: Expression;
+}
+
+export interface UnpinStatement extends BaseNode {
+  type: "UnpinStatement";
+  target: Expression;
+}
+
+export interface AddReactionStatement extends BaseNode {
+  type: "AddReactionStatement";
+  target: Expression;
+  emoji: StringLiteral;
+}
+
+export interface RemoveReactionStatement extends BaseNode {
+  type: "RemoveReactionStatement";
+  target: Expression;
+  emoji: StringLiteral;
+}
+
+export interface RemoveAllReactionsStatement extends BaseNode {
+  type: "RemoveAllReactionsStatement";
+  target: Expression;
+}
+
+export interface CreateChannelStatement extends BaseNode {
+  type: "CreateChannelStatement";
+  name: StringLiteral;
+  channelType?: StringLiteral;
+}
+
+export interface DeleteChannelStatement extends BaseNode {
+  type: "DeleteChannelStatement";
+  target: Expression;
+}
+
+export interface EditChannelStatement extends BaseNode {
+  type: "EditChannelStatement";
+  target: Expression;
+  newName?: StringLiteral;
+}
+
+export interface CreateRoleStatement extends BaseNode {
+  type: "CreateRoleStatement";
+  name: StringLiteral;
+}
+
+export interface DeleteRoleStatement extends BaseNode {
+  type: "DeleteRoleStatement";
+  target: Expression;
+}
+
+export interface EditRoleStatement extends BaseNode {
+  type: "EditRoleStatement";
+  target: Expression;
+  newName?: StringLiteral;
+}
+
+export interface SendDMStatement extends BaseNode {
+  type: "SendDMStatement";
+  target: Expression;
+  message: Expression;
 }
 
 export interface DeleteKeyStatement extends BaseNode {

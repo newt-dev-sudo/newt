@@ -38,10 +38,18 @@ reply "Your message here"
 reply "Hello, {user.username}!"
 ```
 
+**Ephemeral replies (only visible to the user):**
+```javascript
+reply ephemeral "This is only visible to you"
+```
+
 **Example:**
 ```javascript
 on command "hello":
     reply "Hi there, {user.username}!"
+
+on command "secret":
+    reply ephemeral "This is a secret message just for you"
 ```
 
 **What this does:**
@@ -122,6 +130,12 @@ say embed:
 - `description` - Main body text (supports basic formatting)
 - `color` - Hex color for the left border (like #5865F2 for Discord blurple)
 - `field` - Named field with a value (you can have multiple fields)
+- `author` - Author name shown at the top
+- `footer` - Footer text shown at the bottom
+- `image` - Large image displayed in the embed
+- `thumbnail` - Small thumbnail image in the corner
+- `url` - URL that the title links to
+- `timestamp` - Shows the current time in the embed
 
 **Example:**
 ```javascript
@@ -130,6 +144,12 @@ on command "rules":
         title "Server Rules"
         description "Please follow these rules"
         color #ED4245
+        author "Admin Team"
+        footer "Last updated: Today"
+        image "https://example.com/banner.png"
+        thumbnail "https://example.com/icon.png"
+        url "https://example.com/rules"
+        timestamp
         field "Rule 1" "Be respectful"
         field "Rule 2" "No spam"
         field "Rule 3" "Stay on topic"
@@ -170,6 +190,15 @@ say with components "Choose an option:":
     button "reject" label "Reject"
 ```
 
+**Button with style:**
+```javascript
+say with components "Choose an option:":
+    button "approve" label "Approve" style "success"
+    button "reject" label "Reject" style "danger"
+    button "info" label "More Info" style "secondary"
+    button "website" label "Visit Site" style "link" url "https://example.com"
+```
+
 **Select menus:**
 ```javascript
 say with components "Select a role:":
@@ -178,6 +207,27 @@ say with components "Select a role:":
         "Moderator" as "mod"
         "Member" as "member"
 ```
+
+**Advanced select menu types:**
+```javascript
+# Channel selection (auto-populated by Discord)
+say with components "Select a channel:":
+    select menu "channel_select" type "channel"
+
+# User selection (auto-populated by Discord)
+say with components "Select a user:":
+    select menu "user_select" type "user"
+
+# Role selection (auto-populated by Discord)
+say with components "Select a role:":
+    select menu "role_select" type "role"
+
+# Mentionable selection (auto-populated by Discord)
+say with components "Select mentionable:":
+    select menu "mentionable_select" type "mentionable"
+```
+
+**Important:** Select menu selections are handled using the `on menu` handler.
 
 **Example with buttons:**
 ```javascript
@@ -207,6 +257,69 @@ on button click "no":
 - Configuration menus
 
 **Important:** Button clicks and select menu selections are handled using separate handlers (`on button click` and `on select menu`).
+
+**Button styles:**
+- `primary` - Blue button (default)
+- `secondary` - Gray button
+- `success` - Green button
+- `danger` - Red button
+- `link` - Gray button that opens a URL (requires `url` parameter)
+
+**Select menu types:**
+- `string` - Text options (default)
+- `channel` - Channel selection
+- `role` - Role selection
+- `user` - User selection
+- `mentionable` - Users and roles
+
+## show modal
+
+**Concept:** Interactive UI (forms and input)
+
+**What it does:** Displays a modal dialog with text input fields
+
+**When to use it:** When you need to collect structured input from users
+
+**How it works:**
+- Shows a popup dialog with text input fields
+- User fills in the fields and submits
+- Your bot handles the submission with `on modal submit`
+
+```javascript
+show modal "feedback_form" title "Feedback":
+    input "name" label "Your Name" style "short" required
+    input "message" label "Your Message" style "paragraph" required
+```
+
+**Example:**
+```javascript
+on slash "feedback":
+    show modal "feedback_form" title "Send Feedback":
+        input "name" label "Your Name" style "short" required
+        input "message" label "Your Message" style "paragraph" required
+
+on modal submit "feedback_form":
+    reply "Thanks {fields.getTextValue('name')} for your feedback!"
+```
+
+**What this does:**
+- User types `/feedback`
+- Bot shows a modal with name and message fields
+- User fills in the form and submits
+- Bot thanks them by name
+
+**Use cases:**
+- Feedback forms
+- Bug reports
+- Applications
+- Surveys
+- Data collection
+
+**Input styles:**
+- `short` - Single line text input
+- `paragraph` - Multi-line text input
+
+**Important:** Modals are triggered from interactions (slash commands, button clicks, etc.). They cannot be shown from regular message commands.
 
 ## let
 
@@ -635,6 +748,393 @@ on command "ban":
 - Dealing with spammers/trolls
 
 **Important:** Your bot must have the "Ban Members" permission. Use bans carefully - they're permanent.
+
+## unban
+
+**Concept:** Side effects and output (system state modification)
+
+**What it does:** Unbans a user from the server (allows them to rejoin)
+
+**When to use it:** When you want to reverse a ban and allow a user back
+
+**How it works:**
+- Removes the user from the server's ban list
+- They can rejoin if they have an invite
+- Only an admin can unban users
+
+```javascript
+unban target
+```
+
+**Example:**
+```javascript
+on command "unban":
+    if user has role "Admin":
+        unban target
+        reply "Unbanned {target.username}"
+    else:
+        reply "You don't have permission to unban"
+```
+
+**What this does:**
+- Admin types: `!unban @ReformedUser`
+- Bot removes the user from the ban list
+- Bot confirms the unban
+
+**Use cases:**
+- Reversing bans
+- Forgiving users
+- Temporary bans
+- Appeals process
+
+**Important:** Your bot must have the "Ban Members" permission to unban users.
+
+## pin message
+
+**Concept:** Message management and organization
+
+**What it does:** Pins a message to the channel (keeps it at the top)
+
+**When to use it:** When you want to highlight important messages
+
+**How it works:**
+- Pins the specified message to the channel
+- Pinned messages appear in a special section
+- Useful for announcements, rules, or important info
+
+```javascript
+pin message
+```
+
+**Example:**
+```javascript
+on command "pin":
+    pin message
+    reply "Message pinned!"
+```
+
+**What this does:**
+- User types: `!pin` in response to an important message
+- Bot pins that message to the channel
+- Bot confirms the pin
+
+**Use cases:**
+- Highlighting announcements
+- Pinning rules
+- Important information
+- Reference material
+
+**Important:** Your bot must have the "Manage Messages" permission.
+
+## unpin message
+
+**Concept:** Message management and organization
+
+**What it does:** Unpins a message from the channel
+
+**When to use it:** When you want to remove a pinned message
+
+**How it works:**
+- Removes the pin from the specified message
+- Message is no longer highlighted
+- Useful for updating pinned content
+
+```javascript
+unpin message
+```
+
+**Example:**
+```javascript
+on command "unpin":
+    unpin message
+    reply "Message unpinned!"
+```
+
+**What this does:**
+- User types: `!unpin` in response to a pinned message
+- Bot unpins that message
+- Bot confirms the unpin
+
+**Use cases:**
+- Updating pinned content
+- Removing outdated pins
+- Managing channel organization
+- Cleaning up old announcements
+
+**Important:** Your bot must have the "Manage Messages" permission.
+
+## add reaction
+
+**Concept:** Message interaction and feedback
+
+**What it does:** Adds a reaction emoji to a message
+
+**When to use it:** When you want to add emoji reactions to messages
+
+**How it works:**
+- Adds the specified emoji to the target message
+- Useful for feedback, voting, or marking messages
+- Can use any Discord emoji
+
+```javascript
+add reaction to message with "👍"
+add reaction to message with "✅"
+```
+
+**Example:**
+```javascript
+on command "approve":
+    add reaction to message with "✅"
+    reply "Marked as approved"
+```
+
+**What this does:**
+- User types: `!approve` in response to a message
+- Bot adds ✅ reaction to that message
+- Bot confirms the action
+
+**Use cases:**
+- Marking messages as reviewed
+- Voting systems
+- Feedback collection
+- Message categorization
+
+## remove reaction
+
+**Concept:** Message interaction and feedback
+
+**What it does:** Removes a specific reaction emoji from a message
+
+**When to use it:** When you want to remove a specific reaction
+
+**How it works:**
+- Removes the specified emoji from the target message
+- Only removes that specific emoji
+- Other reactions remain
+
+```javascript
+remove reaction from message with "👍"
+remove reaction from message with "❌"
+```
+
+**Example:**
+```javascript
+on command "disapprove":
+    remove reaction from message with "✅"
+    add reaction to message with "❌"
+    reply "Marked as disapproved"
+```
+
+**What this does:**
+- User types: `!disapprove` in response to a message
+- Bot removes ✅ reaction and adds ❌
+- Bot confirms the action
+
+**Use cases:**
+- Changing votes
+- Removing incorrect reactions
+- Updating feedback
+- Correcting mistakes
+
+## clear reactions
+
+**Concept:** Message cleanup and management
+
+**What it does:** Removes all reactions from a message
+
+**When to use it:** When you want to remove all emoji reactions from a message
+
+**How it works:**
+- Removes every reaction from the target message
+- Message is left without any reactions
+- Useful for cleaning up or resetting
+
+```javascript
+clear reactions from message
+```
+
+**Example:**
+```javascript
+on command "reset":
+    clear reactions from message
+    reply "All reactions cleared"
+```
+
+**What this does:**
+- User types: `!reset` in response to a message
+- Bot removes all reactions from that message
+- Bot confirms the cleanup
+
+**Use cases:**
+- Resetting votes
+- Cleaning up old reactions
+- Starting fresh
+- Message cleanup
+
+## create role
+
+**Concept:** Server management and organization
+
+**What it does:** Creates a new role in the server
+
+**When to use it:** When you need to create roles dynamically
+
+**How it works:**
+- Creates a new role with the specified name
+- Role has default permissions initially
+- Can be modified after creation
+
+```javascript
+create role "Moderator"
+create role "VIP"
+```
+
+**Example:**
+```javascript
+on command "createrole":
+    if user has role "Admin":
+        create role args[0]
+        reply "Created role: {args[0]}"
+    else:
+        reply "You don't have permission"
+```
+
+**What this does:**
+- Admin types: `!createrole Helper`
+- Bot creates a new role named "Helper"
+- Bot confirms the creation
+
+**Use cases:**
+- Dynamic role creation
+- Automated role setup
+- Server organization
+- Temporary roles
+
+**Important:** Your bot must have the "Manage Roles" permission.
+
+## delete role
+
+**Concept:** Server management and organization
+
+**What it does:** Deletes a role from the server
+
+**When to use it:** When you need to remove a role
+
+**How it works:**
+- Deletes the specified role
+- All members lose that role
+- Cannot be undone
+
+```javascript
+delete role target
+```
+
+**Example:**
+```javascript
+on command "deleterole":
+    if user has role "Admin":
+        delete role target
+        reply "Deleted role"
+    else:
+        reply "You don't have permission"
+```
+
+**What this does:**
+- Admin types: `!deleterole @Helper`
+- Bot deletes the Helper role
+- Bot confirms the deletion
+
+**Use cases:**
+- Removing unused roles
+- Cleaning up server
+- Role management
+- Server reorganization
+
+**Important:** Your bot must have the "Manage Roles" permission. Be careful - this affects all members with that role.
+
+## edit role
+
+**Concept:** Server management and organization
+
+**What it does:** Changes a role's name
+
+**When to use it:** When you need to rename a role
+
+**How it works:**
+- Changes the role's name to the new name
+- All permissions and members remain the same
+- Only the name changes
+
+```javascript
+edit role target to "New Name"
+```
+
+**Example:**
+```javascript
+on command "renamerole":
+    if user has role "Admin":
+        edit role target to args[0]
+        reply "Renamed role to {args[0]}"
+    else:
+        reply "You don't have permission"
+```
+
+**What this does:**
+- Admin types: `!renamerole @Helper Assistant`
+- Bot renames the Helper role to Assistant
+- Bot confirms the rename
+
+**Use cases:**
+- Role renaming
+- Corrections
+- Rebranding
+- Organization updates
+
+**Important:** Your bot must have the "Manage Roles" permission.
+
+## dm send
+
+**Concept:** Direct messaging and private communication
+
+**What it does:** Sends a direct message to a user
+
+**When to use it:** When you want to send a private message to a user
+
+**How it works:**
+- Sends a message directly to the user's DMs
+- Only the recipient can see the message
+- Useful for private notifications
+
+```javascript
+dm user send "This is a private message"
+dm target send "You've been warned"
+```
+
+**Example:**
+```javascript
+on command "warn":
+    if user has role "Mod":
+        dm target send "You have been warned for rule violation"
+        reply "Warning sent to {target.username}"
+    else:
+        reply "You don't have permission"
+```
+
+**What this does:**
+- Moderator types: `!warn @RuleBreaker`
+- Bot sends a private DM to the user
+- Bot confirms the warning was sent
+
+**Use cases:**
+- Private warnings
+- Personal notifications
+- Sensitive information
+- Direct communication
+
+**Important notes:**
+- Users can disable DMs from bots
+- The message will fail if the user has DMs disabled
+- Your bot must share a server with the user
 
 ## wait
 

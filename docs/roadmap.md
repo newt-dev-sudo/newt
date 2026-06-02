@@ -5,16 +5,18 @@ This page shows what features are currently implemented in Newt and what's comin
 ## ✅ Implemented Features
 
 ### Core Functionality
-- **Event Handlers:** `on ready`, `on command`, `on join`, `on leave`, `on reaction add`, `on message contains`, `on slash`, `on button click`, `on select menu`, `on message update`, `on message delete`
-- **Actions:** `reply`, `say`, `give role`, `remove role`, `mute`, `kick`, `ban`, `edit message`, `delete message`, `wait for`
-- **Variables:** `let` for variable declaration
+- **Event Handlers:** `on ready`, `on command`, `on join`, `on leave`, `on reaction add`, `on remove reaction`, `on member update`, `on presence update`, `on message contains`, `on slash`, `on button click`, `on select menu`, `on modal submit`, `on message update`, `on message delete`
+- **Actions:** `reply`, `reply ephemeral`, `say`, `say embed`, `say with components`, `show modal`, `give role`, `remove role`, `mute`, `kick`, `ban`, `unban`, `edit message`, `delete message`, `wait for`, `pin message`, `unpin message`, `add reaction`, `remove reaction`, `clear reactions`, `create role`, `delete role`, `edit role`, `dm send`
+- **Variables:** `let` for variable declaration with boolean values (`true`, `false`)
 - **Storage:** `store` and `load` for data persistence
 - **Conditionals:** `if`, `else` with `has`, `and`, `or` operators
 - **Loops:** `for each` for iteration
 - **Timers:** `every`, `at daily` for scheduled tasks
 - **String Interpolation:** `{variable}` syntax
-- **Built-in Variables:** `user.*`, `message.*`, `channel.*`, `server.*`, `args`, `target`
+- **Built-in Variables:** `user.*`, `message.*`, `channel.*`, `server.*`, `args`, `target`, `values`, `fields`
 - **REST Methods:** `getReactionUsers()`, `random()`
+- **Components:** Buttons (primary, secondary, success, danger, link), Select menus (string, channel, role, user, mentionable), Modals with text inputs
+- **Embeds:** Enhanced with author, footer, image, thumbnail, URL, timestamp
 
 ### Bot Configuration
 - Bot name, prefix, and token configuration
@@ -23,7 +25,6 @@ This page shows what features are currently implemented in Newt and what's comin
 ## 🚧 Coming Soon
 
 ### Language Features
-- `true`/`false` keywords for boolean values
 - Array support
 
 ### Advanced Features

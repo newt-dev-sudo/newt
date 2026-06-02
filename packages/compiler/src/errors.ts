@@ -64,7 +64,7 @@ export const errorCatalog: Record<NewtErrorCode, { message: string; suggestion: 
   },
   NEWT_E003: {
     message: "That is not a known event name.",
-    suggestion: "Try one of: on ready, on command, on slash, on join, on leave, on message contains, on message update, on message delete, on reaction add, on button click, or on menu."
+    suggestion: "Try one of: on ready, on command, on slash, on join, on leave, on message contains, on message update, on message delete, on reaction add, on remove reaction, on member update, on presence update, on button click, on menu, on select menu, or on modal submit."
   },
   NEWT_E004: {
     message: "This line needs to be inside a handler.",

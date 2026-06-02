@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "discord.js";
+import { Client, GatewayIntentBits, Partials, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ChannelSelectMenuBuilder, RoleSelectMenuBuilder, UserSelectMenuBuilder, MentionableSelectMenuBuilder } from "discord.js";
 import Database from "better-sqlite3";
 import type {
   Program,
@@ -36,6 +36,7 @@ interface ExecutionContext {
   args?: any[];
   interaction?: any;
   values?: string[];
+  fields?: any;
   variables: Map<string, any>;
 }
 
@@ -229,6 +230,46 @@ export class NewtInterpreter {
           });
           break;
 
+        case "ReactionRemoveHandler":
+          this.client.on("messageReactionRemove", async (reaction, user) => {
+            if (user.bot) return;
+            if (reaction.emoji.name !== handler.emoji.value) return;
+
+            const context: ExecutionContext = {
+              user,
+              channel: reaction.message.channel,
+              server: reaction.message.guild,
+              message: reaction.message,
+              variables: new Map(),
+            };
+            await this.executeStatements(handler.body, context);
+          });
+          break;
+
+        case "GuildMemberUpdateHandler":
+          this.client.on("guildMemberUpdate", async (oldMember, newMember) => {
+            const context: ExecutionContext = {
+              user: newMember.user,
+              channel: newMember.guild.systemChannel,
+              server: newMember.guild,
+              variables: new Map(),
+            };
+            await this.executeStatements(handler.body, context);
+          });
+          break;
+
+        case "PresenceUpdateHandler":
+          this.client.on("presenceUpdate", async (oldPresence, newPresence) => {
+            const context: ExecutionContext = {
+              user: newPresence.user,
+              channel: newPresence.guild?.systemChannel,
+              server: newPresence.guild,
+              variables: new Map(),
+            };
+            await this.executeStatements(handler.body, context);
+          });
+          break;
+
         case "SlashCommandHandler":
           this.client.on("interactionCreate", async (interaction) => {
             if (!interaction.isChatInputCommand()) return;
@@ -282,6 +323,28 @@ export class NewtInterpreter {
               await this.executeStatements(handler.body, context);
             } catch (error) {
               console.error("Error in select menu handler:", error);
+            }
+          });
+          break;
+
+        case "ModalSubmitHandler":
+          this.client.on("interactionCreate", async (interaction) => {
+            if (!interaction.isModalSubmit()) return;
+            if (interaction.customId !== handler.modalId.value) return;
+
+            try {
+              const context: ExecutionContext = {
+                user: interaction.user,
+                channel: interaction.channel,
+                server: interaction.guild,
+                message: null,
+                fields: interaction.fields,
+                interaction,
+                variables: new Map(),
+              };
+              await this.executeStatements(handler.body, context);
+            } catch (error) {
+              console.error("Error in modal submit handler:", error);
             }
           });
           break;
@@ -340,7 +403,11 @@ export class NewtInterpreter {
               await context.channel?.send(replyText);
             } else {
               if (!context.interaction.replied && !context.interaction.deferred) {
-                await context.interaction.reply(replyText);
+                if (stmt.ephemeral) {
+                  await context.interaction.reply({ content: replyText, ephemeral: true });
+                } else {
+                  await context.interaction.reply(replyText);
+                }
               }
             }
           } else {
@@ -386,6 +453,31 @@ export class NewtInterpreter {
           }
           break;
 
+        case "ShowModalStatement":
+          if (!context.interaction) {
+            console.error("Cannot show modal without interaction context");
+            return;
+          }
+          const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = await import("discord.js");
+          const modalInputs = stmt.inputs.map((input: any) => {
+            const style = input.style?.value === "paragraph" ? TextInputStyle.Paragraph : TextInputStyle.Short;
+            return new TextInputBuilder()
+              .setCustomId(input.id.value)
+              .setLabel(input.label.value)
+              .setStyle(style)
+              .setRequired(input.required);
+          });
+          const modal = new ModalBuilder()
+            .setCustomId(stmt.modalId.value)
+            .setTitle(stmt.title.value)
+            .addComponents(modalInputs);
+          try {
+            await context.interaction.showModal(modal);
+          } catch (error) {
+            console.error("Error showing modal:", error);
+          }
+          break;
+
         case "LetDecl":
           const value = await this.evaluateExpression(stmt.value, context);
           context.variables.set(stmt.name, value);
@@ -403,7 +495,23 @@ export class NewtInterpreter {
             return;
           }
           // Get the member object for the user
-          const member = context.user.roles ? context.user : await context.server.members.fetch(context.user.id);
+          let member;
+          if (context.user.roles) {
+            member = context.user;
+          } else {
+            try {
+              member = await context.server.members.fetch(context.user.id);
+            } catch (error) {
+              console.error(`Failed to fetch member: ${error}`);
+              const errorMsg = `You need the "${stmt.role.value}" role to use this command.`;
+              if (context.message) {
+                await context.message.reply(errorMsg);
+              } else if (context.interaction) {
+                await context.interaction.reply({ content: errorMsg, ephemeral: true });
+              }
+              return;
+            }
+          }
           if (!member.roles.cache.has(requiredRole.id)) {
             const errorMsg = `You need the "${stmt.role.value}" role to use this command.`;
             if (context.message) {
@@ -451,6 +559,71 @@ export class NewtInterpreter {
         case "DeleteMessageStatement":
           const deleteTarget = await this.evaluateExpression(stmt.target, context);
           await deleteTarget?.delete();
+          break;
+
+        case "PinStatement":
+          const pinTarget = await this.evaluateExpression(stmt.target, context);
+          await pinTarget?.pin();
+          break;
+
+        case "UnpinStatement":
+          const unpinTarget = await this.evaluateExpression(stmt.target, context);
+          await unpinTarget?.unpin();
+          break;
+
+        case "AddReactionStatement":
+          const addReactionTarget = await this.evaluateExpression(stmt.target, context);
+          await addReactionTarget?.react(stmt.emoji.value);
+          break;
+
+        case "RemoveReactionStatement":
+          const removeReactionTarget = await this.evaluateExpression(stmt.target, context);
+          await removeReactionTarget?.reactions?.remove(stmt.emoji.value, context.user);
+          break;
+
+        case "RemoveAllReactionsStatement":
+          const removeAllReactionsTarget = await this.evaluateExpression(stmt.target, context);
+          await removeAllReactionsTarget?.reactions?.removeAll();
+          break;
+
+        case "CreateChannelStatement":
+          const channelName = stmt.name.value;
+          const newChannel = await context.server?.channels.create({ name: channelName });
+          break;
+
+        case "DeleteChannelStatement":
+          const deleteChannelTarget = await this.evaluateExpression(stmt.target, context);
+          await deleteChannelTarget?.delete();
+          break;
+
+        case "EditChannelStatement":
+          const editChannelTarget = await this.evaluateExpression(stmt.target, context);
+          if (stmt.newName) {
+            await editChannelTarget?.setName(stmt.newName.value);
+          }
+          break;
+
+        case "CreateRoleStatement":
+          const roleName = stmt.name.value;
+          await context.server?.roles.create({ name: roleName });
+          break;
+
+        case "DeleteRoleStatement":
+          const deleteRoleTarget = await this.evaluateExpression(stmt.target, context);
+          await deleteRoleTarget?.delete();
+          break;
+
+        case "EditRoleStatement":
+          const editRoleTarget = await this.evaluateExpression(stmt.target, context);
+          if (stmt.newName) {
+            await editRoleTarget?.setName(stmt.newName.value);
+          }
+          break;
+
+        case "SendDMStatement":
+          const dmTarget = await this.evaluateExpression(stmt.target, context);
+          const dmMessage = await this.evaluateExpression(stmt.message, context);
+          await dmTarget?.send(dmMessage);
           break;
 
         case "UploadStatement":
@@ -560,6 +733,13 @@ export class NewtInterpreter {
           const banSubject = await this.evaluateExpression(stmt.subject, context);
           if (banSubject) {
             await banSubject.ban();
+          }
+          break;
+
+        case "UnbanStatement":
+          const unbanSubject = await this.evaluateExpression(stmt.subject, context);
+          if (unbanSubject) {
+            await context.server?.members.unban(unbanSubject);
           }
           break;
 
@@ -797,6 +977,12 @@ export class NewtInterpreter {
     if (embed.title) built.setTitle(embed.title.value);
     if (embed.description) built.setDescription(embed.description.value);
     if (embed.color) built.setColor(embed.color.value);
+    if (embed.author) built.setAuthor({ name: embed.author.value });
+    if (embed.footer) built.setFooter({ text: embed.footer.value });
+    if (embed.image) built.setImage(embed.image.value);
+    if (embed.thumbnail) built.setThumbnail(embed.thumbnail.value);
+    if (embed.url) built.setURL(embed.url.value);
+    if (embed.timestamp) built.setTimestamp();
     
     for (const field of embed.fields) {
       built.addFields({
@@ -813,26 +999,57 @@ export class NewtInterpreter {
     
     for (const comp of components) {
       if (comp.type === "ButtonComponent") {
-        const row = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setCustomId(comp.id.value)
-            .setLabel(comp.label?.value || "Button")
-            .setStyle(ButtonStyle.Primary)
-        );
+        let button = new ButtonBuilder()
+          .setLabel(comp.label?.value || "Button");
+        
+        if (comp.url) {
+          button = button.setStyle(ButtonStyle.Link).setURL(comp.url.value);
+          // Link buttons don't have customId
+        } else {
+          button = button.setCustomId(comp.id.value);
+          if (comp.style) {
+            const styleValue = comp.style.value.toLowerCase();
+            const styleMap: Record<string, any> = {
+              primary: ButtonStyle.Primary,
+              secondary: ButtonStyle.Secondary,
+              success: ButtonStyle.Success,
+              danger: ButtonStyle.Danger,
+              link: ButtonStyle.Link
+            };
+            button = button.setStyle(styleMap[styleValue] || ButtonStyle.Primary);
+          } else {
+            button = button.setStyle(ButtonStyle.Primary);
+          }
+        }
+        
+        const row = new ActionRowBuilder().addComponents(button);
         rows.push(row);
       } else if (comp.type === "SelectMenuComponent") {
-        const options = comp.options?.map((opt: any) =>
-          new StringSelectMenuOptionBuilder()
-            .setLabel(opt.label?.value || "Option")
-            .setValue(opt.value?.value || "value")
-        ) || [];
+        let menu: any;
+        const menuType = comp.menuType?.value?.toLowerCase() || "string";
+        
+        if (menuType === "channel") {
+          menu = new ChannelSelectMenuBuilder().setCustomId(comp.id.value);
+        } else if (menuType === "role") {
+          menu = new RoleSelectMenuBuilder().setCustomId(comp.id.value);
+        } else if (menuType === "user") {
+          menu = new UserSelectMenuBuilder().setCustomId(comp.id.value);
+        } else if (menuType === "mentionable") {
+          menu = new MentionableSelectMenuBuilder().setCustomId(comp.id.value);
+        } else {
+          const options = comp.options?.map((opt: any) =>
+            new StringSelectMenuOptionBuilder()
+              .setLabel(opt.label?.value || "Option")
+              .setValue(opt.value?.value || "value")
+          ) || [];
 
-        const row = new ActionRowBuilder().addComponents(
-          new StringSelectMenuBuilder()
+          menu = new StringSelectMenuBuilder()
             .setCustomId(comp.id.value)
             .setPlaceholder("Select an option")
-            .setOptions(options)
-        );
+            .setOptions(options);
+        }
+
+        const row = new ActionRowBuilder().addComponents(menu);
         rows.push(row);
       }
     }

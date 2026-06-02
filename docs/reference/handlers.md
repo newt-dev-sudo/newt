@@ -82,7 +82,13 @@ Each handler has access to specific variables (context) that provide information
 | `on message delete` | user, message, channel, server |
 | `on join` | user, member, server |
 | `on leave` | user, server |
-| `on reaction add` | user, channel, server |
+| `on reaction add` | user, channel, server, message |
+| `on remove reaction` | user, channel, server, message |
+| `on member update` | user, member, server |
+| `on presence update` | user, member, server |
+| `on button click` | user, channel, server, interaction |
+| `on select menu` | user, channel, server, values, interaction |
+| `on modal submit` | user, channel, server, fields, interaction |
 
 **Why context matters:**
 - Not all variables are available in every handler
@@ -566,6 +572,194 @@ on reaction add "✅":
 - ✅ - Confirmation/verification
 - ❌ - Rejection/cancellation
 - 🎉 - Celebration
+
+## on remove reaction
+
+**Concept:** Event-driven programming (reaction events)
+
+**What it does:** Triggers when someone removes a reaction from a message
+
+**When it triggers:** When a reaction emoji is removed from any message
+
+**How it works:**
+- Your bot watches for reactions being removed from messages
+- When someone removes the specified emoji, your handler runs
+- Useful for tracking reaction changes and cancellations
+
+```javascript
+on remove reaction "👍":
+    reply "You removed the thumbs up!"
+
+on remove reaction "✅":
+    remove user role "Verified"
+    reply "You're no longer verified"
+```
+
+**Available variables:**
+- `user` - The user who removed the reaction
+- `channel` - The channel where the reaction was removed
+- `server` - The server (guild)
+- `message` - The message the reaction was removed from
+
+**Use cases:**
+- Tracking reaction changes
+- Removing roles when reactions are removed
+- Cancellation workflows
+- Poll vote changes
+
+**Example:**
+```javascript
+on remove reaction "✅":
+    remove user role "Verified"
+    reply "Verification removed"
+```
+
+**What this does:**
+- User removes ✅ reaction from a message
+- Bot removes their "Verified" role
+- Bot confirms the removal
+
+## on member update
+
+**Concept:** Event-driven programming (member state changes)
+
+**What it does:** Triggers when a member's information is updated
+
+**When it triggers:** When a member's roles, nickname, or other member data changes
+
+**How it works:**
+- Detects changes to member information
+- Provides access to the updated member data
+- Useful for tracking role changes and member updates
+
+```javascript
+on member update:
+    reply "Member information was updated"
+```
+
+**Available variables:**
+- `user` - The user whose information was updated
+- `member` - The member object (server-specific user data)
+- `server` - The server (guild)
+
+**Use cases:**
+- Role change logging
+- Nickname tracking
+- Member audit trails
+- Permission change notifications
+
+**Example:**
+```javascript
+on member update:
+    say "Member {user.username} was updated" in channel "admin-log"
+```
+
+**What this does:**
+- A member's information changes (role added, nickname changed, etc.)
+- Bot logs the update in the admin-log channel
+
+**Important notes:**
+- This triggers for any member update, not just role changes
+- Bot's own updates are ignored
+- Requires appropriate intents
+
+## on presence update
+
+**Concept:** Event-driven programming (presence state changes)
+
+**What it does:** Triggers when a user's presence changes (online, idle, dnd, offline)
+
+**When it triggers:** When a user's status, activity, or presence changes
+
+**How it works:**
+- Detects when users change their Discord status
+- Provides access to the new presence data
+- Useful for tracking user activity
+
+```javascript
+on presence update:
+    reply "User presence changed"
+```
+
+**Available variables:**
+- `user` - The user whose presence changed
+- `member` - The member object (if in a server)
+- `server` - The server (guild), if applicable
+
+**Use cases:**
+- Activity tracking
+- Status change logging
+- User activity analytics
+- Welcome messages when users come online
+
+**Example:**
+```javascript
+on presence update:
+    say "{user.username} is now online" in channel "activity-log"
+```
+
+**What this does:**
+- A user changes their presence (comes online, goes offline, changes status)
+- Bot logs the change in the activity-log channel
+
+**Important notes:**
+- This triggers frequently - be careful with spam
+- Consider adding conditions to reduce noise
+- Bot's own presence changes are ignored
+- Requires appropriate intents
+
+## on modal submit
+
+**Concept:** Event-driven programming (form submissions)
+
+**What it does:** Triggers when a user submits a modal dialog
+
+**When it triggers:** When a user fills in and submits a modal form
+
+**How it works:**
+- Detects modal submissions from interactions
+- Provides access to the submitted field values
+- Useful for processing form data
+
+```javascript
+on modal submit "feedback_form":
+    reply "Form submitted!"
+```
+
+**Available variables:**
+- `user` - The user who submitted the modal
+- `channel` - The channel where the interaction occurred
+- `server` - The server (guild)
+- `fields` - The submitted form fields
+- `interaction` - The interaction object
+
+**Use cases:**
+- Processing feedback forms
+- Handling applications
+- Collecting user input
+- Bug reports
+- Surveys
+
+**Example:**
+```javascript
+on modal submit "feedback_form":
+    let name = fields.getTextValue("name")
+    let message = fields.getTextValue("message")
+    say "Feedback from {name}: {message}" in channel "admin-log"
+    reply "Thanks for your feedback!"
+```
+
+**What this does:**
+- User submits a modal with ID "feedback_form"
+- Bot extracts the name and message fields
+- Bot logs the feedback in admin-log channel
+- Bot confirms receipt to the user
+
+**Important notes:**
+- Modals must be shown from interactions (slash commands, button clicks)
+- Field IDs must match those used when creating the modal
+- Use `fields.getTextValue("field_id")` to get input values
+- Bot's own modal submissions are ignored
 
 ## Multiple Handlers
 

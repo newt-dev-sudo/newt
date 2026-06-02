@@ -147,6 +147,26 @@ ${emitStatements(node.body, "  ", "member")}
   const { channel, guild: server } = message;
 ${emitStatements(node.body, "  ", "message")}
 });`;
+    case "ReactionRemoveHandler":
+      return `client.on("messageReactionRemove", async (reaction, user) => {
+  if (reaction.emoji.name !== ${emitExpression(node.emoji)}) return;
+  const { message } = reaction;
+  const { channel, guild: server } = message;
+${emitStatements(node.body, "  ", "message")}
+});`;
+    case "GuildMemberUpdateHandler":
+      return `client.on("guildMemberUpdate", async (oldMember, newMember) => {
+  const { user, guild: server } = newMember;
+  const channel = findChannel(server, "general");
+${emitStatements(node.body, "  ", "member")}
+});`;
+    case "PresenceUpdateHandler":
+      return `client.on("presenceUpdate", async (oldPresence, newPresence) => {
+  const { user } = newPresence;
+  const server = newPresence.guild;
+  const channel = findChannel(server, "general");
+${emitStatements(node.body, "  ", "member")}
+});`;
     case "SlashCommandHandler":
       const optionsDef = node.options ? node.options.map(opt => 
         `{
@@ -188,6 +208,12 @@ ${emitStatements(node.body, "  ", "interaction")}
   const { user, channel, guild: server, values } = interaction;
 ${emitStatements(node.body, "  ", "interaction")}
 });`;
+    case "ModalSubmitHandler":
+      return `client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isModalSubmit() || interaction.customId !== ${emitExpression(node.modalId)}) return;
+  const { user, channel, guild: server, fields } = interaction;
+${emitStatements(node.body, "  ", "interaction")}
+});`;
     case "EveryTimerDecl":
       return `setInterval(async () => {\n${emitStatements(node.body, "  ", "message")}\n}, ${durationMs(node.amount.value, node.unit)});`;
     case "DailyTimerDecl":
@@ -209,6 +235,9 @@ function emitStatements(statements: Statement[], indent: string, triggerName: st
 function emitStatement(statement: Statement, indent: string, triggerName: string): string {
   switch (statement.type) {
     case "ReplyStatement":
+      if (statement.ephemeral) {
+        return `${indent}await ${triggerName}.reply({ content: ${emitExpression(statement.message)}, ephemeral: true });`;
+      }
       return `${indent}await ${triggerName}.reply(${emitExpression(statement.message)});`;
     case "SayStatement": {
       if (statement.channel) {
@@ -227,6 +256,24 @@ function emitStatement(statement: Statement, indent: string, triggerName: string
         return `${indent}await findChannel(server, "general")?.send({ content: ${emitExpression(statement.message)}, components: [${components}] });`;
       }
       return `${indent}await (${triggerName}.channel ?? channel)?.send({ content: ${emitExpression(statement.message)}, components: [${components}] });`;
+    case "ShowModalStatement":
+      const modalInputs = statement.inputs.map((input: any) => {
+        const style = input.style ? `.${input.style.value === "short" ? "Short" : "Paragraph"}` : ".Short";
+        return `new TextInputBuilder()
+        .setCustomId(${emitExpression(input.id)})
+        .setLabel(${emitExpression(input.label)})
+        .setStyle(TextInputStyle${style})
+        .setRequired(${input.required})`;
+      }).join(",\n        ");
+      return `${indent}const modal = new ModalBuilder()
+        .setCustomId(${emitExpression(statement.modalId)})
+        .setTitle(${emitExpression(statement.title)})
+        .addComponents(
+          new ActionRowBuilder<TextInputBuilder>().addComponents(
+            ${modalInputs}
+          )
+        );
+      await interaction.showModal(modal);`;
     case "LetDecl":
       return `${indent}const ${statement.name} = ${emitExpression(statement.value)};`;
     case "StoreStatement":
@@ -250,10 +297,45 @@ function emitStatement(statement: Statement, indent: string, triggerName: string
       return `${indent}await ${emitExpression(statement.subject)}?.kick?.();`;
     case "BanStatement":
       return `${indent}await ${emitExpression(statement.subject)}?.ban?.();`;
+    case "UnbanStatement":
+      return `${indent}await server?.members.unban(${emitExpression(statement.subject)});`;
     case "EditMessageStatement":
       return `${indent}await ${emitExpression(statement.target)}?.edit?.(${emitExpression(statement.newContent)});`;
     case "DeleteMessageStatement":
       return `${indent}await ${emitExpression(statement.target)}?.delete?.();`;
+    case "PinStatement":
+      return `${indent}await ${emitExpression(statement.target)}?.pin?.();`;
+    case "UnpinStatement":
+      return `${indent}await ${emitExpression(statement.target)}?.unpin?.();`;
+    case "AddReactionStatement":
+      return `${indent}await ${emitExpression(statement.target)}?.react?.(${emitExpression(statement.emoji)});`;
+    case "RemoveReactionStatement":
+      return `${indent}await ${emitExpression(statement.target)}?.reactions?.remove(${emitExpression(statement.emoji)});`;
+    case "RemoveAllReactionsStatement":
+      return `${indent}await ${emitExpression(statement.target)}?.reactions?.removeAll?.();`;
+    case "CreateChannelStatement":
+      if (statement.channelType) {
+        return `${indent}await server?.channels.create({ name: ${emitExpression(statement.name)}, type: ${emitExpression(statement.channelType)} });`;
+      }
+      return `${indent}await server?.channels.create({ name: ${emitExpression(statement.name)} });`;
+    case "DeleteChannelStatement":
+      return `${indent}await ${emitExpression(statement.target)}?.delete?.();`;
+    case "EditChannelStatement":
+      if (statement.newName) {
+        return `${indent}await ${emitExpression(statement.target)}?.setName(${emitExpression(statement.newName)});`;
+      }
+      return `${indent}await ${emitExpression(statement.target)}?.setName();`;
+    case "CreateRoleStatement":
+      return `${indent}await server?.roles.create({ name: ${emitExpression(statement.name)} });`;
+    case "DeleteRoleStatement":
+      return `${indent}await ${emitExpression(statement.target)}?.delete?.();`;
+    case "EditRoleStatement":
+      if (statement.newName) {
+        return `${indent}await ${emitExpression(statement.target)}?.setName(${emitExpression(statement.newName)});`;
+      }
+      return `${indent}await ${emitExpression(statement.target)}?.setName();`;
+    case "SendDMStatement":
+      return `${indent}await ${emitExpression(statement.target)}?.send(${emitExpression(statement.message)});`;
     case "UploadStatement":
       if (statement.message) {
         return `${indent}await ${triggerName}.channel.send({ files: [${emitExpression(statement.filePath)}], content: ${emitExpression(statement.message)} });`;
@@ -272,11 +354,17 @@ function emitStatement(statement: Statement, indent: string, triggerName: string
   }
 }
 
-function emitEmbed(embed: { title?: Expression; description?: Expression; color?: { value: string }; fields: { name: Expression; value: Expression }[] }): string {
+function emitEmbed(embed: { title?: Expression; description?: Expression; color?: { value: string }; author?: Expression; footer?: Expression; image?: Expression; thumbnail?: Expression; url?: Expression; timestamp?: boolean; fields: { name: Expression; value: Expression }[] }): string {
   let lines = "new EmbedBuilder()";
   if (embed.title) lines += `.setTitle(${emitExpression(embed.title)})`;
   if (embed.description) lines += `.setDescription(${emitExpression(embed.description)})`;
   if (embed.color) lines += `.setColor(${JSON.stringify(embed.color.value)})`;
+  if (embed.author) lines += `.setAuthor({ name: ${emitExpression(embed.author)} })`;
+  if (embed.footer) lines += `.setFooter({ text: ${emitExpression(embed.footer)} })`;
+  if (embed.image) lines += `.setImage(${emitExpression(embed.image)})`;
+  if (embed.thumbnail) lines += `.setThumbnail(${emitExpression(embed.thumbnail)})`;
+  if (embed.url) lines += `.setURL(${emitExpression(embed.url)})`;
+  if (embed.timestamp) lines += `.setTimestamp()`;
   for (const field of embed.fields) {
     lines += `.addFields({ name: ${emitExpression(field.name)}, value: ${emitExpression(field.value)} })`;
   }
@@ -381,18 +469,68 @@ function emitComponents(components: any[]): string {
 
   for (const component of components) {
     if (component.type === "ButtonComponent") {
-      currentRow.push(`new ButtonBuilder()
+      let buttonCode = `new ButtonBuilder()
         .setCustomId(${emitExpression(component.id)})
-        .setLabel(${emitExpression(component.label)})
-        .setStyle(ButtonStyle.Primary)`);
+        .setLabel(${emitExpression(component.label)})`;
+      
+      if (component.url) {
+        buttonCode += `.setStyle(ButtonStyle.Link).setURL(${emitExpression(component.url)})`;
+      } else if (component.style) {
+        const styleValue = component.style.value.toLowerCase();
+        const styleMap: Record<string, string> = {
+          primary: "ButtonStyle.Primary",
+          secondary: "ButtonStyle.Secondary",
+          success: "ButtonStyle.Success",
+          danger: "ButtonStyle.Danger",
+          link: "ButtonStyle.Link"
+        };
+        buttonCode += `.setStyle(${styleMap[styleValue] || "ButtonStyle.Primary"})`;
+      } else {
+        buttonCode += `.setStyle(ButtonStyle.Primary)`;
+      }
+      
+      currentRow.push(buttonCode);
     } else if (component.type === "SelectMenuComponent") {
-      currentRow.push(`new StringSelectMenuBuilder()
-        .setCustomId(${emitExpression(component.id)})
-        .setOptions(${component.options.map((opt: any) => 
+      let menuCode = `new StringSelectMenuBuilder()
+        .setCustomId(${emitExpression(component.id)})`;
+      
+      if (component.menuType) {
+        const menuTypeValue = component.menuType.value.toLowerCase();
+        const menuTypeMap: Record<string, string> = {
+          string: "StringSelectMenuBuilder",
+          channel: "ChannelSelectMenuBuilder",
+          role: "RoleSelectMenuBuilder",
+          user: "UserSelectMenuBuilder",
+          mentionable: "MentionableSelectMenuBuilder"
+        };
+        
+        if (menuTypeValue === "channel") {
+          menuCode = `new ChannelSelectMenuBuilder()
+            .setCustomId(${emitExpression(component.id)})`;
+        } else if (menuTypeValue === "role") {
+          menuCode = `new RoleSelectMenuBuilder()
+            .setCustomId(${emitExpression(component.id)})`;
+        } else if (menuTypeValue === "user") {
+          menuCode = `new UserSelectMenuBuilder()
+            .setCustomId(${emitExpression(component.id)})`;
+        } else if (menuTypeValue === "mentionable") {
+          menuCode = `new MentionableSelectMenuBuilder()
+            .setCustomId(${emitExpression(component.id)})`;
+        }
+      }
+      
+      if (component.options && component.options.length > 0) {
+        menuCode += `.setOptions(${component.options.map((opt: any) => 
           `new StringSelectMenuOptionBuilder()
             .setLabel(${emitExpression(opt.label)})
             .setValue(${emitExpression(opt.value)})`
-        ).join(", ")})`);
+        ).join(", ")})`;
+      }
+      
+      currentRow.push(menuCode);
+    } else if (component.type === "ModalComponent") {
+      // Modals are shown via showModal, not sent in components
+      // This is handled separately in the button/interaction codegen
     }
   }
 

@@ -122,6 +122,22 @@ class Parser {
         handler = { type: "ReactionAddHandler", loc: this.loc(start), emoji, body: [] };
         break;
       }
+      case "remove": {
+        this.consumeKeyword("reaction");
+        const emoji = this.parseStringLiteral();
+        handler = { type: "ReactionRemoveHandler", loc: this.loc(start), emoji, body: [] };
+        break;
+      }
+      case "member": {
+        this.consumeKeyword("update");
+        handler = { type: "GuildMemberUpdateHandler", loc: this.loc(start), body: [] };
+        break;
+      }
+      case "presence": {
+        this.consumeKeyword("update");
+        handler = { type: "PresenceUpdateHandler", loc: this.loc(start), body: [] };
+        break;
+      }
       case "slash": {
         const command = this.parseStringLiteral();
         let description: StringLiteral | undefined;
@@ -175,6 +191,12 @@ class Parser {
         handler = { type: "SelectMenuHandler", loc: this.loc(start), menuId, body: [] };
         break;
       }
+      case "modal": {
+        this.consumeKeyword("submit");
+        const modalId = this.parseStringLiteral();
+        handler = { type: "ModalSubmitHandler", loc: this.loc(start), modalId, body: [] };
+        break;
+      }
       default: {
         throw makeCatalogError("NEWT_E003", event.line, event.column, this.sourceLineHint(event));
       }
@@ -225,13 +247,27 @@ class Parser {
   private parseStatement(): Statement {
     if (this.checkKeyword("reply")) {
       const start = this.advance();
+      const ephemeral = this.matchKeyword("ephemeral");
       const message = this.parseExpressionUntilLineEnd();
       this.consumeLineEnd();
-      return { type: "ReplyStatement", loc: this.loc(start), message };
+      return { type: "ReplyStatement", loc: this.loc(start), message, ephemeral };
+    }
+
+    if (this.checkKeyword("dm")) {
+      const start = this.advance();
+      const target = this.parseAtom();
+      this.consumeKeyword("send");
+      const message = this.parseExpressionUntilLineEnd();
+      this.consumeLineEnd();
+      return { type: "SendDMStatement", loc: this.loc(start), target, message };
     }
 
     if (this.checkKeyword("say")) {
       return this.parseSayStatement();
+    }
+
+    if (this.checkKeyword("show")) {
+      return this.parseShowModalStatement();
     }
 
     if (this.checkKeyword("let")) {
@@ -269,8 +305,88 @@ class Parser {
       return { type: "RequireRoleStatement", loc: this.loc(start), role };
     }
 
-    if (this.checkKeyword("give") || this.checkKeyword("remove")) {
+    if (this.checkKeyword("give")) {
       return this.parseRoleMutation();
+    }
+
+    if (this.checkKeyword("remove")) {
+      const start = this.advance();
+      if (this.checkKeyword("all")) {
+        this.consumeKeyword("all");
+        this.consumeKeyword("reactions");
+        this.consumeKeyword("from");
+        const target = this.parseAtom();
+        this.consumeLineEnd();
+        return { type: "RemoveAllReactionsStatement", loc: this.loc(start), target };
+      } else if (this.checkKeyword("reaction")) {
+        this.consumeKeyword("reaction");
+        this.consumeKeyword("from");
+        const target = this.parseAtom();
+        this.consumeKeyword("with");
+        const emoji = this.parseStringLiteral();
+        this.consumeLineEnd();
+        return { type: "RemoveReactionStatement", loc: this.loc(start), target, emoji };
+      } else {
+        // This is for "remove role" - we already advanced past "remove"
+        const subject = this.parseAtom();
+        this.consumeKeyword("role");
+        const role = this.parseStringLiteral();
+        this.consumeLineEnd();
+        return { type: "RemoveRoleStatement", loc: this.loc(start), subject, role };
+      }
+    }
+
+    if (this.checkKeyword("clear")) {
+      const start = this.advance();
+      this.consumeKeyword("reactions");
+      this.consumeKeyword("from");
+      const target = this.parseAtom();
+      this.consumeLineEnd();
+      return { type: "RemoveAllReactionsStatement", loc: this.loc(start), target };
+    }
+
+    if (this.checkKeyword("create")) {
+      const start = this.advance();
+      if (this.checkKeyword("channel")) {
+        this.consumeKeyword("channel");
+        const name = this.parseStringLiteral();
+        let channelType: StringLiteral | undefined;
+        if (this.matchKeyword("as")) {
+          channelType = this.parseStringLiteral();
+        }
+        this.consumeLineEnd();
+        return { type: "CreateChannelStatement", loc: this.loc(start), name, channelType };
+      } else if (this.checkKeyword("role")) {
+        this.consumeKeyword("role");
+        const name = this.parseStringLiteral();
+        this.consumeLineEnd();
+        return { type: "CreateRoleStatement", loc: this.loc(start), name };
+      }
+    }
+
+    if (this.checkKeyword("edit")) {
+      const start = this.advance();
+      if (this.checkKeyword("channel")) {
+        this.consumeKeyword("channel");
+        const target = this.parseAtom();
+        this.consumeKeyword("to");
+        const newName = this.parseStringLiteral();
+        this.consumeLineEnd();
+        return { type: "EditChannelStatement", loc: this.loc(start), target, newName };
+      } else if (this.checkKeyword("role")) {
+        this.consumeKeyword("role");
+        const target = this.parseAtom();
+        this.consumeKeyword("to");
+        const newName = this.parseStringLiteral();
+        this.consumeLineEnd();
+        return { type: "EditRoleStatement", loc: this.loc(start), target, newName };
+      } else {
+        const target = this.parseAtom();
+        this.consumeKeyword("to");
+        const newContent = this.parseExpressionUntilLineEnd();
+        this.consumeLineEnd();
+        return { type: "EditMessageStatement", loc: this.loc(start), target, newContent };
+      }
     }
 
     if (this.checkKeyword("mute")) {
@@ -284,11 +400,11 @@ class Parser {
       return { type: "MuteStatement", loc: this.loc(start), subject, duration };
     }
 
-    if (this.checkKeyword("kick") || this.checkKeyword("ban")) {
+    if (this.checkKeyword("kick") || this.checkKeyword("ban") || this.checkKeyword("unban")) {
       const start = this.advance();
       const subject = this.parseAtom();
       this.consumeLineEnd();
-      return { type: start.value === "kick" ? "KickStatement" : "BanStatement", loc: this.loc(start), subject };
+      return { type: start.value === "kick" ? "KickStatement" : start.value === "ban" ? "BanStatement" : "UnbanStatement", loc: this.loc(start), subject };
     }
 
     if (this.checkKeyword("try")) {
@@ -314,9 +430,46 @@ class Parser {
 
     if (this.checkKeyword("delete")) {
       const start = this.advance();
+      if (this.checkKeyword("channel")) {
+        this.consumeKeyword("channel");
+        const target = this.parseAtom();
+        this.consumeLineEnd();
+        return { type: "DeleteChannelStatement", loc: this.loc(start), target };
+      } else if (this.checkKeyword("role")) {
+        this.consumeKeyword("role");
+        const target = this.parseAtom();
+        this.consumeLineEnd();
+        return { type: "DeleteRoleStatement", loc: this.loc(start), target };
+      } else {
+        const target = this.parseAtom();
+        this.consumeLineEnd();
+        return { type: "DeleteMessageStatement", loc: this.loc(start), target };
+      }
+    }
+
+    if (this.checkKeyword("pin")) {
+      const start = this.advance();
       const target = this.parseAtom();
       this.consumeLineEnd();
-      return { type: "DeleteMessageStatement", loc: this.loc(start), target };
+      return { type: "PinStatement", loc: this.loc(start), target };
+    }
+
+    if (this.checkKeyword("unpin")) {
+      const start = this.advance();
+      const target = this.parseAtom();
+      this.consumeLineEnd();
+      return { type: "UnpinStatement", loc: this.loc(start), target };
+    }
+
+    if (this.checkKeyword("add")) {
+      const start = this.advance();
+      this.consumeKeyword("reaction");
+      this.consumeKeyword("to");
+      const target = this.parseAtom();
+      this.consumeKeyword("with");
+      const emoji = this.parseStringLiteral();
+      this.consumeLineEnd();
+      return { type: "AddReactionStatement", loc: this.loc(start), target, emoji };
     }
 
     if (this.checkKeyword("upload")) {
@@ -371,6 +524,46 @@ class Parser {
     return { type: "SayStatement", loc: this.loc(start), message, channel };
   }
 
+  private parseShowModalStatement(): Statement {
+    const start = this.consumeKeyword("show");
+    this.consumeKeyword("modal");
+    const modalId = this.parseStringLiteral();
+    this.consumeKeyword("title");
+    const title = this.parseStringLiteral();
+    this.match("COLON");
+    this.consumeLineEnd();
+    this.skipNewlines();
+    this.consumeType("INDENT", "Modal inputs need to be indented.");
+    const inputs: any[] = [];
+    this.skipNewlines();
+    while (this.checkKeyword("input")) {
+      this.consumeKeyword("input");
+      const inputId = this.parseStringLiteral();
+      this.consumeKeyword("label");
+      const inputLabel = this.parseStringLiteral();
+      let inputStyle: StringLiteral | undefined;
+      let required = false;
+      if (this.matchKeyword("style")) {
+        inputStyle = this.parseStringLiteral();
+      }
+      if (this.matchKeyword("required")) {
+        required = true;
+      }
+      this.consumeLineEnd();
+      inputs.push({
+        type: "TextInput",
+        loc: this.loc(start),
+        id: inputId,
+        label: inputLabel,
+        style: inputStyle,
+        required
+      });
+      this.skipNewlines();
+    }
+    this.consumeType("DEDENT", "Modal inputs need to be indented.");
+    return { type: "ShowModalStatement", loc: this.loc(start), modalId, title, inputs };
+  }
+
   private parseComponents(start: Token): Component[] {
     this.skipNewlines();
     this.consumeType("INDENT", "Components need to be indented.");
@@ -382,39 +575,81 @@ class Parser {
         const id = this.parseStringLiteral();
         this.consumeKeyword("label");
         const label = this.parseStringLiteral();
+        let style: StringLiteral | undefined;
+        let url: StringLiteral | undefined;
+        if (this.matchKeyword("style")) {
+          style = this.parseStringLiteral();
+        }
+        if (this.matchKeyword("url")) {
+          url = this.parseStringLiteral();
+        }
+        this.consumeLineEnd();
         components.push({
           type: "ButtonComponent",
           loc: this.loc(start),
           id,
-          label
+          label,
+          style,
+          url
         });
       } else if (this.matchKeyword("select")) {
         this.consumeKeyword("menu");
         const id = this.parseStringLiteral();
-        this.consumeKeyword("with");
-        this.consumeKeyword("options");
-        this.skipNewlines();
-        const options: SelectOption[] = [];
-        while (this.check("STRING")) {
-          const label = this.parseStringLiteral();
-          this.consumeKeyword("as");
-          const value = this.parseStringLiteral();
-          options.push({
-            type: "SelectOption",
-            loc: this.loc(start),
-            label,
-            value
-          });
-          this.skipNewlines();
+        let menuType: StringLiteral | undefined;
+        if (this.matchKeyword("type")) {
+          menuType = this.parseStringLiteral();
         }
-        components.push({
-          type: "SelectMenuComponent",
-          loc: this.loc(start),
-          id,
-          options
-        });
+        
+        // Advanced select menu types (channel, role, user, mentionable) don't need options
+        // They're auto-populated by Discord
+        const needsOptions = !menuType || 
+          (menuType.value.toLowerCase() !== "channel" && 
+           menuType.value.toLowerCase() !== "role" && 
+           menuType.value.toLowerCase() !== "user" && 
+           menuType.value.toLowerCase() !== "mentionable");
+        
+        if (needsOptions) {
+          this.consumeKeyword("with");
+          this.consumeKeyword("options");
+          this.match("COLON");
+          this.consumeLineEnd();
+          this.skipNewlines();
+          this.consumeType("INDENT", "Select options need to be indented.");
+          this.skipNewlines();
+          const options: SelectOption[] = [];
+          while (this.check("STRING")) {
+            const label = this.parseStringLiteral();
+            this.consumeKeyword("as");
+            const value = this.parseStringLiteral();
+            this.consumeLineEnd();
+            options.push({
+              type: "SelectOption",
+              loc: this.loc(start),
+              label,
+              value
+            });
+            this.skipNewlines();
+          }
+          this.consumeType("DEDENT", "Select options need to be indented.");
+          components.push({
+            type: "SelectMenuComponent",
+            loc: this.loc(start),
+            id,
+            menuType,
+            options
+          });
+        } else {
+          this.consumeLineEnd();
+          components.push({
+            type: "SelectMenuComponent",
+            loc: this.loc(start),
+            id,
+            menuType,
+            options: []
+          });
+        }
       } else {
-        this.advance();
+        throw this.error(this.peek(), "Components can only contain buttons and select menus.");
       }
       this.skipNewlines();
     }
@@ -437,12 +672,24 @@ class Parser {
       } else if (this.matchKeyword("color")) {
         const color = this.consumeType("HASH_COLOR", "Embed colors look like #5865F2.");
         embed.color = { type: "ColorLiteral", loc: this.loc(color), value: color.value };
+      } else if (this.matchKeyword("author")) {
+        embed.author = this.parseStringLiteral();
+      } else if (this.matchKeyword("footer")) {
+        embed.footer = this.parseStringLiteral();
+      } else if (this.matchKeyword("image")) {
+        embed.image = this.parseStringLiteral();
+      } else if (this.matchKeyword("thumbnail")) {
+        embed.thumbnail = this.parseStringLiteral();
+      } else if (this.matchKeyword("url")) {
+        embed.url = this.parseStringLiteral();
+      } else if (this.matchKeyword("timestamp")) {
+        embed.timestamp = true;
       } else if (this.matchKeyword("field")) {
         const name = this.parseStringLiteral();
         const value = this.parseStringLiteral();
         embed.fields.push({ type: "EmbedField", loc: name.loc, name, value });
       } else {
-        throw this.error(this.peek(), "Embeds support title, description, color, and field lines.");
+        throw this.error(this.peek(), "Embeds support title, description, color, author, footer, image, thumbnail, url, timestamp, and field lines.");
       }
       this.consumeLineEnd();
       this.skipNewlines();
@@ -548,6 +795,16 @@ class Parser {
 
     if (this.check("NUMBER")) {
       return this.parseNumberLiteral();
+    }
+
+    if (this.matchKeyword("true")) {
+      const start = this.previous();
+      return { type: "BooleanLiteral", loc: this.loc(start), value: true };
+    }
+
+    if (this.matchKeyword("false")) {
+      const start = this.previous();
+      return { type: "BooleanLiteral", loc: this.loc(start), value: false };
     }
 
     if (this.matchKeyword("load")) {
