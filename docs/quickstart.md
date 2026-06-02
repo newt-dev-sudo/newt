@@ -12,7 +12,7 @@ Newt is a programming language designed specifically for Discord bots. Instead o
 
 ## Prerequisites
 
-- **Node.js 20 or higher** - This is a tool that runs your bot (download from [nodejs.org](https://nodejs.org))
+- **Node.js 18 or higher** - This is a tool that runs your bot (download from [nodejs.org](https://nodejs.org))
 - **A Discord account** - You probably already have this!
 - **A Discord server** - Where you'll test your bot
 

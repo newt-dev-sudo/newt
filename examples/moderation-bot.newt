@@ -5,6 +5,7 @@ bot token from env "DISCORD_TOKEN"
 on ready:
     say "ModNewt is watching the server." in channel "general"
 
+# Note: This filter is case-sensitive and only catches lowercase "spoiler"
 on message contains "spoiler":
     reply "Please keep spoilers in the spoiler channel."
 
@@ -14,13 +15,22 @@ on message contains "badword":
     reply "Inappropriate language is not allowed."
 
 on slash "mute":
-    mute target for 10 minutes
-    reply "{target} has been muted for 10 minutes."
+    if user has role "Moderator":
+        mute target for 10 minutes
+        reply "{target} has been muted for 10 minutes."
+    else:
+        reply "You don't have permission to use this command."
 
 on slash "kick":
-    kick target
-    reply "{target} was kicked."
+    if user has role "Moderator":
+        kick target
+        reply "{target} was kicked."
+    else:
+        reply "You don't have permission to use this command."
 
 on slash "ban":
-    ban target
-    reply "{target} has been banned."
+    if user has role "Moderator":
+        ban target
+        reply "{target} has been banned."
+    else:
+        reply "You don't have permission to use this command."

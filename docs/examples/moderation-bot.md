@@ -2,8 +2,6 @@
 
 A moderation bot with content filtering and member management commands.
 
-> **Note:** This example uses `require role` and timers (`every`, `at`) which are not yet implemented in the interpreter.
-
 ## Code
 
 ```javascript
@@ -14,35 +12,30 @@ bot token from env "DISCORD_TOKEN"
 on ready:
     say "ModNewt is watching the server." in channel "moderation"
 
+# Note: This filter is case-sensitive and only catches lowercase "spoiler"
 on message contains "spoiler":
     reply "Please keep spoilers in the spoiler channel."
 
 on command "mute":
-    # Note: require role is not yet implemented
-    # Alternative: use if statements with store/load for permission checks
-    mute target for 10 minutes
-    reply "{target} has been muted for 10 minutes."
+    if user has role "Moderator":
+        mute target for 10 minutes
+        reply "{target} has been muted for 10 minutes."
+    else:
+        reply "You don't have permission to use this command."
 
 on command "kick":
-    # Note: require role is not yet implemented
-    kick target
-    reply "{target} was kicked."
-
-# Note: timers (every, at) are not yet implemented
-# every 1 hour:
-#     say "Moderation reminder: be kind and read the rules." in channel "general"
-#
-# at "09:00" daily:
-#     say "Good morning! Today's mod queue is ready." in channel "moderation"
+    if user has role "Moderator":
+        kick target
+        reply "{target} was kicked."
+    else:
+        reply "You don't have permission to use this command."
 ```
 
 ## What It Does
 
-- Automatically responds to messages containing "spoiler"
+- Automatically responds to messages containing "spoiler" (case-sensitive)
 - `!mute` - Mutes a user for 10 minutes (Moderator only)
 - `!kick` - Kicks a user (Moderator only)
-- Hourly moderation reminders
-- Daily morning announcements
 
 ## Key Concepts
 
@@ -56,13 +49,17 @@ on message contains "spoiler":
 - Triggers on any message containing the text
 - Useful for auto-moderation
 - Can be used for keyword filtering
+- **Note:** This is case-sensitive and only matches lowercase "spoiler"
 
-### Role Requirements
+### Permission Checks
 
 ```javascript
 on command "mute":
-    require role "Moderator"
-    mute target for 10 minutes
+    if user has role "Moderator":
+        mute target for 10 minutes
+        reply "{target} has been muted for 10 minutes."
+    else:
+        reply "You don't have permission to use this command."
 ```
 
 - Restricts commands to specific roles
@@ -80,27 +77,10 @@ kick target
 - Time-based mutes
 - Permanent kicks
 
-### Timers
-
-```javascript
-every 1 hour:
-    say "Reminder" in channel "general"
-
-at "09:00" daily:
-    say "Morning announcement" in channel "moderation"
-```
-
-- Recurring tasks
-- Scheduled messages
-- Automated reminders
-
 ## How to Run
 
 ```bash
-newt build moderation-bot.newt --out moderation-bot
-cd moderation-bot
-npm install
-DISCORD_TOKEN="your-token" npm start
+newt run moderation-bot.newt
 ```
 
 ## Setup Requirements
@@ -117,7 +97,6 @@ DISCORD_TOKEN="your-token" npm start
 
 - Content moderation
 - Rule enforcement
-- Automated reminders
 - Community management
 
 ## Extensions

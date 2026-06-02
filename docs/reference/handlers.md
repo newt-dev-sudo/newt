@@ -76,7 +76,7 @@ Each handler has access to specific variables (context) that provide information
 | `on command` | user, message, channel, server, args, target |
 | `on slash` | user, channel, server, args, interaction |
 | `on button click` | user, channel, server, interaction |
-| `on select menu` | user, channel, server, values, interaction |
+| `on menu` | user, channel, server, values, interaction |
 | `on message contains` | user, message, channel, server |
 | `on message update` | user, message, channel, server |
 | `on message delete` | user, message, channel, server |
@@ -86,8 +86,6 @@ Each handler has access to specific variables (context) that provide information
 | `on remove reaction` | user, channel, server, message |
 | `on member update` | user, member, server |
 | `on presence update` | user, member, server |
-| `on button click` | user, channel, server, interaction |
-| `on select menu` | user, channel, server, values, interaction |
 | `on modal submit` | user, channel, server, fields, interaction |
 
 **Why context matters:**
@@ -284,7 +282,7 @@ on button click "no":
 - Interactive menus
 - Confirmation dialogs
 
-## on select menu
+## on menu
 
 **Concept:** Event-driven programming (interaction)
 
@@ -299,7 +297,7 @@ on button click "no":
 4. Your bot can respond to the selection
 
 ```javascript
-on select menu "role_select":
+on menu "role_select":
     reply "You selected: {values.join(', ')}"
 ```
 
@@ -319,7 +317,7 @@ on slash "role":
             "Moderator" as "mod"
             "Member" as "member"
 
-on select menu "role_select":
+on menu "role_select":
     give user role values[0]
     reply "You now have the {values[0]} role!"
 ```

@@ -181,7 +181,7 @@ on command "rules":
 **How it works:**
 - Your bot sends a message with clickable elements
 - Users click buttons or select options
-- Your bot responds using `on button click` or `on select menu` handlers
+- Your bot responds using `on button click` or `on menu` handlers
 
 **Buttons:**
 ```javascript
@@ -256,7 +256,7 @@ on button click "no":
 - Polls and voting
 - Configuration menus
 
-**Important:** Button clicks and select menu selections are handled using separate handlers (`on button click` and `on select menu`).
+**Important:** Button clicks and select menu selections are handled using separate handlers (`on button click` and `on menu`).
 
 **Button styles:**
 - `primary` - Blue button (default)
@@ -557,14 +557,58 @@ on command "ban":
 **What this does:**
 - User types: `!ban @TrollUser`
 - Bot checks if the user has Admin role
-- If yes: Bans the target and confirms
-- If no: Says they don't have permission
+- If yes, bans the target user
+- If no, replies with permission denied message
 
 **Use cases:**
 - Permission checks
-- Different responses based on conditions
+- Conditional responses
 - Error handling
-- User tiers/levels
+- Branching logic
+
+## try / on error
+
+**Concept:** Error handling and graceful failure
+
+**What it does:** Runs code that might fail, and provides a fallback if it does
+
+**When to use it:** When you want to handle errors gracefully instead of crashing
+
+**How it works:**
+- Tries to run the code in the try block
+- If an error occurs, runs the code in the on error block
+- If no error occurs, skips the on error block
+
+```javascript
+try:
+    let userInfo = getUser(target.id)
+    reply "User found: {userInfo.username}"
+on error:
+    reply "Could not fetch user info"
+```
+
+**Example:**
+```javascript
+on command "userinfo":
+    try:
+        let userInfo = getUser(target.id)
+        reply "User: {userInfo.username}"
+        reply "ID: {userInfo.id}"
+    on error:
+        reply "Could not fetch user information"
+```
+
+**What this does:**
+- User types: `!userinfo @SomeUser`
+- Bot tries to fetch the user's information
+- If successful, displays the username and ID
+- If the user doesn't exist or can't be fetched, shows an error message
+
+**Use cases:**
+- Handling API failures
+- Graceful degradation
+- User-friendly error messages
+- Preventing bot crashes
 
 **Comparison operators:**
 - `=` - Equal to

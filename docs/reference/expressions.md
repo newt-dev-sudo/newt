@@ -71,12 +71,12 @@ reply "You said: {message.content}"
 **Example:**
 ```javascript
 on command "echo":
-    reply "You said: {message.content}"
+    reply "You said: {args}"
 ```
 
 **What this does:**
 - User types: `!echo hello world`
-- Bot responds: "You said: !echo hello world"
+- Bot responds: "You said: hello world" (without the !echo prefix)
 
 ### channel
 
@@ -157,6 +157,8 @@ on command "add":
 - User types: `!add 5 3`
 - Bot responds: "The sum is 8"
 
+**Important:** Args are strings, but Newt automatically converts them to numbers for math operations. If you need to ensure numeric conversion, you can use math operations directly.
+
 ### target
 
 **What it is:** The first user mentioned in a message
@@ -219,12 +221,16 @@ Operators let you compare values, combine conditions, and do math.
 **What they do:** Compare two values to see if they're equal, greater than, etc.
 
 **Available operators:**
-- `=` - Equal to
+- `=` - Equal to (used in conditions like `if x = 5`)
 - `!=` - Not equal to
 - `<` - Less than
 - `>` - Greater than
 - `<=` - Less than or equal to
 - `>=` - Greater than or equal to
+
+**Important:** The `=` operator has different meanings depending on context:
+- In conditions (`if x = 5`), it means "equal to" (comparison)
+- In assignments (`let x = 5` or `store key = 5`), it means "assign value"
 
 ```javascript
 if points > 100:
@@ -598,6 +604,41 @@ on command "list":
 - Storing lists of items
 - Managing multiple values
 - Processing collections
+
+## HTTP Requests
+
+**What they are:** Functions that make HTTP requests to external APIs
+
+**Available methods:**
+- `fetch "url"` - Make an HTTP GET request to a URL
+
+```javascript
+let data = fetch "https://api.example.com/data"
+reply "Fetched: {data}"
+```
+
+**Example:**
+```javascript
+on command "weather":
+    let weatherData = fetch "https://api.weatherapi.com/v1/current.json?q=London"
+    reply "Weather data: {weatherData}"
+```
+
+**What this does:**
+- User types: `!weather`
+- Bot makes an HTTP request to the weather API
+- Bot responds with the fetched data
+
+**Important:**
+- `fetch` returns the raw response from the API
+- You may need to parse JSON responses depending on the API
+- Use `try / on error` to handle network failures gracefully
+
+**Use cases:**
+- Fetching data from external APIs
+- Getting weather information
+- Retrieving data from web services
+- Integrating with third-party services
 
 ## String Methods
 
