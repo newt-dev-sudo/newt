@@ -1150,7 +1150,7 @@ on command "warn":
 - Useful for timed sequences or rate limiting
 
 ```javascript
-wait 5 seconds
+wait for 5 seconds
 say "This appears 5 seconds later"
 ```
 
@@ -1158,7 +1158,7 @@ say "This appears 5 seconds later"
 ```javascript
 on command "remind":
     reply "I'll remind you in 1 minute"
-    wait 1 minute
+    wait for 1 minute
     reply "Here's your reminder!"
 ```
 
@@ -1202,7 +1202,7 @@ edit message to "Updated content"
 ```javascript
 on command "status":
     reply "Checking status..."
-    wait 2 seconds
+    wait for 2 seconds
     edit message to "Status: All systems operational"
 ```
 
@@ -1241,7 +1241,7 @@ delete message
 ```javascript
 on command "cleanup":
     reply "This message will self-destruct in 5 seconds"
-    wait 5 seconds
+    wait for 5 seconds
     delete message
 ```
 
