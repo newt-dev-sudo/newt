@@ -4,17 +4,16 @@
   "private": true,
   "description": "Newt monorepo: a beginner-friendly DSL for Discord bots.",
   "workspaces": [
-    "packages/cli",
-    "packages/compiler"
+    "packages/compiler",
+    "packages/cli"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "check": "npm run check --workspaces --if-present",
-    "verify:runtime": "node scripts/verify-generated-bot.mjs"
+    "check": "npm run check --workspaces --if-present"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=18"
   },
   "license": "MIT"
 }

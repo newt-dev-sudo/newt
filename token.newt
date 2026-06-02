@@ -1,9 +1,0 @@
-bot name "HelloNewt"
-bot prefix "!"
-bot token from env "DISCORD_TOKEN"
-
-on ready:
-    say "HelloNewt is online!" in channel "bot-status"
-
-on command "hello":
-    reply "Hey there, {user.name}!"
