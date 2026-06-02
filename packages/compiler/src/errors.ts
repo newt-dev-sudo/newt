@@ -15,7 +15,8 @@ export type NewtErrorCode =
   | "NEWT_E012"
   | "NEWT_E013"
   | "NEWT_E014"
-  | "NEWT_E015";
+  | "NEWT_E015"
+  | "NEWT_E016";
 
 export interface NewtErrorOptions {
   code: NewtErrorCode;
@@ -114,6 +115,10 @@ export const errorCatalog: Record<NewtErrorCode, { message: string; suggestion: 
   NEWT_E015: {
     message: "Role names cannot be empty.",
     suggestion: "Use a real role name, like: require role \"Moderator\""
+  },
+  NEWT_E016: {
+    message: "This feature is not supported in generated builds.",
+    suggestion: "Use 'newt run', or remove/replace this feature."
   }
 };
 

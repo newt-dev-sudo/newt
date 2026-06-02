@@ -6,6 +6,7 @@ import type {
   Statement,
   TimerDecl
 } from "./ast.js";
+import { NewtError } from "./errors.js";
 
 export interface GeneratedProject {
   botJs: string;
@@ -350,7 +351,13 @@ function emitStatement(statement: Statement, indent: string, triggerName: string
     case "ExpressionStatement":
       return `${indent}${emitExpression(statement.expression)};`;
     default:
-      throw new Error(`Statement type "${statement.type}" is not supported in generated code. This feature may be available in 'newt run' but not in 'newt build'.`);
+      throw new NewtError({
+        code: "NEWT_E016",
+        message: `Statement type "${statement.type}" is not supported in generated code. This feature may be available in 'newt run' but not in 'newt build'.`,
+        line: 1,
+        column: 1,
+        sourceLine: ""
+      });
   }
 }
 

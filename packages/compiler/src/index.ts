@@ -38,6 +38,18 @@ export function compile(source: string, filename = "input.newt"): CompileResult 
     if (error instanceof NewtError) {
       return { success: false, errors: [new NewtError({ ...error, filename })] };
     }
+    if (error instanceof Error) {
+      // Convert any other Error to a NewtError for consistent error handling
+      const newtError = new NewtError({
+        code: "NEWT_E016",
+        message: error.message,
+        line: 1,
+        column: 1,
+        sourceLine: "",
+        filename
+      });
+      return { success: false, errors: [newtError] };
+    }
     throw error;
   }
 }
