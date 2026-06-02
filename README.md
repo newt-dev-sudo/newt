@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/public/newt-logo.png" alt="Newt Logo" width="200">
+
 # 🦎 Newt
 
 **Small script, big bot.**

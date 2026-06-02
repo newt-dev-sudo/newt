@@ -8,6 +8,7 @@ export default defineConfig({
     ['link', { rel: 'icon', href: '/favicon.svg' }]
   ],
   themeConfig: {
+    logo: '/newt-logo.png',
     search: {
       provider: 'local'
     },
