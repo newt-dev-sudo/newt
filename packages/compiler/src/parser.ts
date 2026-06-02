@@ -16,7 +16,8 @@ import type {
   TimeUnit,
   TopLevelNode,
   Component,
-  SelectOption
+  SelectOption,
+  ObjectProperty
 } from "./ast.js";
 import { makeCatalogError, NewtError } from "./errors.js";
 import type { Token, TokenType } from "./lexer.js";
@@ -250,7 +251,7 @@ class Parser {
       const ephemeral = this.matchKeyword("ephemeral");
       const message = this.parseExpressionUntilLineEnd();
       this.consumeLineEnd();
-      return { type: "ReplyStatement", loc: this.loc(start), message, ephemeral };
+      return { type: "ReplyStatement", loc: this.loc(start), message, ephemeral, captureMessage: false };
     }
 
     if (this.checkKeyword("dm")) {
@@ -273,7 +274,26 @@ class Parser {
     if (this.checkKeyword("let")) {
       const start = this.advance();
       const name = this.consumeType("IDENTIFIER", "let needs a variable name.").value;
+      
+      // Support "let x be y" syntax
+      if (this.matchKeyword("be")) {
+        const value = this.parseExpressionUntilLineEnd();
+        this.consumeLineEnd();
+        return { type: "LetDecl", loc: this.loc(start), name, value };
+      }
+      
       this.consumeType("EQUALS", "let needs an equals sign before the value.");
+      
+      // Check if this is a reply expression
+      if (this.checkKeyword("reply")) {
+        const replyStart = this.advance();
+        const ephemeral = this.matchKeyword("ephemeral");
+        const message = this.parseExpressionUntilLineEnd();
+        this.consumeLineEnd();
+        const replyExpr: any = { type: "ReplyExpr", loc: this.loc(replyStart), message, ephemeral };
+        return { type: "LetDecl", loc: this.loc(start), name, value: replyExpr };
+      }
+      
       const value = this.parseExpressionUntilLineEnd();
       this.consumeLineEnd();
       return { type: "LetDecl", loc: this.loc(start), name, value };
@@ -871,6 +891,63 @@ class Parser {
         messageId,
         emoji
       };
+    }
+
+    // Array literal: [1, 2, 3]
+    if (this.match("LBRACKET")) {
+      const start = this.previous();
+      const elements: Expression[] = [];
+      while (!this.check("RBRACKET") && !this.isAtEnd()) {
+        elements.push(this.parseExpressionUntil(["RBRACKET", "COMMA"]));
+        if (!this.match("COMMA")) break;
+      }
+      this.consumeType("RBRACKET", "Close array with ].");
+      return { type: "ArrayLiteral", loc: this.loc(start), elements };
+    }
+
+    // String methods: uppercase of text, lowercase of text, etc.
+    if (this.matchKeyword("uppercase") || this.matchKeyword("lowercase") || this.matchKeyword("length") || this.matchKeyword("split") || this.matchKeyword("trim")) {
+      const start = this.previous();
+      const method = start.value as "uppercase" | "lowercase" | "length" | "split" | "trim";
+      this.consumeKeyword("of");
+      const target = this.parseAtom();
+      let args: Expression[] | undefined;
+      if (method === "split" && this.matchKeyword("by")) {
+        args = [this.parseAtom()];
+      }
+      return { type: "StringMethodExpr", loc: this.loc(start), target, method, args };
+    }
+
+    // Array access: first of items, second of items, etc.
+    if (this.matchKeyword("first") || this.matchKeyword("second") || this.matchKeyword("third") || this.matchKeyword("last")) {
+      const start = this.previous();
+      const index = start.value as "first" | "second" | "third" | "last";
+      this.consumeKeyword("of");
+      const target = this.parseAtom();
+      return { type: "ArrayAccessExpr", loc: this.loc(start), target, index };
+    }
+
+    // Find expressions: role named "Admin", channel named "general", user with id "123"
+    if (this.matchKeyword("role")) {
+      const start = this.previous();
+      this.consumeKeyword("named");
+      const roleName = this.parseAtom();
+      return { type: "FindRoleExpr", loc: this.loc(start), roleName };
+    }
+
+    if (this.matchKeyword("channel")) {
+      const start = this.previous();
+      this.consumeKeyword("named");
+      const channelName = this.parseAtom();
+      return { type: "FindChannelExpr", loc: this.loc(start), channelName };
+    }
+
+    if (this.matchKeyword("user")) {
+      const start = this.previous();
+      this.consumeKeyword("with");
+      this.consumeKeyword("id");
+      const userId = this.parseAtom();
+      return { type: "FindUserExpr", loc: this.loc(start), userId };
     }
 
     if (this.match("LPAREN")) {

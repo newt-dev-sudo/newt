@@ -20,6 +20,15 @@ import type {
   GetReactionUsersExpr,
   DurationLiteral,
   TimerDecl,
+  ArrayLiteral,
+  ObjectLiteral,
+  ObjectProperty,
+  StringMethodExpr,
+  ArrayAccessExpr,
+  FindRoleExpr,
+  FindChannelExpr,
+  FindUserExpr,
+  ReplyExpr,
 } from "@newt-dev/compiler";
 
 interface InterpreterOptions {
@@ -902,8 +911,8 @@ export class NewtInterpreter {
         return callee(...callArgs);
 
       case "GetUserExpr":
-        const userId = await this.evaluateExpression(expr.userId, context);
-        return await this.client.users.fetch(userId);
+        const getUserId = await this.evaluateExpression(expr.userId, context);
+        return await this.client.users.fetch(getUserId);
 
       case "GetGuildExpr":
         const guildId = await this.evaluateExpression(expr.guildId, context);
@@ -927,6 +936,92 @@ export class NewtInterpreter {
           console.error("Error fetching reaction users:", error);
           return [];
         }
+
+      case "ArrayLiteral":
+        const elements = await Promise.all(
+          expr.elements.map((el) => this.evaluateExpression(el, context))
+        );
+        return elements;
+
+      case "ObjectLiteral":
+        const obj: any = {};
+        for (const prop of expr.properties) {
+          const value = await this.evaluateExpression(prop.value, context);
+          obj[prop.key] = value;
+        }
+        return obj;
+
+      case "StringMethodExpr":
+        const target = await this.evaluateExpression(expr.target, context);
+        const str = String(target);
+        switch (expr.method) {
+          case "uppercase":
+            return str.toUpperCase();
+          case "lowercase":
+            return str.toLowerCase();
+          case "length":
+            return str.length;
+          case "split":
+            const separator = expr.args ? await this.evaluateExpression(expr.args[0], context) : " ";
+            return str.split(separator);
+          case "trim":
+            return str.trim();
+          default:
+            throw new Error(`Unknown string method: ${expr.method}`);
+        }
+
+      case "ArrayAccessExpr":
+        const array = await this.evaluateExpression(expr.target, context);
+        if (!Array.isArray(array)) {
+          throw new Error(`Cannot access array index on non-array value`);
+        }
+        if (typeof expr.index === "string") {
+          switch (expr.index) {
+            case "first":
+              return array[0];
+            case "second":
+              return array[1];
+            case "third":
+              return array[2];
+            case "last":
+              return array[array.length - 1];
+            default:
+              throw new Error(`Unknown array index keyword: ${expr.index}`);
+          }
+        } else {
+          const index = await this.evaluateExpression(expr.index, context);
+          return array[index];
+        }
+
+      case "FindRoleExpr":
+        const roleName = await this.evaluateExpression(expr.roleName, context);
+        return this.findRole(context.server, roleName);
+
+      case "FindChannelExpr":
+        const channelName = await this.evaluateExpression(expr.channelName, context);
+        return this.findChannel(context.server, channelName);
+
+      case "FindUserExpr":
+        const findUserId = await this.evaluateExpression(expr.userId, context);
+        return await this.client.users.fetch(findUserId);
+
+      case "ReplyExpr":
+        const replyText = await this.evaluateExpression(expr.message, context);
+        let sentMessage;
+        if (context.interaction) {
+          if (!context.interaction.replied && !context.interaction.deferred) {
+            if (expr.ephemeral) {
+              sentMessage = await context.interaction.reply({ content: replyText, ephemeral: true, fetchReply: true });
+            } else {
+              sentMessage = await context.interaction.reply({ content: replyText, fetchReply: true });
+            }
+          } else {
+            sentMessage = await context.channel?.send(replyText);
+          }
+        } else {
+          sentMessage = await context.message?.reply(replyText);
+        }
+        return sentMessage;
 
       default:
         throw new Error(`Unknown expression type: ${(expr as any).type}`);

@@ -1181,8 +1181,6 @@ on command "remind":
 
 ## edit
 
-> ⚠️ **Known Limitation:** Edit statement is implemented but has a syntax limitation - you cannot store message references from `reply` statements using `let`. See the [Roadmap](../roadmap.md) for status.
-
 **Concept:** Message mutation and state management
 
 **What it does:** Changes the content of a message that was already sent
@@ -1198,12 +1196,19 @@ on command "remind":
 edit message to "Updated content"
 ```
 
+**With message references:**
+```javascript
+let msg = reply "Checking status..."
+wait for 2 seconds
+edit msg to "Status: All systems operational"
+```
+
 **Example:**
 ```javascript
 on command "status":
-    reply "Checking status..."
+    let statusMsg = reply "Checking status..."
     wait for 2 seconds
-    edit message to "Status: All systems operational"
+    edit statusMsg to "Status: All systems operational"
 ```
 
 **What this does:**
@@ -1215,12 +1220,10 @@ on command "status":
 **Use cases:**
 - Status updates
 - Correcting mistakes
-- Timed message changes
+- Timed messages
 - Progress indicators
 
 ## delete
-
-> ⚠️ **Known Limitation:** Delete statement is implemented but has a syntax limitation - you cannot store message references from `reply` statements using `let`. See the [Roadmap](../roadmap.md) for status.
 
 **Concept:** Message cleanup and moderation
 
@@ -1237,12 +1240,19 @@ on command "status":
 delete message
 ```
 
+**With message references:**
+```javascript
+let temp = reply "This will self-destruct in 5 seconds"
+wait for 5 seconds
+delete temp
+```
+
 **Example:**
 ```javascript
 on command "cleanup":
-    reply "This message will self-destruct in 5 seconds"
+    let tempMsg = reply "This message will self-destruct in 5 seconds"
     wait for 5 seconds
-    delete message
+    delete tempMsg
 ```
 
 **What this does:**

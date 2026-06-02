@@ -166,7 +166,16 @@ const keywords = new Set([
   "lowercase",
   "replace",
   "split",
-  "as"
+  "as",
+  "be",
+  "first",
+  "second",
+  "third",
+  "last",
+  "of",
+  "named",
+  "length",
+  "trim"
 ]);
 
 const CHAR_TOKEN_TYPES: Record<string, TokenType> = {

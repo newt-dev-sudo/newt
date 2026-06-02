@@ -193,6 +193,7 @@ export interface ReplyStatement extends BaseNode {
   type: "ReplyStatement";
   message: Expression;
   ephemeral: boolean;
+  captureMessage: boolean;
 }
 
 export interface SayStatement extends BaseNode {
@@ -446,6 +447,8 @@ export type Expression =
   | NumberLiteral
   | BooleanLiteral
   | ColorLiteral
+  | ArrayLiteral
+  | ObjectLiteral
   | IdentifierExpr
   | MemberExpr
   | ArgsIndexExpr
@@ -457,7 +460,13 @@ export type Expression =
   | GetReactionUsersExpr
   | BinaryExpr
   | UnaryExpr
-  | CallExpr;
+  | CallExpr
+  | StringMethodExpr
+  | ArrayAccessExpr
+  | FindRoleExpr
+  | FindChannelExpr
+  | FindUserExpr
+  | ReplyExpr;
 
 export interface StringLiteral extends BaseNode {
   type: "StringLiteral";
@@ -546,6 +555,56 @@ export interface CallExpr extends BaseNode {
   type: "CallExpr";
   callee: string;
   args: Expression[];
+}
+
+export interface ArrayLiteral extends BaseNode {
+  type: "ArrayLiteral";
+  elements: Expression[];
+}
+
+export interface ObjectLiteral extends BaseNode {
+  type: "ObjectLiteral";
+  properties: ObjectProperty[];
+}
+
+export interface ObjectProperty extends BaseNode {
+  type: "ObjectProperty";
+  key: string;
+  value: Expression;
+}
+
+export interface StringMethodExpr extends BaseNode {
+  type: "StringMethodExpr";
+  target: Expression;
+  method: "uppercase" | "lowercase" | "length" | "split" | "trim";
+  args?: Expression[];
+}
+
+export interface ArrayAccessExpr extends BaseNode {
+  type: "ArrayAccessExpr";
+  target: Expression;
+  index: "first" | "second" | "third" | "last" | Expression;
+}
+
+export interface FindRoleExpr extends BaseNode {
+  type: "FindRoleExpr";
+  roleName: Expression;
+}
+
+export interface FindChannelExpr extends BaseNode {
+  type: "FindChannelExpr";
+  channelName: Expression;
+}
+
+export interface FindUserExpr extends BaseNode {
+  type: "FindUserExpr";
+  userId: Expression;
+}
+
+export interface ReplyExpr extends BaseNode {
+  type: "ReplyExpr";
+  message: Expression;
+  ephemeral: boolean;
 }
 
 export interface DurationLiteral extends BaseNode {

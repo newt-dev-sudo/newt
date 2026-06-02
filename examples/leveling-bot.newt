@@ -1,0 +1,12 @@
+bot name "LevelBot"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on slash "level":
+    reply "Leveling system coming soon! Use /addpoints to test."
+
+on slash "addpoints":
+    reply "Points system coming soon!"
+
+on slash "leaderboard":
+    reply "Leaderboard feature coming soon!"

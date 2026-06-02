@@ -545,6 +545,146 @@ Yes! You can combine operators:
 let result = (points + bonus) * multiplier
 ```
 
+## Arrays
+
+**What they are:** Lists of values stored together
+
+**How to create them:** Use square brackets with comma-separated values
+
+```javascript
+let items = ["apple", "banana", "cherry"]
+let numbers = [1, 2, 3, 4, 5]
+```
+
+**Array access:** Use natural English to access elements
+
+```javascript
+first of items      # First element (index 0)
+second of items     # Second element (index 1)
+third of items      # Third element (index 2)
+last of items       # Last element
+```
+
+**Example:**
+```javascript
+on command "list":
+    let fruits = ["apple", "banana", "cherry"]
+    reply "First: {first of fruits}"
+    reply "Last: {last of fruits}"
+```
+
+**What this does:**
+- User types: `!list`
+- Bot responds: "First: apple"
+- Bot responds: "Last: cherry"
+
+**Use cases:**
+- Storing lists of items
+- Managing multiple values
+- Processing collections
+
+## String Methods
+
+**What they are:** Functions that transform or analyze text strings
+
+**Available methods:**
+- `uppercase of text` - Convert to uppercase
+- `lowercase of text` - Convert to lowercase
+- `length of text` - Get the number of characters
+- `split text by "separator"` - Split into an array
+- `trim of text` - Remove whitespace from ends
+
+```javascript
+let greeting = "Hello World"
+reply uppercase of greeting      # "HELLO WORLD"
+reply lowercase of greeting      # "hello world"
+reply length of greeting          # 11
+```
+
+**Example:**
+```javascript
+on command "shout":
+    let message = "hello world"
+    reply uppercase of message
+```
+
+**What this does:**
+- User types: `!shout`
+- Bot responds: "HELLO WORLD"
+
+**Split example:**
+```javascript
+let sentence = "apple,banana,cherry"
+let parts = split sentence by ","
+reply "First part: {first of parts}"
+```
+
+**Use cases:**
+- Text formatting
+- Data processing
+- Input validation
+- String manipulation
+
+## Find Expressions
+
+**What they are:** Natural English ways to find Discord objects by name or ID
+
+### role named
+
+**What it does:** Find a role by its name
+
+```javascript
+let adminRole = role named "Admin"
+```
+
+**Example:**
+```javascript
+on command "admin":
+    let adminRole = role named "Admin"
+    if user has role adminRole:
+        reply "You are an admin"
+```
+
+### channel named
+
+**What it does:** Find a channel by its name
+
+```javascript
+let generalChannel = channel named "general"
+```
+
+**Example:**
+```javascript
+on command "announce":
+    let generalChannel = channel named "general"
+    say "Important announcement!" in channel generalChannel
+```
+
+### user with id
+
+**What it does:** Find a user by their ID
+
+```javascript
+let targetUser = user with id "123456789012345678"
+```
+
+**Example:**
+```javascript
+on command "dm":
+    let targetUser = user with id args[0]
+    dm targetUser send "Hello from the bot!"
+```
+
+**Use cases:**
+- Finding objects by name instead of ID
+- More readable code
+- Better error handling
+
+**Important notes:**
+- `role named` and `channel named` search within the current server
+- `user with id` can find users outside the server
+- Returns `null` if not found (handle with if statements)
+
 ## Next Steps
 
 Now that you understand expressions, learn about:

@@ -1,0 +1,12 @@
+bot name "Ticket Bot"
+bot prefix "!"
+bot token from env "DISCORD_TOKEN"
+
+on slash "ticket":
+    create channel "ticket-channel" as "text"
+    reply "Your ticket has been created"
+
+on slash "close":
+    let ticketChannel = channel named "ticket-channel"
+    delete channel ticketChannel
+    reply "Ticket closed"
