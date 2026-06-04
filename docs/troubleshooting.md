@@ -272,6 +272,74 @@ This page helps you solve common problems when working with Newt bots. Issues ar
 3. Ensure file has `.newt` extension
 4. Install from the [GitHub release](https://github.com/newt-dev-sudo/newt/releases/tag/v0.1.0)
 
+
+## Bot's `on ready:` Block Never Runs
+
+**Symptom:** Your bot logs in and shows as online, but any code inside `on ready:` (like startup announcements or setting status) never executes.
+
+**Cause:** This was a bug in `newt run` versions prior to the stabilization release. The interpreter registered the ready handler on the wrong Discord.js event (`"clientReady"` instead of `"ready"`), so the handler was silently never called.
+
+**Solution:** Update to the latest version of `@newt-dev/cli`:
+```bash
+npm update -g @newt-dev/cli
+```
+
+After updating, `on ready:` blocks will fire correctly. No changes to your `.newt` file are needed.
+
+---
+
+## Bot Built with `newt build` Crashes with SyntaxError (and / or operators)
+
+**Symptom:** Running the generated `bot.js` file immediately crashes with:
+```
+SyntaxError: Unexpected identifier 'and'
+```
+or
+```
+SyntaxError: Unexpected identifier 'or'
+```
+
+**Cause:** This was a bug in the code generator (`newt build`) where the logical operators `and` and `or` from your `.newt` file were emitted literally into the generated JavaScript. JavaScript uses `&&` and `||` instead.
+
+**Solution:** Update to the latest version:
+```bash
+npm update -g @newt-dev/cli
+```
+
+Then regenerate your bot:
+```bash
+newt build my-bot.newt
+```
+
+The generated `bot.js` will now correctly use `&&` and `||`. Your `.newt` file is unchanged — you still write `and` and `or`.
+
+---
+
+## Generated Bot Says "environment variable X is not set" and Exits
+
+**Symptom:** When you run a bot generated with `newt build`, it immediately prints something like:
+```
+Error: environment variable DISCORD_TOKEN is not set.
+Add it to your environment before running your bot.
+```
+and exits.
+
+**What this means:** This is intentional and helpful — the generated bot now checks that your token environment variable is set before trying to connect. Previously, a missing token would cause a confusing Discord.js error deep in the startup sequence.
+
+**Solution:** Set the environment variable before running:
+```bash
+export DISCORD_TOKEN=your_bot_token_here
+node bot.js
+```
+
+Or on Windows:
+```cmd
+set DISCORD_TOKEN=your_bot_token_here
+node bot.js
+```
+
+---
+
 ## Still Having Issues?
 
 If you've tried these solutions and still have problems:
