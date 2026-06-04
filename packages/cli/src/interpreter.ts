@@ -181,7 +181,7 @@ export class NewtInterpreter {
     for (const handler of handlers) {
       switch (handler.type) {
         case "ReadyHandler":
-          this.client.once("clientReady", async () => {
+          this.client.once("ready", async () => {
             console.log(`Bot ${this.botName} is online!`);
             // Register slash commands
             await this.registerSlashCommands();
@@ -251,6 +251,8 @@ export class NewtInterpreter {
 
         case "LeaveHandler":
           this.client.on("guildMemberRemove", async (member) => {
+            // Fix #13: channel is set to systemChannel (same as JoinHandler) so
+            // say/channel-targeting statements inside on leave: work correctly.
             const context: ExecutionContext = {
               user: member.user,
               channel: member.guild.systemChannel,
@@ -322,12 +324,16 @@ export class NewtInterpreter {
             if (!interaction.isChatInputCommand()) return;
             if (interaction.commandName !== handler.command) return;
 
+            // Fix #10: Populate args from slash command option values so {args[0]} works.
+            // Previously args was always [], causing slash options to be silently undefined.
+            const args = interaction.options.data.map((opt) => opt.value);
+
             const context: ExecutionContext = {
               user: interaction.user,
               channel: interaction.channel,
               server: interaction.guild,
               message: null,
-              args: [],
+              args,
               interaction,
               variables: new Map(),
             };
