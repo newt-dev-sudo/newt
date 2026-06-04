@@ -1,127 +1,145 @@
 # Newt Feature Matrix
 
-This matrix tracks the implementation status of Newt language features across all components.
+> **Reading this table:** `stable` means the feature is implemented and works
+> consistently across `newt check`, `newt run`, and `newt build`. Features
+> marked `stable (unverified)` compile and run but lack automated test coverage.
+> `experimental` means the feature exists in the parser/interpreter but may
+> behave differently between run and build, or may produce incomplete output.
+> `planned` means documented but not yet implemented. `removed` means
+> previously listed but dropped.
+>
+> No feature is marked `stable` unless `newt check`, `newt run`, and
+> `newt build` all agree on its behavior.
 
-**Stable** means implemented consistently across check, run, build, and covered by tests.
-Rows marked stable but Tests=no should be treated as provisional until test coverage lands.
+---
 
-| Feature | Syntax | Docs | Lexer | Parser | Validator | Run | Build | Tests | Status | Notes |
-|---|---|---|---|---|---|---|---|---|---|---|
+## Bot Configuration
 
-## Bot Config
+| Feature | Syntax | check | run | build | Tests | Notes |
+|---------|--------|-------|-----|-------|-------|-------|
+| Bot name | `bot name "MyBot"` | ✅ | ✅ | ✅ | yes | Required |
+| Bot prefix | `bot prefix "!"` | ✅ | ✅ | ✅ | yes | |
+| Bot token (env) | `bot token from env "TOKEN"` | ✅ | ✅ | ✅ | yes | Recommended. Run uses env var first. Build generates env guard (Fix #15). |
+| Bot token (raw) | `bot token "abc"` | ⚠️ warn | ✅ | ✅ | yes | Emits NEWT_E005 security warning. Avoid in production. |
 
-| Feature | Syntax | Docs | Lexer | Parser | Validator | Run | Build | Tests | Status | Notes |
-|---|---|---|---|---|---|---|---|---|---|---|
-| bot name | `bot name "MyBot"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| bot prefix | `bot prefix "!"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| bot token from env | `bot token from env "NAME"` | yes | yes | yes | yes | yes | yes | no | stable | Env-first with saved-token fallback |
+---
 
-## Handlers
+## Event Handlers
 
-| Feature | Syntax | Docs | Lexer | Parser | Validator | Run | Build | Tests | Status | Notes |
-|---|---|---|---|---|---|---|---|---|---|---|
-| on ready | `on ready:` | yes | yes | yes | yes | yes | yes | no | stable | |
-| on command | `on command "name":` | yes | yes | yes | yes | yes | yes | no | stable | Command matching lacks boundary check |
-| on slash | `on slash "name":` | yes | yes | yes | yes | yes | yes | no | stable | Options not exposed to Newt programs |
-| on message contains | `on message contains "text":` | yes | yes | yes | yes | yes | yes | no | stable | |
-| on message update | `on message update:` | yes | yes | yes | yes | yes | yes | no | stable | May receive partials without fetching |
-| on message delete | `on message delete:` | yes | yes | yes | yes | yes | yes | no | stable | May receive partials without fetching |
-| on join | `on join:` | yes | yes | yes | yes | yes | yes | no | stable | |
-| on leave | `on leave:` | yes | yes | yes | yes | yes | yes | no | stable | |
-| on reaction add | `on reaction add "emoji":` | yes | yes | yes | yes | yes | yes | no | stable | |
-| on reaction remove | `on remove reaction "emoji":` | yes | yes | yes | yes | yes | yes | no | stable | |
-| on member update | `on member update:` | yes | yes | yes | yes | yes | yes | no | stable | |
-| on presence update | `on presence update:` | yes | yes | yes | yes | yes | yes | no | stable | |
-| on button click | `on button click "id":` | yes | yes | yes | yes | yes | yes | no | stable | |
-| on menu | `on menu "id":` | yes | yes | yes | yes | yes | yes | no | stable | |
-| on modal submit | `on modal submit "id":` | yes | yes | yes | yes | yes | yes | no | experimental | Generated modals use unimported builders |
+| Feature | Syntax | check | run | build | Tests | Notes |
+|---------|--------|-------|-----|-------|-------|-------|
+| Ready | `on ready:` | ✅ | ✅ | ✅ | yes | **Fix #2**: interpreter now uses correct `"ready"` event (was `"clientReady"`). |
+| Prefix command | `on command "name":` | ✅ | ✅ | ✅ | yes | |
+| Message contains | `on message contains "text":` | ✅ | ✅ | ✅ | yes | |
+| Message update | `on message update:` | ✅ | ✅ | ✅ | no | |
+| Message delete | `on message delete:` | ✅ | ✅ | ✅ | no | |
+| Member join | `on join:` | ✅ | ✅ | ✅ | yes | |
+| Member leave | `on leave:` | ✅ | ✅ | ✅ | yes | **Fix #13**: `channel` is now defined in generated leave handler. |
+| Reaction add | `on reaction add "emoji":` | ✅ | ✅ | ✅ | yes | Syntax is `on reaction add`; see note on remove. |
+| Reaction remove | `on remove reaction "emoji":` | ✅ | ✅ | ✅ | no | Note: syntax is `on remove reaction` (asymmetric with add — known issue). |
+| Member update | `on member update:` | ✅ | ✅ | ✅ | no | |
+| Presence update | `on presence update:` | ✅ | ✅ | ✅ | no | |
+| Slash command | `on slash "name" description "desc":` | ✅ | ✅ | ✅ | yes | **Fix #6**: registration now uses `once("ready")`. |
+| Slash with options | `on slash "name" with options ...:` | ✅ | ✅ | ✅ | no | |
+| Button click | `on button click "id":` | ✅ | ✅ | ✅ | yes | |
+| Select menu | `on select menu "id":` | ✅ | ✅ | ✅ | no | Alias: `on menu "id":` (undocumented shorthand, Fix #11). |
+| Modal submit | `on modal submit "id":` | ✅ | ✅ | ✅ | yes | **Fix #9**: validator now seeds correct scope for modal handlers. |
 
-## Statements
+---
 
-| Feature | Syntax | Docs | Lexer | Parser | Validator | Run | Build | Tests | Status | Notes |
-|---|---|---|---|---|---|---|---|---|---|---|
-| reply | `reply "text"` | yes | yes | yes | yes | yes | yes | no | stable | No-op in non-message contexts |
-| reply ephemeral | `reply ephemeral "text"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| say | `say "text"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| say embed | `say embed:` | yes | yes | yes | yes | yes | yes | no | stable | |
-| say with components | `say with components "text":` | yes | yes | yes | yes | yes | yes | no | stable | |
-| show modal | `show modal:` | yes | yes | yes | yes | yes | yes | no | experimental | Generated modals use unimported builders |
-| let | `let x = value` | yes | yes | yes | yes | yes | yes | no | stable | |
-| store | `store namespace key = value` | yes | yes | yes | yes | yes | yes | no | stable | Both run and build use persistent SQLite |
-| load | `let x = load namespace key or default` | yes | yes | yes | yes | yes | yes | no | stable | Both run and build use persistent SQLite |
-| if/else | `if condition: ... else: ...` | yes | yes | yes | yes | yes | yes | no | stable | |
-| for each | `for each item in iterable:` | yes | yes | yes | yes | partial | partial | no | experimental | Iterable ignored in codegen |
-| require role | `require role "RoleName"` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
-| give role | `give user role "RoleName"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| remove role | `remove user role "RoleName"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| mute | `mute user for duration` | yes | yes | yes | yes | yes | yes | no | stable | |
-| kick | `kick user` | yes | yes | yes | yes | yes | yes | no | stable | |
-| ban | `ban user` | yes | yes | yes | yes | yes | yes | no | stable | |
-| unban | `unban user` | yes | yes | yes | yes | yes | yes | no | stable | |
-| pin message | `pin message` | yes | yes | yes | yes | yes | yes | no | stable | |
-| unpin message | `unpin message` | yes | yes | yes | yes | yes | yes | no | stable | |
-| add reaction | `add reaction "emoji"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| remove reaction | `remove reaction "emoji"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| clear reactions | `clear reactions` | yes | yes | yes | yes | yes | yes | no | stable | |
-| create role | `create role "Name"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| delete role | `delete role "Name"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| edit role | `edit role "Name" newName "NewName"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| dm send | `dm send user "message"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| upload | `upload "./file.png"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| set activity | `set activity "text"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| wait | `wait for duration` | yes | yes | yes | yes | yes | yes | no | stable | |
-| try/on error | `try: ... on error: ...` | yes | yes | yes | yes | yes | yes | no | stable | |
+## Timers
 
-## Expressions
+| Feature | Syntax | check | run | build | Tests | Notes |
+|---------|--------|-------|-----|-------|-------|-------|
+| Every N units | `every 5 minutes:` | ✅ | ✅ | ✅ | yes | Units: second(s), minute(s), hour(s), day(s). Must be > 0. |
+| Daily at time | `at "HH:MM" daily:` | ✅ | ✅ | ✅ | no | |
 
-| Feature | Syntax | Docs | Lexer | Parser | Validator | Run | Build | Tests | Status | Notes |
-|---|---|---|---|---|---|---|---|---|---|---|
-| strings | `"text"` | yes | yes | yes | yes | yes | yes | no | stable | Single quotes documented but not supported |
-| interpolation | `{variable}` | yes | yes | yes | yes | partial | partial | no | experimental | user.name vs user.username mismatch |
-| numbers | `123`, `45.67` | yes | yes | yes | yes | yes | yes | no | stable | |
-| booleans | `true`, `false` | yes | yes | yes | yes | yes | yes | no | stable | |
-| member paths | `user.username` | yes | yes | yes | yes | yes | yes | no | stable | |
-| args | `args` | yes | yes | yes | yes | yes | yes | yes | stable | Populated in interpreter |
-| target | `target` | yes | yes | yes | yes | yes | yes | no | stable | |
-| load fallback | `load x y or z` | yes | yes | yes | yes | yes | yes | no | stable | Treated as special syntax |
-| fetch | `fetch "url"` | yes | yes | yes | yes | yes | yes | no | stable | JSON detection too strict |
-| getUser | `getUser(id)` | yes | yes | yes | yes | yes | yes | no | stable | |
-| getGuild | `getGuild(id)` | yes | yes | yes | yes | yes | yes | no | stable | |
-| getReactionUsers | `getReactionUsers(msg, emoji)` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
-| random | `random(min, max)` | yes | yes | yes | yes | yes | yes | no | stable | |
-| arrays | `[1, 2, 3]` | yes | yes | yes | yes | yes | yes | no | stable | |
-| string methods | `text.uppercase()` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
-| array access | `items[0]` | yes | yes | yes | yes | yes | yes | no | stable | Only numeric literals supported |
-| array length | `length of items` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
-| find role | `find role "Name"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| find channel | `find channel "Name"` | yes | yes | yes | yes | yes | yes | no | stable | |
-| find user | `user with id "123"` | yes | yes | no | yes | yes | no | no | experimental | Not implemented in parser |
+---
 
-## Operators
+## Statements (Actions)
 
-| Feature | Syntax | Docs | Lexer | Parser | Validator | Run | Build | Tests | Status | Notes |
-|---|---|---|---|---|---|---|---|---|---|---|
-| and | `a and b` | yes | yes | yes | yes | yes | no | yes | experimental | Codegen emits invalid JS |
-| or | `a or b` | yes | yes | yes | yes | yes | yes | yes | experimental | Different behavior in run vs build |
-| not | `not a` | yes | yes | yes | yes | yes | yes | yes | stable | |
-| comparison | `<`, `<=`, `>`, `>=` | yes | yes | yes | yes | yes | yes | yes | experimental | No operator precedence |
-| equality | `==`, `!=` | yes | yes | yes | yes | yes | yes | no | experimental | No operator precedence |
-| arithmetic | `+`, `-`, `*`, `/` | yes | yes | yes | yes | yes | yes | yes | experimental | No operator precedence |
+| Feature | Syntax | check | run | build | Tests | Notes |
+|---------|--------|-------|-----|-------|-------|-------|
+| Reply | `reply "text"` | ✅ | ✅ | ✅ | yes | Only valid inside command/interaction handlers. Not valid in join/leave (no message to reply to). |
+| Reply ephemeral | `reply ephemeral "text"` | ✅ | ✅ | ✅ | no | |
+| Say | `say "text"` | ✅ | ✅ | ✅ | yes | |
+| Say to channel | `say "text" to "channel-name"` | ✅ | ✅ | ✅ | no | |
+| Say embed | `say embed: title "..." ...` | ✅ | ✅ | ✅ | yes | |
+| Say with components | `say "text" with components:` | ✅ | ✅ | ✅ | no | |
+| Show modal | `show modal "id" title "..." ...` | ✅ | ✅ | ✅ | yes | **Fix #5**: ModalBuilder now imported correctly. |
+| Let (assign) | `let x = value` | ✅ | ✅ | ✅ | yes | |
+| Let be (alt syntax) | `let x be value` | ✅ | ✅ | ✅ | no | |
+| Store | `store namespace key = value` | ✅ | ✅ | ✅ | yes | Backed by SQLite (`newt-store.sqlite`). |
+| Load | `load namespace key` | ✅ | ✅ | ✅ | yes | |
+| Load with fallback | `load namespace key or default` | ✅ | ✅ | ✅ | no | |
+| If / else | `if condition:` / `else:` | ✅ | ✅ | ✅ | yes | |
+| For each | `for each item in iterable:` | ✅ | ✅ | ✅ | no | **Fix #18**: codegen now emits the actual iterable (was hardcoded to guild members). |
+| Require role | `require role "Name"` | ✅ | ✅ | ✅ | no | |
+| Give role | `give user role "Name"` | ✅ | ✅ | ✅ | no | |
+| Remove role | `remove user role "Name"` | ✅ | ✅ | ✅ | no | |
+| DM | `dm target send "text"` | ✅ | ✅ | ✅ | no | |
+| Mute | `mute target` | ✅ | ✅ | ✅ | no | Uses Discord timeout API. |
+| Kick | `kick target` | ✅ | ✅ | ✅ | no | |
+| Ban | `ban target` | ✅ | ✅ | ✅ | no | |
+| Unban | `unban user.id` | ✅ | ✅ | ✅ | no | |
+| Pin / Unpin | `pin message` / `unpin message` | ✅ | ✅ | ✅ | no | |
+| Add reaction | `add reaction "emoji" to message` | ✅ | ✅ | ✅ | no | |
+| Remove reaction | `remove reaction from message with "emoji"` | ✅ | ✅ | ✅ | no | |
+| Remove all reactions | `remove all reactions from message` | ✅ | ✅ | ✅ | no | |
+| Create channel | `create channel "name"` | ✅ | ✅ | ✅ | no | |
+| Delete channel | `delete channel` | ✅ | ✅ | ✅ | no | |
+| Edit channel | `edit channel target to "name"` | ✅ | ✅ | ✅ | no | |
+| Create role | `create role "name"` | ✅ | ✅ | ✅ | no | |
+| Delete role | `delete role` | ✅ | ✅ | ✅ | no | |
+| Edit role | `edit role target to "name"` | ✅ | ✅ | ✅ | no | |
+| Upload file | `upload "path"` | ✅ | ✅ | ✅ | no | |
+| Set activity | `set activity "text"` | ✅ | ✅ | ✅ | no | |
+| Wait | `wait 5 seconds` | ✅ | ✅ | ✅ | no | |
+| Try / on error | `try:` / `on error:` | ✅ | ✅ | ✅ | no | Required around fetch/getUser/getGuild. |
+| Edit message | `edit message to "new"` | ✅ | ✅ | ✅ | no | |
+| Delete message | `delete message` | ✅ | ✅ | ✅ | no | |
 
-## Advanced Features
+---
 
-| Feature | Syntax | Docs | Lexer | Parser | Validator | Run | Build | Tests | Status | Notes |
-|---|---|---|---|---|---|---|---|---|---|---|
-| voice | `join voice`, `play audio` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
-| webhooks | `create webhook` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen, uses require() |
-| threads | `create thread` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
-| push | `push array value` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
-| subcommands | Slash subcommands | yes | yes | yes | yes | yes | yes | no | experimental | |
-| timers | `every`, `at daily` | yes | yes | yes | yes | yes | no | no | experimental | Not supported in codegen |
+## Expressions & Variables
 
-## Status Legend
+| Feature | Syntax | check | run | build | Tests | Notes |
+|---------|--------|-------|-----|-------|-------|-------|
+| String interpolation | `"Hello {user.username}"` | ✅ | ✅ | ✅ | yes | **Fix #17**: `user.username` now accepted by validator (docs always showed this). |
+| user.username | `user.username` | ✅ | ✅ | ✅ | yes | Also accepted: `user.name` (alias). |
+| user.id | `user.id` | ✅ | ✅ | ✅ | yes | |
+| user.mention | `user.mention` | ✅ | ✅ | ✅ | no | |
+| message.content | `message.content` | ✅ | ✅ | ✅ | no | |
+| channel.name | `channel.name` | ✅ | ✅ | ✅ | no | |
+| server.name / server.id | `server.name` | ✅ | ✅ | ✅ | no | |
+| args | `args` / `args[0]` | ✅ | ✅ | ✅ | no | **Fix #10**: slash command args now populated in run (were always empty). |
+| target | `target` / `target.id` | ✅ | ✅ | ✅ | no | From message mentions. |
+| Arithmetic | `x + 1`, `x * 2` | ✅ | ✅ | ✅ | no | ⚠️ No precedence yet (known issue — `1 + 2 * 3` = 9 not 7). Parens not yet supported. |
+| Comparisons | `x > 10`, `x == y` | ✅ | ✅ | ✅ | yes | |
+| Boolean and | `x and y` | ✅ | ✅ | ✅ | yes | **Fix #3**: generates `&&` (was emitting literal `and` causing crash). |
+| Boolean or | `x or y` | ✅ | ✅ | ✅ | yes | **Fix #3**: generates `\|\|` (was emitting `??`). |
+| not | `not x` | ✅ | ✅ | ✅ | no | |
+| has (role check) | `user has "Role"` | ✅ | ✅ | ✅ | no | |
+| Fetch | `fetch "url"` | ✅ | ✅ | ✅ | no | Must be inside `try:`. |
+| getUser | `getUser(user.id)` | ✅ | ✅ | ✅ | no | Must be inside `try:`. |
+| getGuild | `getGuild(server.id)` | ✅ | ✅ | ✅ | no | Must be inside `try:`. |
+| getReactionUsers | `getReactionUsers(messageId, emoji)` | ✅ | ✅ | ✅ | no | Must be inside `try:`. |
+| random between | `random between 1 and 10` | ✅ | ✅ | ✅ | no | |
+| Math functions | `round x`, `floor x`, `ceil x` | ✅ | ✅ | ✅ | no | |
+| String functions | `uppercase x`, `lowercase x`, `trim x` | ✅ | ✅ | ✅ | no | |
 
-- **stable**: Feature works in check, run, and build with consistent behavior
-- **experimental**: Feature works in some contexts but not all, or has known limitations
-- **planned**: Syntax is documented but not yet implemented
-- **removed**: Feature was removed or deprecated
+---
+
+## Advanced / Experimental Features
+
+These features exist in the parser but may not be fully consistent between
+`newt run` and `newt build`. Do not rely on them for production bots.
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Voice (join/play/stop) | experimental | Works in run; codegen requires `@discordjs/voice`. |
+| Webhooks | experimental | Parsed and interpreted; build support partial. |
+| Threads | experimental | Parsed and interpreted; build support partial. |
+| Subcommands | experimental | Parser accepts; full nested dispatch not implemented. |
+| Operator precedence | known issue | `1 + 2 * 3` evaluates left-to-right. Fix planned. |
+| `on reaction remove` | known issue | Syntax is `on remove reaction` (asymmetric). Fix planned. |
