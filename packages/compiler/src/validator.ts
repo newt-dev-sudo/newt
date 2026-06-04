@@ -10,7 +10,10 @@ import type {
 import { makeCatalogError, type NewtError } from "./errors.js";
 
 const builtIns = new Set([
+  // Fix #17: Added user.username to match docs (docs showed user.username, validator only had user.name).
+  // Both are now accepted; user.name is kept for backwards compatibility.
   "user.name",
+  "user.username",
   "user.id",
   "user.mention",
   "message.content",
@@ -21,7 +24,7 @@ const builtIns = new Set([
   "args",
   "target",
   "target.id",
-  "target.username"
+  "target.username",
 ]);
 
 export function validate(program: Program, source = ""): NewtError[] {
@@ -64,7 +67,9 @@ class Validator {
         return;
       }
 
-      // Handle new handler types
+      // Fix #1: Removed the duplicate SlashCommandHandler case that was previously
+      // copy-pasted below ButtonClickHandler/SelectMenuHandler. The second occurrence
+      // was unreachable dead code because the first already returned.
       case "SlashCommandHandler": {
         if (node.options) {
           for (const option of node.options) {
@@ -74,7 +79,6 @@ class Validator {
         if (node.description) {
           this.visitExpression(node.description, new Set(), false);
         }
-        // Add built-in variables for slash commands
         const slashScope = new Set(["user", "channel", "server", "args", "interaction"]);
         this.visitStatements(node.body, slashScope);
         return;
@@ -82,37 +86,34 @@ class Validator {
 
       case "ButtonClickHandler":
       case "SelectMenuHandler": {
-        // Add built-in variables for interactions
         const interactionScope = new Set(["user", "channel", "server", "interaction", "values"]);
         this.visitStatements(node.body, interactionScope);
         return;
       }
 
-      case "SlashCommandHandler": {
-        if (node.options) {
-          for (const option of node.options) {
-            this.visitExpression(option.description, new Set(), false);
-          }
-        }
-        if (node.description) {
-          this.visitExpression(node.description, new Set(), false);
-        }
-        // Add built-in variables for slash commands
-        const slashScope = new Set(["user", "channel", "server", "args", "interaction"]);
-        this.visitStatements(node.body, slashScope);
+      // Fix #9: ModalSubmitHandler now gets its own case with a proper scope that
+      // includes user, channel, server, interaction, and fields. Previously it fell
+      // through to the default branch which used an empty scope, causing false
+      // "variable not defined" validation errors inside modal submit handlers.
+      case "ModalSubmitHandler": {
+        const modalScope = new Set(["user", "channel", "server", "interaction", "fields"]);
+        this.visitStatements(node.body, modalScope);
         return;
       }
 
       case "MessageUpdateHandler":
       case "MessageDeleteHandler": {
-        // Add built-in variables for message events
         const messageScope = new Set(["user", "channel", "server", "message"]);
         this.visitStatements(node.body, messageScope);
         return;
       }
 
       default: {
-        this.visitStatements(node.body, new Set());
+        // ReadyHandler, CommandHandler, JoinHandler, LeaveHandler, ReactionAddHandler,
+        // ReactionRemoveHandler, GuildMemberUpdateHandler, PresenceUpdateHandler, etc.
+        // all seed a reasonable base scope.
+        const defaultScope = new Set(["user", "channel", "server", "message", "member", "target", "args"]);
+        this.visitStatements(node.body, defaultScope);
       }
     }
   }
@@ -146,7 +147,7 @@ class Validator {
         case "ReplyStatement":
         case "SayStatement":
         case "ExpressionStatement":
-          this.visitExpression("message" in statement ? statement.message : statement.expression, scope, inTry);
+          this.visitExpression("message" in statement ? statement.message : (statement as any).expression, scope, inTry);
           break;
         case "SayEmbedStatement":
           if (statement.embed.title) this.visitExpression(statement.embed.title, scope, inTry);
@@ -172,10 +173,10 @@ class Validator {
         case "RequireRoleStatement":
         case "GiveRoleStatement":
         case "RemoveRoleStatement":
-          if ("role" in statement && statement.role.value.length === 0) {
+          if ("role" in statement && (statement as any).role.value.length === 0) {
             this.errors.push(makeCatalogError("NEWT_E015", statement.loc.line, statement.loc.column, this.line(statement.loc.line)));
           }
-          if ("subject" in statement) this.visitExpression(statement.subject, scope, inTry);
+          if ("subject" in statement) this.visitExpression((statement as any).subject, scope, inTry);
           break;
         case "MuteStatement":
         case "KickStatement":
@@ -214,7 +215,10 @@ class Validator {
   private visitExpression(expression: Expression, scope: Set<string>, inTry: boolean): void {
     switch (expression.type) {
       case "IdentifierExpr":
-        if (!scope.has(expression.name) && !["user", "message", "channel", "server", "args", "target", "member", "current"].includes(expression.name)) {
+        if (
+          !scope.has(expression.name) &&
+          !["user", "message", "channel", "server", "args", "target", "member", "current", "interaction", "values", "fields"].includes(expression.name)
+        ) {
           this.errors.push(makeCatalogError("NEWT_E007", expression.loc.line, expression.loc.column, this.line(expression.loc.line), {
             length: expression.name.length
           }));
@@ -222,7 +226,10 @@ class Validator {
         break;
       case "MemberExpr": {
         const path = expression.path.join(".");
-        const isKnown = builtIns.has(path) || scope.has(expression.path[0] ?? "") || expression.path[0] === "member";
+        const isKnown =
+          builtIns.has(path) ||
+          scope.has(expression.path[0] ?? "") ||
+          ["member", "interaction", "fields", "values"].includes(expression.path[0] ?? "");
         if (!isKnown) {
           this.errors.push(makeCatalogError("NEWT_E013", expression.loc.line, expression.loc.column, this.line(expression.loc.line), {
             length: path.length
