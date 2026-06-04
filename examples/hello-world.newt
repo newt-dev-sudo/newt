@@ -6,7 +6,7 @@ on ready:
     say "HelloNewt is online!" in channel "bot-status"
 
 on command "hello":
-    reply "Hey there, {user.name}! Small script, big bot."
+    reply "Hey there, {user.username}! Small script, big bot."
 
 on command "ping":
     reply "Pong!"
