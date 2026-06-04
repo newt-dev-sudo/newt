@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+- **Fix #21** `args[0]` as an expression (e.g. `let x = args[0]`) now correctly returns the argument value in `newt run`; previously only string interpolation `{args[0]}` worked (interpreter `ArgsIndexExpr` now falls back to `context.args`).
+- **Fix #22** `set volume <level>` now parses correctly. The parser had two separate `if (checkKeyword("set"))` blocks — the first always consumed `set` and immediately demanded `activity`, so `set volume` always threw "Expected 'activity' here". Both blocks are now merged into a single branch with `if/else if`.
+- **Fix #23** Removed unreachable dead `edit` block that duplicated the `EditMessageStatement` path already covered by the first `edit` block.
+- **Fix #24** Removed dead `replace` keyword from the lexer — it was in the keyword list but was never implemented as a string method.
+- **Fix #25** Example files (`hello-world.newt`, `welcome-bot.newt`, `points-bot.newt`) updated to use `user.username` instead of the undocumented `user.name` alias.
+
+### Docs
+- Updated `docs/reference/statements.md` `for each` section: removed stale "Experimental" warning claiming the iterable was ignored in generated builds — this was already fixed in Fix #18 (PR #2).
+- Fixed `if/else` documentation example: the parser does not support `else if condition:` syntax. Updated the example to use the correct nested `else: if ...` pattern.
+
+
 ## [Unreleased] — Stabilization PR: fix/stabilize-core-bugs
 
 This PR fixes all critical, high, and medium severity bugs identified in the

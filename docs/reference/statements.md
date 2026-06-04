@@ -534,14 +534,15 @@ else:
     reply "Regular user access"
 ```
 
-**With else if:**
+**With chained conditions (nested if/else):**
 ```javascript
 if points > 100:
     reply "VIP level"
-else if points > 50:
-    reply "Regular level"
 else:
-    reply "New member"
+    if points > 50:
+        reply "Regular level"
+    else:
+        reply "New member"
 ```
 
 **Example:**
@@ -620,7 +621,7 @@ on command "userinfo":
 
 ## for each
 
-> **Experimental:** This feature is available in `newt run` but the iterable expression is currently ignored in generated builds. The loop always iterates over server members.
+> **Note:** This feature is available in both `newt run` and `newt build`. The iterable expression is fully supported in generated builds.
 
 **Concept:** Iteration and collections
 

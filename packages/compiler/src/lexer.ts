@@ -81,7 +81,7 @@ const keywords = new Set([
   // Math helpers
   "random", "between", "round", "floor", "ceil",
   // String helpers
-  "uppercase", "lowercase", "replace", "split", "trim", "length",
+  "uppercase", "lowercase", "split", "trim", "length",
   // Ordinals (argument access: "first", "third", "last"; "second" covered above)
   "first", "third", "last", "of",
   // Misc syntax
