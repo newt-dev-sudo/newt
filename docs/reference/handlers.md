@@ -80,8 +80,8 @@ Each handler has access to specific variables (context) that provide information
 | `on message contains` | user, message, channel, server |
 | `on message update` | user, message, channel, server |
 | `on message delete` | user, message, channel, server |
-| `on join` | user, member, server |
-| `on leave` | user, server |
+| `on join` | user, member, channel, server |
+| `on leave` | user, channel, server |
 | `on reaction add` | user, channel, server, message |
 | `on remove reaction` | user, channel, server, message |
 | `on member update` | user, member, server |
@@ -209,7 +209,7 @@ on slash "greet":
 - `user` - The user who invoked the command
 - `channel` - The channel where the command was invoked
 - `server` - The server (guild)
-- `args` - Command options/arguments
+- `args` - Command option values as an array (`args[0]` is the first option value, etc.)
 - `interaction` - The interaction object (Discord's way of handling slash commands)
 
 **Note:** Slash commands are automatically registered when your bot starts. They may take a few minutes to appear in Discord after the first run.
@@ -474,6 +474,7 @@ on join:
 **Available variables:**
 - `user` - The user who joined
 - `member` - The member object (server-specific user data)
+- `channel` - The system channel (or #general fallback)
 - `server` - The server they joined
 
 **Example:**
@@ -511,6 +512,7 @@ on leave:
 
 **Available variables:**
 - `user` - The user who left
+- `channel` - The system channel (or #general) — available since the stabilization PR (Fix #13)
 - `server` - The server they left
 
 **Example:**

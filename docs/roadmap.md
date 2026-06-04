@@ -45,7 +45,21 @@ These features are planned but not yet in development:
 ## 🐛 Known Limitations
 
 ### Edit/Delete Statements
-The `edit` and `delete` statements have a syntax limitation - you cannot store message references from `reply` statements using `let`. This requires a language design change to fix.
+The `edit` and `delete` statements have a syntax limitation — you cannot store message references from `reply` statements using `let`. This requires a language design change to fix.
+
+### Arithmetic Operator Precedence
+Arithmetic expressions evaluate strictly left-to-right. There is no precedence — `1 + 2 * 3` evaluates to `9` (not `7`). Parenthesized grouping is not yet supported. Work around this by using intermediate `let` variables:
+```javascript
+let product = 2 * 3
+let result = 1 + product
+```
+
+### Asymmetric Reaction Syntax
+Adding and removing reactions use different keyword orders:
+- Add: `on reaction add "emoji":`
+- Remove: `on remove reaction "emoji":` ← note the different word order
+
+This inconsistency is a known issue and will be normalized in a future release.
 
 ---
 

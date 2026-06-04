@@ -25,6 +25,7 @@ This document outlines the features currently supported by the Newt interpreter 
 
 ✅ **Leave Handler** - `on leave:`
 - Triggers when a member leaves the server
+- Provides context variables: `user`, `channel`, `server`
 - Useful for logging and cleanup
 
 ✅ **Reaction Add Handler** - `on reaction add "emoji":`
@@ -42,7 +43,8 @@ This document outlines the features currently supported by the Newt interpreter 
 ✅ **Slash Command Handler** - `on slash "name":`
 - Responds to Discord slash commands
 - Automatically registered with Discord API on bot startup
-- Provides context variables: `user`, `server`, `channel`, `interaction`
+- Provides context variables: `user`, `server`, `channel`, `args`, `interaction`
+- `args` is an array of option values (`args[0]` = first option value, etc.)
 
 ✅ **Button Click Handler** - `on button click "id":`
 - Handles button interactions from components
