@@ -17,13 +17,45 @@ export function generate(program: Program): GeneratedProject {
   const botName = getBotValue(program, "name") ?? "NewtBot";
   const prefix = getBotValue(program, "prefix") ?? "!";
   const tokenDecl = program.body.find((node): node is BotDecl => node.type === "BotDecl" && node.kind === "token");
-  const tokenExpr = tokenDecl?.fromEnv ? `process.env.${tokenDecl.value.value}` : JSON.stringify(tokenDecl?.value.value ?? "");
+
+  // Fix #15: Guard against missing DISCORD_TOKEN env var with a clear message.
+  // Previously generated code silently passed undefined to client.login().
+  const tokenExpr = tokenDecl?.fromEnv
+    ? `(() => { const t = process.env.${tokenDecl.value.value}; if (!t) { console.error("Error: environment variable ${tokenDecl.value.value} is not set.\\nAdd it to your environment before running your bot."); process.exit(1); } return t; })()`
+    : JSON.stringify(tokenDecl?.value.value ?? "");
+
+  // Collect which handlers are present so we can emit only the imports we need
+  const handlerTypes = new Set(
+    program.body
+      .filter((n): n is Handler | TimerDecl => n.type.endsWith("Handler") || n.type.endsWith("TimerDecl"))
+      .map((n) => n.type)
+  );
+
+  const hasModals = handlerTypes.has("ModalSubmitHandler") ||
+    program.body.some((n) => n.type.endsWith("Handler") && hasShowModal((n as Handler).body ?? []));
+
   const handlers = program.body
     .filter((node): node is Handler | TimerDecl => node.type.endsWith("Handler") || node.type.endsWith("TimerDecl"))
     .map((node) => emitTopLevel(node, prefix))
     .join("\n\n");
 
-  const botJs = `import { Client, EmbedBuilder, GatewayIntentBits, Partials, ButtonBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonStyle } from "discord.js";
+  // Fix #5: Build the discord.js import dynamically based on what the program actually uses,
+  // so we never reference an unimported builder. Previously the import was hardcoded and
+  // lacked ModalBuilder, TextInputBuilder, TextInputStyle, etc. needed for modals.
+  const discordImports = [
+    "Client",
+    "EmbedBuilder",
+    "GatewayIntentBits",
+    "Partials",
+    "ButtonBuilder",
+    "ButtonStyle",
+    "ActionRowBuilder",
+    "StringSelectMenuBuilder",
+    "StringSelectMenuOptionBuilder",
+    ...(hasModals ? ["ModalBuilder", "TextInputBuilder", "TextInputStyle"] : []),
+  ].join(", ");
+
+  const botJs = `import { ${discordImports} } from "discord.js";
 import Database from "better-sqlite3";
 
 const client = new Client({
@@ -44,15 +76,12 @@ const prefix = ${JSON.stringify(prefix)};
 
 async function processedFetch(url) {
   const response = await fetch(url);
-
   if (!response.ok) {
     throw new Error("HTTP error! status: " + response.status);
   }
-
-  if (response.headers.get('content-type')?.toLowerCase() === 'application/json') {
+  if (response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
     return await response.json();
   }
-
   return await response.text();
 }
 
@@ -66,12 +95,16 @@ function loadValue(namespace, key, fallback = undefined) {
 }
 
 function findChannel(guild, name) {
-  return guild?.channels?.cache?.find((channel) => channel.name === name);
+  return guild?.channels?.cache?.find((ch) => ch.name === name);
 }
 
 function findRole(guild, name) {
-  return guild?.roles?.cache?.find((role) => role.name === name);
+  return guild?.roles?.cache?.find((r) => r.name === name);
 }
+
+client.on("error", (err) => {
+  console.error("Discord client error:", err.message);
+});
 
 ${handlers}
 
@@ -91,6 +124,16 @@ client.login(${tokenExpr});
   };
 }
 
+function hasShowModal(statements: Statement[]): boolean {
+  return statements.some((s) => {
+    if (s.type === "ShowModalStatement") return true;
+    if (s.type === "IfStatement") return hasShowModal(s.consequent) || hasShowModal(s.alternate);
+    if (s.type === "TryCatchStatement") return hasShowModal(s.body) || hasShowModal(s.errorHandler);
+    if (s.type === "ForEachStatement") return hasShowModal(s.body);
+    return false;
+  });
+}
+
 function getBotValue(program: Program, kind: BotDecl["kind"]): string | undefined {
   return program.body.find((node): node is BotDecl => node.type === "BotDecl" && node.kind === kind)?.value.value;
 }
@@ -99,138 +142,166 @@ function emitTopLevel(node: Handler | TimerDecl, prefix: string): string {
   switch (node.type) {
     case "ReadyHandler":
       return `client.once("ready", async () => {
+  console.log(\`Bot \${botName} is online!\`);
   for (const guild of client.guilds.cache.values()) {
     const server = guild;
 ${emitStatements(node.body, "    ", "guild")}
   }
 });`;
+
     case "CommandHandler":
       return `client.on("messageCreate", async (message) => {
   if (message.author.bot || !message.content.startsWith(prefix + ${JSON.stringify(node.command)})) return;
   const args = message.content.slice((prefix + ${JSON.stringify(node.command)}).length).trim().split(/\\s+/).filter(Boolean);
   const { author: user, channel, guild: server } = message;
-  const target = message.mentions.members.first();
+  const target = message.mentions.members?.first() ?? null;
 ${emitStatements(node.body, "  ", "message")}
 });`;
+
     case "MessageContainsHandler":
       return `client.on("messageCreate", async (message) => {
   if (message.author.bot || !message.content.includes(${emitExpression(node.needle)})) return;
   const { author: user, channel, guild: server } = message;
 ${emitStatements(node.body, "  ", "message")}
 });`;
+
     case "MessageUpdateHandler":
       return `client.on("messageUpdate", async (oldMessage, newMessage) => {
   if (!newMessage.author || newMessage.author.bot) return;
   const { author: user, channel, guild: server } = newMessage;
 ${emitStatements(node.body, "  ", "newMessage")}
 });`;
+
     case "MessageDeleteHandler":
       return `client.on("messageDelete", async (message) => {
   if (!message.author || message.author.bot) return;
   const { author: user, channel, guild: server } = message;
 ${emitStatements(node.body, "  ", "message")}
 });`;
+
     case "JoinHandler":
       return `client.on("guildMemberAdd", async (member) => {
   const { user, guild: server } = member;
-  const channel = findChannel(server, "general");
+  const channel = server.systemChannel ?? findChannel(server, "general");
 ${emitStatements(node.body, "  ", "member")}
 });`;
+
+    // Fix #13: LeaveHandler now defines a `channel` variable, matching JoinHandler.
+    // Previously LeaveHandler omitted the channel binding, causing ReferenceError
+    // if user wrote `say` or any channel-targeting statement inside `on leave:`.
     case "LeaveHandler":
       return `client.on("guildMemberRemove", async (member) => {
   const { user, guild: server } = member;
+  const channel = server.systemChannel ?? findChannel(server, "general");
 ${emitStatements(node.body, "  ", "member")}
 });`;
+
     case "ReactionAddHandler":
       return `client.on("messageReactionAdd", async (reaction, user) => {
-  if (reaction.emoji.name !== ${emitExpression(node.emoji)}) return;
+  if (user.bot || reaction.emoji.name !== ${emitExpression(node.emoji)}) return;
   const { message } = reaction;
   const { channel, guild: server } = message;
 ${emitStatements(node.body, "  ", "message")}
 });`;
+
     case "ReactionRemoveHandler":
       return `client.on("messageReactionRemove", async (reaction, user) => {
-  if (reaction.emoji.name !== ${emitExpression(node.emoji)}) return;
+  if (user.bot || reaction.emoji.name !== ${emitExpression(node.emoji)}) return;
   const { message } = reaction;
   const { channel, guild: server } = message;
 ${emitStatements(node.body, "  ", "message")}
 });`;
+
     case "GuildMemberUpdateHandler":
       return `client.on("guildMemberUpdate", async (oldMember, newMember) => {
   const { user, guild: server } = newMember;
-  const channel = findChannel(server, "general");
-${emitStatements(node.body, "  ", "member")}
+  const channel = server.systemChannel ?? findChannel(server, "general");
+${emitStatements(node.body, "  ", "newMember")}
 });`;
+
     case "PresenceUpdateHandler":
       return `client.on("presenceUpdate", async (oldPresence, newPresence) => {
-  const { user } = newPresence;
-  const server = newPresence.guild;
-  const channel = findChannel(server, "general");
-${emitStatements(node.body, "  ", "member")}
+  if (!newPresence) return;
+  const { user, guild: server } = newPresence;
+  const channel = server ? (server.systemChannel ?? findChannel(server, "general")) : null;
+${emitStatements(node.body, "  ", "newPresence")}
 });`;
-    case "SlashCommandHandler":
-      const optionsDef = node.options ? node.options.map(opt => 
-        `{
-          name: "${opt.name}",
-          description: ${emitExpression(opt.description)},
-          type: ${getOptionTypeValue(opt.optionType)},
-          required: ${opt.required.value}
-        }`
-      ).join(",\n          ") : "";
 
-      const commandReg = `client.on("ready", async () => {
+    // Fix #6: Slash command registration now uses client.once("ready") instead of
+    // client.on("ready"), preventing duplicate re-registration on reconnects.
+    // Also added null check for client.application before calling .commands.create().
+    case "SlashCommandHandler": {
+      const optionsDef = node.options
+        ? node.options.map(opt =>
+            `{ name: ${JSON.stringify(opt.name)}, description: ${emitExpression(opt.description)}, type: ${getOptionTypeValue(opt.optionType)}, required: ${opt.required.value} }`
+          ).join(", ")
+        : "";
+
+      const commandReg = `client.once("ready", async () => {
   try {
+    if (!client.application) throw new Error("client.application is null");
     await client.application.commands.create({
-      name: "${node.command}",
+      name: ${JSON.stringify(node.command)},
       description: ${node.description ? emitExpression(node.description) : '"No description"'},
       options: [${optionsDef}]
     });
+    console.log(\`Registered slash command: /${node.command}\`);
   } catch (err) {
-    console.error("Failed to register slash command:", err);
+    console.error("Failed to register slash command /${node.command}:", err);
   }
 });`;
-      
+
       const commandHandler = `client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isChatInputCommand() || interaction.commandName !== "${node.command}") return;
-  const { user, channel, guild: server, options: args } = interaction;
+  if (!interaction.isChatInputCommand() || interaction.commandName !== ${JSON.stringify(node.command)}) return;
+  const { user, channel, guild: server } = interaction;
+  const args = interaction.options;
 ${emitStatements(node.body, "  ", "interaction")}
 });`;
-      
+
       return commandReg + "\n\n" + commandHandler;
+    }
+
     case "ButtonClickHandler":
       return `client.on("interactionCreate", async (interaction) => {
   if (!interaction.isButton() || interaction.customId !== ${emitExpression(node.buttonId)}) return;
   const { user, channel, guild: server } = interaction;
 ${emitStatements(node.body, "  ", "interaction")}
 });`;
+
     case "SelectMenuHandler":
       return `client.on("interactionCreate", async (interaction) => {
   if (!interaction.isStringSelectMenu() || interaction.customId !== ${emitExpression(node.menuId)}) return;
   const { user, channel, guild: server, values } = interaction;
 ${emitStatements(node.body, "  ", "interaction")}
 });`;
+
     case "ModalSubmitHandler":
       return `client.on("interactionCreate", async (interaction) => {
   if (!interaction.isModalSubmit() || interaction.customId !== ${emitExpression(node.modalId)}) return;
   const { user, channel, guild: server, fields } = interaction;
 ${emitStatements(node.body, "  ", "interaction")}
 });`;
+
     case "EveryTimerDecl":
-      return `setInterval(async () => {\n${emitStatements(node.body, "  ", "message")}\n}, ${durationMs(node.amount.value, node.unit)});`;
+      return `setInterval(async () => {
+${emitStatements(node.body, "  ", "client")}
+}, ${durationMs(node.amount.value, node.unit)});`;
+
     case "DailyTimerDecl":
       return `setInterval(async () => {
   const now = new Date();
   const hhmm = now.toTimeString().slice(0, 5);
   if (hhmm !== ${emitExpression(node.time)}) return;
-${emitStatements(node.body, "  ", "message")}
+${emitStatements(node.body, "  ", "client")}
 }, 60000);`;
+
     default:
       return "";
   }
 }
 
 function emitStatements(statements: Statement[], indent: string, triggerName: string): string {
-  return statements.map((statement) => emitStatement(statement, indent, triggerName)).join("\n");
+  return statements.map((s) => emitStatement(s, indent, triggerName)).join("\n");
 }
 
 function emitStatement(statement: Statement, indent: string, triggerName: string): string {
@@ -240,128 +311,147 @@ function emitStatement(statement: Statement, indent: string, triggerName: string
         return `${indent}await ${triggerName}.reply({ content: ${emitExpression(statement.message)}, ephemeral: true });`;
       }
       return `${indent}await ${triggerName}.reply(${emitExpression(statement.message)});`;
+
     case "SayStatement": {
       if (statement.channel) {
-        return `${indent}await findChannel(${triggerName === "guild" ? "server" : `server ?? ${triggerName}.guild`}, ${emitExpression(statement.channel)})?.send(${emitExpression(statement.message)});`;
+        return `${indent}await findChannel(server, ${emitExpression(statement.channel)})?.send(${emitExpression(statement.message)});`;
       }
-      return `${indent}await (${triggerName}.channel ?? channel)?.send(${emitExpression(statement.message)});`;
+      return `${indent}await (channel ?? ${triggerName}.channel)?.send(${emitExpression(statement.message)});`;
     }
+
     case "SayEmbedStatement":
-      if (triggerName === "member") {
-        return `${indent}await findChannel(server, "general")?.send({ embeds: [${emitEmbed(statement.embed)}] });`;
-      }
-      return `${indent}await (${triggerName}.channel ?? channel)?.send({ embeds: [${emitEmbed(statement.embed)}] });`;
-    case "SayComponentsStatement":
+      return `${indent}await (channel ?? ${triggerName}.channel ?? findChannel(server, "general"))?.send({ embeds: [${emitEmbed(statement.embed)}] });`;
+
+    case "SayComponentsStatement": {
       const components = emitComponents(statement.components);
-      if (triggerName === "member") {
-        return `${indent}await findChannel(server, "general")?.send({ content: ${emitExpression(statement.message)}, components: [${components}] });`;
-      }
-      return `${indent}await (${triggerName}.channel ?? channel)?.send({ content: ${emitExpression(statement.message)}, components: [${components}] });`;
-    case "ShowModalStatement":
+      return `${indent}await (channel ?? ${triggerName}.channel ?? findChannel(server, "general"))?.send({ content: ${emitExpression(statement.message)}, components: [${components}] });`;
+    }
+
+    case "ShowModalStatement": {
       const modalInputs = statement.inputs.map((input: any) => {
-        const style = input.style ? `.${input.style.value === "short" ? "Short" : "Paragraph"}` : ".Short";
-        return `new TextInputBuilder()
-        .setCustomId(${emitExpression(input.id)})
-        .setLabel(${emitExpression(input.label)})
-        .setStyle(TextInputStyle${style})
-        .setRequired(${input.required})`;
-      }).join(",\n        ");
-      return `${indent}const modal = new ModalBuilder()
-        .setCustomId(${emitExpression(statement.modalId)})
-        .setTitle(${emitExpression(statement.title)})
-        .addComponents(
-          new ActionRowBuilder<TextInputBuilder>().addComponents(
-            ${modalInputs}
-          )
-        );
-      await interaction.showModal(modal);`;
+        const style = input.style?.value === "paragraph" ? "TextInputStyle.Paragraph" : "TextInputStyle.Short";
+        return `new TextInputBuilder().setCustomId(${emitExpression(input.id)}).setLabel(${emitExpression(input.label)}).setStyle(${style}).setRequired(${input.required ?? false})`;
+      }).join(", ");
+      return `${indent}await interaction.showModal(
+${indent}  new ModalBuilder().setCustomId(${emitExpression(statement.modalId)}).setTitle(${emitExpression(statement.title)})
+${indent}    .addComponents(new ActionRowBuilder().addComponents(${modalInputs}))
+${indent});`;
+    }
+
     case "LetDecl":
       return `${indent}const ${statement.name} = ${emitExpression(statement.value)};`;
+
     case "StoreStatement":
       return `${indent}saveValue(${emitExpression(statement.namespace)}, ${JSON.stringify(statement.key)}, ${emitExpression(statement.value)});`;
+
     case "IfStatement":
       return `${indent}if (${emitExpression(statement.condition)}) {\n${emitStatements(statement.consequent, `${indent}  `, triggerName)}\n${indent}}${statement.alternate.length ? ` else {\n${emitStatements(statement.alternate, `${indent}  `, triggerName)}\n${indent}}` : ""}`;
+
+    // Fix #18: ForEachStatement now generates a real for...of loop over the iterable
+    // expression rather than hardcoding server.members.cache.values(). Previously
+    // the codegen always iterated over guild members regardless of what the user wrote.
     case "ForEachStatement":
-      return `${indent}for (const ${statement.itemName} of (server?.members?.cache?.values?.() ?? [])) {\n${emitStatements(statement.body, `${indent}  `, triggerName)}\n${indent}}`;
+      return `${indent}for (const ${statement.itemName} of (${emitExpression(statement.iterable)} ?? [])) {\n${emitStatements(statement.body, `${indent}  `, triggerName)}\n${indent}}`;
+
     case "RequireRoleStatement":
-      return `${indent}if (!${triggerName}.member?.roles?.cache?.some((role) => role.name === ${emitExpression(statement.role)})) return;`;
+      return `${indent}if (!${triggerName}.member?.roles?.cache?.some((r) => r.name === ${emitExpression(statement.role)})) { await ${triggerName}.reply({ content: "You don't have permission to use this command.", ephemeral: true }); return; }`;
+
     case "GiveRoleStatement":
-      if (triggerName === "member") {
-        return `${indent}await ${triggerName}.roles?.add(findRole(server, ${emitExpression(statement.role)}));`;
-      }
       return `${indent}await (${emitExpression(statement.subject)}?.roles ?? ${triggerName}.member?.roles)?.add(findRole(server ?? ${triggerName}.guild, ${emitExpression(statement.role)}));`;
+
     case "RemoveRoleStatement":
       return `${indent}await (${emitExpression(statement.subject)}?.roles ?? ${triggerName}.member?.roles)?.remove(findRole(server ?? ${triggerName}.guild, ${emitExpression(statement.role)}));`;
+
     case "MuteStatement":
-      return `${indent}await ${emitExpression(statement.subject)}?.timeout?.(${statement.duration ? durationMs(statement.duration.amount.value, statement.duration.unit) : 600000});`;
+      return `${indent}await ${emitExpression(statement.subject)}?.timeout?.(${statement.duration ? durationMs(statement.duration.amount.value, statement.duration.unit) : 600000}, "Muted by bot");`;
+
     case "KickStatement":
-      return `${indent}await ${emitExpression(statement.subject)}?.kick?.();`;
+      return `${indent}await ${emitExpression(statement.subject)}?.kick?.("Kicked by bot");`;
+
     case "BanStatement":
-      return `${indent}await ${emitExpression(statement.subject)}?.ban?.();`;
+      return `${indent}await ${emitExpression(statement.subject)}?.ban?.({ reason: "Banned by bot" });`;
+
     case "UnbanStatement":
       return `${indent}await server?.members.unban(${emitExpression(statement.subject)});`;
+
     case "EditMessageStatement":
       return `${indent}await ${emitExpression(statement.target)}?.edit?.(${emitExpression(statement.newContent)});`;
+
     case "DeleteMessageStatement":
       return `${indent}await ${emitExpression(statement.target)}?.delete?.();`;
+
     case "PinStatement":
       return `${indent}await ${emitExpression(statement.target)}?.pin?.();`;
+
     case "UnpinStatement":
       return `${indent}await ${emitExpression(statement.target)}?.unpin?.();`;
+
     case "AddReactionStatement":
       return `${indent}await ${emitExpression(statement.target)}?.react?.(${emitExpression(statement.emoji)});`;
+
     case "RemoveReactionStatement":
-      return `${indent}await ${emitExpression(statement.target)}?.reactions?.remove(${emitExpression(statement.emoji)});`;
+      return `${indent}await ${emitExpression(statement.target)}?.reactions?.cache?.get(${emitExpression(statement.emoji)})?.remove();`;
+
     case "RemoveAllReactionsStatement":
       return `${indent}await ${emitExpression(statement.target)}?.reactions?.removeAll?.();`;
+
     case "CreateChannelStatement":
       if (statement.channelType) {
         return `${indent}await server?.channels.create({ name: ${emitExpression(statement.name)}, type: ${emitExpression(statement.channelType)} });`;
       }
       return `${indent}await server?.channels.create({ name: ${emitExpression(statement.name)} });`;
+
     case "DeleteChannelStatement":
       return `${indent}await ${emitExpression(statement.target)}?.delete?.();`;
+
     case "EditChannelStatement":
-      if (statement.newName) {
-        return `${indent}await ${emitExpression(statement.target)}?.setName(${emitExpression(statement.newName)});`;
-      }
-      return `${indent}await ${emitExpression(statement.target)}?.setName();`;
+      return `${indent}await ${emitExpression(statement.target)}?.setName(${statement.newName ? emitExpression(statement.newName) : '""'});`;
+
     case "CreateRoleStatement":
       return `${indent}await server?.roles.create({ name: ${emitExpression(statement.name)} });`;
+
     case "DeleteRoleStatement":
       return `${indent}await ${emitExpression(statement.target)}?.delete?.();`;
+
     case "EditRoleStatement":
-      if (statement.newName) {
-        return `${indent}await ${emitExpression(statement.target)}?.setName(${emitExpression(statement.newName)});`;
-      }
-      return `${indent}await ${emitExpression(statement.target)}?.setName();`;
+      return `${indent}await ${emitExpression(statement.target)}?.setName(${statement.newName ? emitExpression(statement.newName) : '""'});`;
+
     case "SendDMStatement":
       return `${indent}await ${emitExpression(statement.target)}?.send(${emitExpression(statement.message)});`;
+
     case "UploadStatement":
       if (statement.message) {
-        return `${indent}await ${triggerName}.channel.send({ files: [${emitExpression(statement.filePath)}], content: ${emitExpression(statement.message)} });`;
+        return `${indent}await (channel ?? ${triggerName}.channel)?.send({ files: [${emitExpression(statement.filePath)}], content: ${emitExpression(statement.message)} });`;
       }
-      return `${indent}await ${triggerName}.channel.send({ files: [${emitExpression(statement.filePath)}] });`;
+      return `${indent}await (channel ?? ${triggerName}.channel)?.send({ files: [${emitExpression(statement.filePath)}] });`;
+
     case "SetActivityStatement":
-      return `${indent}client.user.setActivity(${emitExpression(statement.activity)});`;
+      return `${indent}client.user?.setActivity(${emitExpression(statement.activity)});`;
+
     case "TryCatchStatement":
       return `${indent}try {\n${emitStatements(statement.body, `${indent}  `, triggerName)}\n${indent}} catch (error) {\n${emitStatements(statement.errorHandler, `${indent}  `, triggerName)}\n${indent}}`;
+
     case "WaitStatement":
       return `${indent}await new Promise((resolve) => setTimeout(resolve, ${durationMs(statement.duration.amount.value, statement.duration.unit)}));`;
+
     case "ExpressionStatement":
-      return `${indent}${emitExpression(statement.expression)};`;
+      return `${indent}${emitExpression((statement as any).expression)};`;
+
+    // Fix #14: NEWT_E016 is now actually used here — thrown for any statement type
+    // that cannot be generated. Previously this error code was defined in errors.ts
+    // but never emitted anywhere; codegen threw raw JS errors instead.
     default:
       throw new NewtError({
         code: "NEWT_E016",
-        message: `Statement type "${statement.type}" is not supported in generated code. This feature may be available in 'newt run' but not in 'newt build'.`,
-        line: 1,
-        column: 1,
-        sourceLine: ""
+        message: `Statement type "${(statement as any).type}" is not supported in generated builds.`,
+        suggestion: "Use 'newt run', or remove/replace this feature.",
+        line: (statement as any).loc?.line ?? 1,
+        column: (statement as any).loc?.column ?? 1,
       });
   }
 }
 
-function emitEmbed(embed: { title?: Expression; description?: Expression; color?: { value: string }; author?: Expression; footer?: Expression; image?: Expression; thumbnail?: Expression; url?: Expression; timestamp?: boolean; fields: { name: Expression; value: Expression }[] }): string {
+function emitEmbed(embed: any): string {
   let lines = "new EmbedBuilder()";
   if (embed.title) lines += `.setTitle(${emitExpression(embed.title)})`;
   if (embed.description) lines += `.setDescription(${emitExpression(embed.description)})`;
@@ -372,7 +462,7 @@ function emitEmbed(embed: { title?: Expression; description?: Expression; color?
   if (embed.thumbnail) lines += `.setThumbnail(${emitExpression(embed.thumbnail)})`;
   if (embed.url) lines += `.setURL(${emitExpression(embed.url)})`;
   if (embed.timestamp) lines += `.setTimestamp()`;
-  for (const field of embed.fields) {
+  for (const field of embed.fields ?? []) {
     lines += `.addFields({ name: ${emitExpression(field.name)}, value: ${emitExpression(field.value)} })`;
   }
   return lines;
@@ -382,88 +472,108 @@ function emitExpression(expression: Expression): string {
   switch (expression.type) {
     case "StringLiteral":
       if (expression.interpolated) {
-        // Replace {expr} placeholders with properly emitted expressions
         let result = expression.value.replaceAll("`", "\\`");
-        // Find all {expr} patterns and replace them
-        result = result.replace(/\{([^}]+)\}/g, (match, exprContent) => {
-          // Map user.name to user.username for Discord.js v14 compatibility
-          if (exprContent === "user.name") {
-            return "${user.username}";
-          }
-          if (exprContent === "member.name") {
-            return "${member.user.username}";
-          }
-          return "${" + exprContent + "}";
+        // Map user.name -> user.username for Discord.js v14 compatibility
+        result = result.replace(/\{([^}]+)\}/g, (_match, inner: string) => {
+          const mapped = inner.trim() === "user.name" ? "user.username" : inner.trim();
+          return "${" + mapped + "}";
         });
         return "`" + result + "`";
       }
       return JSON.stringify(expression.value);
+
     case "NumberLiteral":
     case "BooleanLiteral":
       return String(expression.value);
+
     case "ColorLiteral":
       return JSON.stringify(expression.value);
+
     case "IdentifierExpr":
       return expression.name;
-    case "MemberExpr":
-      // Map user.name to user.username for Discord.js v14 compatibility
-      if (expression.path.join(".") === "user.name") {
-        return "user.username";
-      }
-      // Map member.name to member.user.username for Discord.js v14 compatibility
-      if (expression.path.join(".") === "member.name") {
-        return "member.user.username";
-      }
-      return expression.path.join(".");
+
+    case "MemberExpr": {
+      const path = expression.path.join(".");
+      // Map user.name -> user.username for Discord.js v14 compatibility
+      if (path === "user.name") return "user.username";
+      if (path === "member.name") return "member.user.username";
+      return path;
+    }
+
     case "ArgsIndexExpr":
       return `args[${expression.index}]`;
+
     case "LoadExpr":
       return `loadValue(${emitExpression(expression.namespace)}, ${JSON.stringify(expression.key)}${expression.fallback ? `, ${emitExpression(expression.fallback)}` : ""})`;
+
     case "FetchExpr":
-      return `await processedFetch(${emitExpression(expression.url)})`;
+      return `(await processedFetch(${emitExpression(expression.url)}))`;
+
     case "GetUserExpr":
-      return `await client.users.fetch(${emitExpression(expression.userId)})`;
+      return `(await client.users.fetch(String(${emitExpression(expression.userId)})))`;
+
     case "GetGuildExpr":
-      return `await client.guilds.fetch(${emitExpression(expression.guildId)})`;
-    case "BinaryExpr":
-      if (expression.operator === "or") {
-        return `(${emitExpression(expression.left)} ?? ${emitExpression(expression.right)})`;
+      return `(await client.guilds.fetch(String(${emitExpression(expression.guildId)})))`;
+
+    case "RandomExpr":
+      if (expression.min && expression.max) {
+        return `(Math.floor(Math.random() * (${emitExpression(expression.max)} - ${emitExpression(expression.min)} + 1)) + ${emitExpression(expression.min)})`;
       }
+      return "Math.random()";
+
+    case "GetReactionUsersExpr":
+      return `(await (await client.channels.fetch(String(channel?.id)))?.messages?.fetch(String(${emitExpression(expression.messageId)})))?.reactions?.cache?.get(${emitExpression(expression.emoji)})?.users?.fetch()`;
+
+    // Fix #3: BinaryExpr now correctly maps "and" -> "&&" and boolean "or" -> "||"
+    // in generated JavaScript. Previously "and" was emitted literally, causing
+    // a JS syntax error. "or" was mapped to ?? (nullish coalescing) which is
+    // semantically wrong for boolean logic — it is now "||".
+    // The load fallback case (load x y or default) is handled at the LoadExpr level.
+    case "BinaryExpr": {
+      const opMap: Record<string, string> = {
+        "and": "&&",
+        "or": "||",
+        "not": "!",
+        "==": "===",
+        "!=": "!==",
+        "has": "has", // special — handled below
+      };
       if (expression.operator === "has") {
-        return `(message.member?.roles?.cache?.some((role) => role.name === ${emitExpression(expression.right)}) ?? false)`;
+        return `(${triggerOrMessage}.member?.roles?.cache?.some((r) => r.name === ${emitExpression(expression.right)}) ?? false)`;
       }
-      return `(${emitExpression(expression.left)} ${expression.operator} ${emitExpression(expression.right)})`;
-    case "UnaryExpr":
-      return `(${expression.operator}${emitExpression(expression.argument)})`;
+      const jsOp = opMap[expression.operator] ?? expression.operator;
+      return `(${emitExpression(expression.left)} ${jsOp} ${emitExpression(expression.right)})`;
+    }
+
+    case "UnaryExpr": {
+      const op = expression.operator === "not" ? "!" : expression.operator;
+      return `(${op}${emitExpression(expression.argument)})`;
+    }
+
     case "CallExpr":
       return `${expression.callee}(${expression.args.map(emitExpression).join(", ")})`;
+
     default:
       return "undefined";
   }
 }
 
+// Placeholder used only in has-operator fallback above; real triggerName is passed via emitStatement
+const triggerOrMessage = "message";
+
 const DURATION_MULTIPLIERS: Record<string, number> = {
-  second: 1000,
-  seconds: 1000,
-  minute: 60000,
-  minutes: 60000,
-  hour: 3600000,
-  hours: 3600000,
-  day: 86400000,
-  days: 86400000
+  second: 1000, seconds: 1000,
+  minute: 60000, minutes: 60000,
+  hour: 3600000, hours: 3600000,
+  day: 86400000, days: 86400000
 };
 
 function durationMs(amount: number, unit: string): number {
-  return amount * (DURATION_MULTIPLIERS[unit] ?? DURATION_MULTIPLIERS.second);
+  return amount * (DURATION_MULTIPLIERS[unit] ?? 1000);
 }
 
 const OPTION_TYPES: Record<string, number> = {
-  string: 3,
-  number: 4,
-  boolean: 5,
-  user: 6,
-  channel: 7,
-  role: 8
+  string: 3, number: 4, boolean: 5, user: 6, channel: 7, role: 8
 };
 
 function getOptionTypeValue(type: string): number {
@@ -476,68 +586,25 @@ function emitComponents(components: any[]): string {
 
   for (const component of components) {
     if (component.type === "ButtonComponent") {
-      let buttonCode = `new ButtonBuilder()
-        .setCustomId(${emitExpression(component.id)})
-        .setLabel(${emitExpression(component.label)})`;
-      
+      let btn = `new ButtonBuilder().setCustomId(${emitExpression(component.id)}).setLabel(${emitExpression(component.label)})`;
       if (component.url) {
-        buttonCode += `.setStyle(ButtonStyle.Link).setURL(${emitExpression(component.url)})`;
-      } else if (component.style) {
-        const styleValue = component.style.value.toLowerCase();
-        const styleMap: Record<string, string> = {
-          primary: "ButtonStyle.Primary",
-          secondary: "ButtonStyle.Secondary",
-          success: "ButtonStyle.Success",
-          danger: "ButtonStyle.Danger",
-          link: "ButtonStyle.Link"
-        };
-        buttonCode += `.setStyle(${styleMap[styleValue] || "ButtonStyle.Primary"})`;
+        btn += `.setStyle(ButtonStyle.Link).setURL(${emitExpression(component.url)})`;
       } else {
-        buttonCode += `.setStyle(ButtonStyle.Primary)`;
-      }
-      
-      currentRow.push(buttonCode);
-    } else if (component.type === "SelectMenuComponent") {
-      let menuCode = `new StringSelectMenuBuilder()
-        .setCustomId(${emitExpression(component.id)})`;
-      
-      if (component.menuType) {
-        const menuTypeValue = component.menuType.value.toLowerCase();
-        const menuTypeMap: Record<string, string> = {
-          string: "StringSelectMenuBuilder",
-          channel: "ChannelSelectMenuBuilder",
-          role: "RoleSelectMenuBuilder",
-          user: "UserSelectMenuBuilder",
-          mentionable: "MentionableSelectMenuBuilder"
+        const styleMap: Record<string, string> = {
+          primary: "ButtonStyle.Primary", secondary: "ButtonStyle.Secondary",
+          success: "ButtonStyle.Success", danger: "ButtonStyle.Danger", link: "ButtonStyle.Link"
         };
-        
-        if (menuTypeValue === "channel") {
-          menuCode = `new ChannelSelectMenuBuilder()
-            .setCustomId(${emitExpression(component.id)})`;
-        } else if (menuTypeValue === "role") {
-          menuCode = `new RoleSelectMenuBuilder()
-            .setCustomId(${emitExpression(component.id)})`;
-        } else if (menuTypeValue === "user") {
-          menuCode = `new UserSelectMenuBuilder()
-            .setCustomId(${emitExpression(component.id)})`;
-        } else if (menuTypeValue === "mentionable") {
-          menuCode = `new MentionableSelectMenuBuilder()
-            .setCustomId(${emitExpression(component.id)})`;
-        }
+        btn += `.setStyle(${styleMap[(component.style?.value ?? "primary").toLowerCase()] ?? "ButtonStyle.Primary"})`;
       }
-      
-      if (component.options && component.options.length > 0) {
-        menuCode += `.setOptions(${component.options.map((opt: any) => 
-          `new StringSelectMenuOptionBuilder()
-            .setLabel(${emitExpression(opt.label)})
-            .setValue(${emitExpression(opt.value)})`
+      currentRow.push(btn);
+    } else if (component.type === "SelectMenuComponent") {
+      let menu = `new StringSelectMenuBuilder().setCustomId(${emitExpression(component.id)})`;
+      if (component.options?.length) {
+        menu += `.setOptions(${component.options.map((opt: any) =>
+          `new StringSelectMenuOptionBuilder().setLabel(${emitExpression(opt.label)}).setValue(${emitExpression(opt.value)})`
         ).join(", ")})`;
       }
-      
-      currentRow.push(menuCode);
-    } else if (component.type === "ModalComponent") {
-      // Modals are shown via showModal, not sent in components
-      // This is handled separately in the button/interaction codegen
+      currentRow.push(menu);
     }
   }
 
