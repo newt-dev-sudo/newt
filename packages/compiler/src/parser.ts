@@ -439,14 +439,6 @@ class Parser {
       return { type: "WaitStatement", loc: this.loc(start), duration };
     }
 
-    if (this.checkKeyword("edit")) {
-      const start = this.advance();
-      const target = this.parseAtom();
-      this.consumeKeyword("to");
-      const newContent = this.parseExpressionUntilLineEnd();
-      this.consumeLineEnd();
-      return { type: "EditMessageStatement", loc: this.loc(start), target, newContent };
-    }
 
     if (this.checkKeyword("delete")) {
       const start = this.advance();
@@ -506,10 +498,18 @@ class Parser {
 
     if (this.checkKeyword("set")) {
       const start = this.advance();
-      this.consumeKeyword("activity");
-      const activity = this.parseExpressionUntilLineEnd();
-      this.consumeLineEnd();
-      return { type: "SetActivityStatement", loc: this.loc(start), activity };
+      if (this.checkKeyword("activity")) {
+        this.consumeKeyword("activity");
+        const activity = this.parseExpressionUntilLineEnd();
+        this.consumeLineEnd();
+        return { type: "SetActivityStatement", loc: this.loc(start), activity };
+      } else if (this.checkKeyword("volume")) {
+        this.consumeKeyword("volume");
+        const volume = this.parseExpressionUntilLineEnd();
+        this.consumeLineEnd();
+        return { type: "SetVolumeStatement", loc: this.loc(start), volume };
+      }
+      throw this.error(this.peek(), 'Expected "activity" or "volume" after "set".');
     }
 
     if (this.checkKeyword("join")) {
@@ -553,13 +553,6 @@ class Parser {
       return { type: "ResumeAudioStatement", loc: this.loc(start) };
     }
 
-    if (this.checkKeyword("set")) {
-      const start = this.advance();
-      this.consumeKeyword("volume");
-      const volume = this.parseExpressionUntilLineEnd();
-      this.consumeLineEnd();
-      return { type: "SetVolumeStatement", loc: this.loc(start), volume };
-    }
 
     if (this.checkKeyword("create")) {
       const start = this.advance();
