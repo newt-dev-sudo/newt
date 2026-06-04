@@ -975,7 +975,9 @@ export class NewtInterpreter {
         return result;
 
       case "ArgsIndexExpr":
-        const argsList = context.variables.get("args") || [];
+        // Fix #21: fall back to context.args so let x = args[0] works in newt run,
+        // not just string interpolation {args[0]}.
+        const argsList = context.variables.get("args") ?? (context as any).args ?? [];
         return argsList[expr.index];
 
       case "LoadExpr":
