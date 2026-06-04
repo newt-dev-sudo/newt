@@ -5,7 +5,7 @@ bot token from env "DISCORD_TOKEN"
 on join:
     give user role "Member"
     say embed:
-        title "Welcome, {user.name}!"
+        title "Welcome, {user.username}!"
         description "Read #rules first, then say hello in #general."
         color #5865F2
         field "Starter role" "I gave you the Member role."
@@ -18,4 +18,4 @@ on command "role":
         reply "Done! Role given."
 
 on leave:
-    say "{user.name} left the server. We'll miss them!" in channel "general"
+    say "{user.username} left the server. We'll miss them!" in channel "general"
