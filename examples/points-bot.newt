@@ -9,11 +9,11 @@ on command "addpoints":
     let current = load user.id points or 0
     store user.id points = current + 10
     let newPoints = load user.id points or 0
-    reply "Nice, {user.name}! You now have {newPoints} points."
+    reply "Nice, {user.username}! You now have {newPoints} points."
 
 on command "points":
     let userPoints = load user.id points or 0
-    reply "{user.name}, you have {userPoints} points."
+    reply "{user.username}, you have {userPoints} points."
 
 on command "leaderboard":
     reply "Leaderboard feature coming soon - check the roadmap!"
